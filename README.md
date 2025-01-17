@@ -1,7 +1,7 @@
 <div style="text-align: center;">
     <h1>Bitwise Wizards</h1>
     <h4>"To run, or not to run"</h4>
-    <img src="team/BitwizeWizardLogoWhite.svg" alt="Logo" width="200">
+    <img src="team/BitwizeWizardLogoWhite.svg" alt="Bitwize Wizards Logo" width="200">
 </div>
 
 # About Us
