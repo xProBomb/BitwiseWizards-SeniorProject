@@ -1,5 +1,5 @@
 # Projects in no particular order
-Project System and Network Architecture: [Mira Link](https://miro.com/welcomeonboard/RE44Tm12anZwMXNGd3l1RWZOclM0Z0ZPSm0wTEw5MXQ3TWp3OWFCQjFCcEJqc2x4VytkRXB2VXIvdEtHc3BwWi9nbVZLQXJSWjAza2FIZVl1dk1CVWxjSnJLQlhNTE15ZUVxM3ZQN2xENlcyMHVjMTIvcHNCOTNsdStCd01zenchZQ==?share_link_id=321696217431)
+Project System and Network Architecture: [Miro Link](https://miro.com/welcomeonboard/RE44Tm12anZwMXNGd3l1RWZOclM0Z0ZPSm0wTEw5MXQ3TWp3OWFCQjFCcEJqc2x4VytkRXB2VXIvdEtHc3BwWi9nbVZLQXJSWjAza2FIZVl1dk1CVWxjSnJLQlhNTE15ZUVxM3ZQN2xENlcyMHVjMTIvcHNCOTNsdStCd01zenchZQ==?share_link_id=321696217431)
 1. ### Too long of a title but this is for a school project so the fact that its long is okay were helping to hit a non existent word quota
 A RPG turn based combat using scenes to depict various battlefields  and different non-combative zones such as places to regain expended resources or obtain new ones. Using a database to fetch and store player data and records and a live service API such as websocket to allow for two way communication between the server and the client to allow for live sessions with other players.
 
