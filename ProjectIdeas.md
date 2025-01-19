@@ -6,7 +6,7 @@ Vision Statement:
 
 "Made Virtual Combat" is a turn-based RPG designed to provide an engaging, story-driven experience for single players or groups of up to four, where every run feels unique and rewarding. Through strategic turn-based combat, players submit actions to a server for simultaneous resolution, prioritizing speed and move order to create dynamic encounters. Featuring a robust "Build" system, players can customize their characters using loot and items, synergizing abilities to adapt to increasing challenges. The game introduces a dynamic event system that interweaves environmental effects, such as weather or disasters, impacting gameplay and offering preparation opportunities. With an integrated achievement system, players can track personal and global milestones, fostering a sense of community and competition. While inspired by games like Divinity: Original Sin and Slay the Spire, "Made Virtual Combat" stands out by combining collaborative storytelling, evolving challenges, and a global tracking system to ensure a continually fresh and immersive experience.
 
-User Actions
+*User Actions*
 Combat Interaction:
 - Players can choose actions (attack, defend, use items, cast spells) during their turn.
 - Submit actions to the server for resolution based on speed and priority.
@@ -36,7 +36,7 @@ Achievement and Tracking:
 - Contribute to global achievements for community goals.
 - Compare stats and performance with other players.
 
-Features
+*Features*
 Dynamic Turn-Based Combat:
 - Simultaneous resolution of player and enemy actions for unpredictable encounters.
 - Priority-based action resolution tied to speed stats or item bonuses.
@@ -75,7 +75,7 @@ Player Support and Accessibility:
 - Adjustable difficulty settings to cater to various skill levels.
 - Comprehensive in-game glossary for mechanics, status effects, and items.
 
-User Needs
+*User Needs*
 Engagement:
 - Unique gameplay scenarios and fresh challenges to sustain interest.
 - Meaningful story choices with tangible consequences.
@@ -95,7 +95,7 @@ Replayability:
 Fairness:
 - Balanced combat mechanics that reward strategy over randomness.
 
-System Needs
+*System Needs*
 Stable Infrastructure:
 - Reliable server-side action resolution for multiplayer.
 - Fast load times for procedural map generation.
