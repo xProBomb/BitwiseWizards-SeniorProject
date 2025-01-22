@@ -1,10 +1,10 @@
-<div style="text-align: center;">
-    <h1>Bitwise Wizards</h1>
-    <h4>"To run, or not to run"</h4>
-    <img src="team/BitwizeWizardLogoWhite.svg" alt="Bitwize Wizards Logo" width="200">
-</div>
+<h1 align="center">Bitwise Wizards</h1>
+<h4 align="center">"To run, or not to run"</h4>
+<p align="center">
+    <img src="team/Logo.png" alt="Bitwize Wizards Logo" width="200">
+</p>
 
-# About Us
+# About us
 We are a committed group of students working combine our skills to address pressing challenges.
 
 # Team members
