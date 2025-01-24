@@ -17,4 +17,4 @@ We are a committed group of students working combine our skills to address press
 "Our vision is to create meaningful and user-centric solutions that simplify complex problems."
 
 # Project description
-We are currently in the process of deciding on a project that aligns with our goals.
+Trust Trade
