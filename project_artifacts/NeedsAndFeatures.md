@@ -1,54 +1,41 @@
 # Needs and features
 
-Core User Needs:
-- Trust and verification in trading community
-- Reliable verification of legitimate traders
-- Validation of performance claims
-- Protection against misinformation
-- Learning and understanding successful strategies
-- Connecting with like-minded traders
-- Collaborative learning opportunities
+# Epic 1: Core Authentication & Profile
+## User Stories
+- 1.1: As a user, I can sign up and login with email/password.
+- 1.2: As a user, I can link my Robinhood account via Plaid.
+- 1.3: As a user, I can toggle privacy settings for net worth visibility.
 
-Portfolio Verification Features:
-- Plaid integration for brokerage connections
-- Verified badge system
-- Performance tracking metrics
-- Privacy controls for sensitive data
-- Protection against fake success claims
+# Epic 2: Trading Content
+## User Stories
+- 2.1: As a user, I can create posts with title, text, and images.
+- 2.2: As a user, I can tag posts with required categories (Gain, Loss, DD, News, etc.).
+- 2.3: As a user, I can comment on posts.
+- 2.4: As a user, I can upvote/downvote posts and comments.
 
-Social Trading Features:
-- Real-time position sharing
-- Trade journaling capabilities
-- Strategy discussion spaces
-- Custom watchlists (potential feature)
-- Real-time learning from other traders
-- Strategy breakdowns from verified traders
-- Historical trade analysis tools
+# Epic 3: Content Discovery
+## User Stories
+- 3.1: As a user, I can filter my feed by "Following" or "Popular".
+- 3.2: As a user, I can search posts by ticker symbol or keyword.
+- 3.3: As a user, I can follow/unfollow other users.
+- 3.4: As a user, I can block users to hide their content.
 
-Community Management:
-- Reputation scoring system
-- Content moderation tools
-- Group creation functionality
-- Private messaging
-- Safe discussion spaces
-- Real-time market updates
-- Sentiment analysis tools
-- Popular trader movement tracking
+# Epic 4: Portfolio Display
+## User Stories
+- 4.1: As a verified user, I can display my current positions from Robinhood.
+- 4.2: As a verified user, I can show my win/loss ratio.
+- 4.3: As a user, I can view other verified traders' positions.
 
-Technical Requirements:
-- High availability with consistent uptime
-- Real-time data processing
-- Secure data storage
-- Scalable infrastructure
-- Robust data privacy measures
-- Financial regulation compliance
-- Low latency updates
-- Support for high concurrent users
-- Efficient data caching
-- Mobile responsiveness
+# Epic 5: Admin Controls
+## User Stories
+- 5.1: As an admin, I can delete inappropriate posts/comments.
+- 5.2: As an admin, I can ban users.
 
-Integration with:
-- Brokerage APIs
-- Market data feeds
-- Payment processors
-- Authentication services
+# Future Phase Features
+- OAuth integration (Google/Apple)
+- Real-time stock price updates
+- Polling posts
+- Multiple brokerage support
+- WebSocket implementation
+- Enhanced market news integration
+
