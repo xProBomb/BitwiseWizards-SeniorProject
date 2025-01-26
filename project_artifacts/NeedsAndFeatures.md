@@ -1,11 +1,4 @@
-# Project
-Project System and Network Architecture: [Miro Link](https://miro.com/welcomeonboard/RE44Tm12anZwMXNGd3l1RWZOclM0Z0ZPSm0wTEw5MXQ3TWp3OWFCQjFCcEJqc2x4VytkRXB2VXIvdEtHc3BwWi9nbVZLQXJSWjAza2FIZVl1dk1CVWxjSnJLQlhNTE15ZUVxM3ZQN2xENlcyMHVjMTIvcHNCOTNsdStCd01zenchZQ==?share_link_id=321696217431)
-
-### TrustTrade
-
-Vision Statement:
-
-TrustTrade, To build an open and transparent trading community where everyone can learn, grow, and succeed together. By combining verified performance with accessible knowledge sharing, we're creating a space where both novice and experienced traders can collaborate, validate their strategies, and help each other achieve financial success. Our platform breaks down traditional barriers in trading, making proven strategies and real-time insights available to all. Yes there is a competitor that is only an app currently called “AfterHour”, we will have a news section and performance scores for both users and stocks potentially that’ll set us apart. Ours will also only be web based. Also guest accounts available with limited access(no live feed or access to our api queries, only viewing). 
+# Needs and features
 
 Core User Needs:
 - Trust and verification in trading community
