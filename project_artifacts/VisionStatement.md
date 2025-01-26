@@ -1,0 +1,5 @@
+# TrustTrade Vision Statement
+
+TrustTrade aims to build an open and transparent trading community where everyone can learn, grow, and succeed together. By combining verified performance tracking with accessible knowledge sharing, we're creating a platform where both novice and experienced traders can collaborate, validate their strategies, and help each other achieve financial success. Through Plaid integration, users can verify their trading performance, building trust in a space where credibility matters most.
+
+Our web-based platform breaks down traditional barriers in trading by providing free access through guest accounts, transparent performance metrics, and a dedicated space for market news and analysis. Unlike mobile-only alternatives, TrustTrade focuses on delivering a comprehensive web experience that too emphasizes transparency, verification, and collaborative learning. Through verified portfolios, community-driven insights, and open discussion, we're fostering an environment where traders of all experience levels can access proven strategies and real-time market insights to make informed decisions.
