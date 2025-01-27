@@ -1,4 +1,4 @@
-# Timeline and release plan
+# Timeline and Release Plan
 
 | Event | End Date |
 | ----------- | ----------- |
