@@ -8,3 +8,5 @@
 6. [Inital system architecture](project_artifacts/ArchitectureAndModels.md)
 7. [Modeling outputs](project_artifacts/ArchitectureAndModels.md)
 8. Jira set up and epics entered
+
+![Jira board](project_artifacts/JiraBoardMilestone3.png)
