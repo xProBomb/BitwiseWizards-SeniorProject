@@ -44,6 +44,7 @@ CREATE TABLE Posts (
     UserID INT NOT NULL,
     Content NVARCHAR(MAX),
     CreatedAt DATETIME DEFAULT GETDATE(),
+    Tag NVARCHAR(50),
     PrivacySetting NVARCHAR(20) DEFAULT 'Public'
 );
 
