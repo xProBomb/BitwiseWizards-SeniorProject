@@ -1,7 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using TrustTrade.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+var connectionString = builder.Configuration.GetConnectionString("TrustTradeConnection");
+builder.Services.AddDbContext<TrustTradeDbContext>(options => options
+    .UseLazyLoadingProxies()
+    .UseSqlServer(connectionString));
 
 var app = builder.Build();
 
