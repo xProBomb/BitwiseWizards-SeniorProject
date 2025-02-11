@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TrustTrade.Models;
 
-[Index("Username", Name = "UQ__Users__536C85E432493D5E", IsUnique = true)]
-[Index("Email", Name = "UQ__Users__A9D105343E6C921E", IsUnique = true)]
+[Index("Username", Name = "UQ__Users__536C85E4118EE84F", IsUnique = true)]
+[Index("Email", Name = "UQ__Users__A9D1053407FDEE60", IsUnique = true)]
 public partial class User
 {
     [Key]

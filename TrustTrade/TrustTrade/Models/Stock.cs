@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace TrustTrade.Models;
 
 [Table("Stock")]
-[Index("TickerSymbol", Name = "UQ__Stock__F144591BE1EFDFAD", IsUnique = true)]
+[Index("TickerSymbol", Name = "UQ__Stock__F144591BBB14E685", IsUnique = true)]
 public partial class Stock
 {
     [Key]

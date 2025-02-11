@@ -45,9 +45,10 @@ CROSS JOIN Stock S
 WHERE U.ID < 100;
 
 -- Insert Posts
-INSERT INTO Posts (UserID, Content, CreatedAt, PrivacySetting)
+INSERT INTO Posts (UserID, Title, Content, CreatedAt, PrivacySetting)
 SELECT 
-    U.ID, 
+    U.ID,
+    CONCAT('Trading Update by User ', U.ID), 
     CONCAT('This is a trading update by User ', U.ID, '. Market looks great!'), 
     DATEADD(DAY, -ABS(CHECKSUM(NEWID())) % 30, GETDATE()), 
     CASE WHEN RAND() > 0.7 THEN 'Private' ELSE 'Public' END

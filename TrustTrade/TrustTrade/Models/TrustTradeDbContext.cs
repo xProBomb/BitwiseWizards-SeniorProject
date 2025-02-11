@@ -35,7 +35,7 @@ public partial class TrustTradeDbContext : DbContext
         {
             optionsBuilder
                 .UseLazyLoadingProxies()
-                .UseSqlServer("Name=SampleConnection");
+                .UseSqlServer("Name=TrustTradeConnection");
         }
     }
 
@@ -43,7 +43,7 @@ public partial class TrustTradeDbContext : DbContext
     {
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC275D142D0B");
+            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC2783103CE7");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -56,7 +56,7 @@ public partial class TrustTradeDbContext : DbContext
 
         modelBuilder.Entity<Follower>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Follower__3214EC276AFC0274");
+            entity.HasKey(e => e.Id).HasName("PK__Follower__3214EC27F5781985");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -69,7 +69,7 @@ public partial class TrustTradeDbContext : DbContext
 
         modelBuilder.Entity<Like>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Likes__3214EC27FF87C594");
+            entity.HasKey(e => e.Id).HasName("PK__Likes__3214EC27C0B9E6BA");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -82,7 +82,7 @@ public partial class TrustTradeDbContext : DbContext
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Posts__3214EC2757B225A3");
+            entity.HasKey(e => e.Id).HasName("PK__Posts__3214EC2756A2A74A");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.PrivacySetting).HasDefaultValue("Public");
@@ -92,14 +92,14 @@ public partial class TrustTradeDbContext : DbContext
 
         modelBuilder.Entity<Stock>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Stock__3214EC2751A28057");
+            entity.HasKey(e => e.Id).HasName("PK__Stock__3214EC2757CBA2DB");
 
             entity.Property(e => e.LastUpdated).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<Trade>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Trade__3214EC271BE9AF7E");
+            entity.HasKey(e => e.Id).HasName("PK__Trade__3214EC273E6E3285");
 
             entity.Property(e => e.LastUpdated).HasDefaultValueSql("(getdate())");
 
@@ -114,7 +114,7 @@ public partial class TrustTradeDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC27D63A1A35");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC2767B019D4");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsAdmin).HasDefaultValue(false);

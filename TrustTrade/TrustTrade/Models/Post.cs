@@ -15,6 +15,9 @@ public partial class Post
     [Column("UserID")]
     public int UserId { get; set; }
 
+    [StringLength(100)]
+    public string? Title { get; set; }
+
     public string? Content { get; set; }
 
     [Column(TypeName = "datetime")]
