@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.Models;
+using TrustTrade.DAL.Abstract;
+using TrustTrade.DAL.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,9 @@ var connectionString = builder.Configuration.GetConnectionString("TrustTradeConn
 builder.Services.AddDbContext<TrustTradeDbContext>(options => options
     .UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
+builder.Services.AddScoped<DbContext, TrustTradeDbContext>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IPostRepository, PostRepository>();
 
 var app = builder.Build();
 
