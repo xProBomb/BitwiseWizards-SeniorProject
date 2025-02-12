@@ -37,7 +37,9 @@ namespace TrustTrade.Controllers
 
             IndexVM vm = new()
             {
-                Posts = postPreviews
+                Posts = postPreviews,
+                CurrentPage = page,
+                TotalPages = totalPages
             };
             return View(vm);
         }
