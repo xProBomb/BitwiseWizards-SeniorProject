@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
+// NOTE: This base repository interface was provided by Scot Morse.
 namespace TrustTrade.DAL.Abstract
 {
     /// <summary>

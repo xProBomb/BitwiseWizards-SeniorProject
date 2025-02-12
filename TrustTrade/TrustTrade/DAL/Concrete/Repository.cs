@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 
 using TrustTrade.DAL.Abstract;
 
+// NOTE: This base repository was provided by Scot Morse.
 namespace TrustTrade.DAL.Concrete
 {
     /// <summary>
