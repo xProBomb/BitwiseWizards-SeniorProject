@@ -6,4 +6,5 @@ public interface IPostRepository : IRepository<Post>
 {
     List<Post> GetPagedPosts(int page = 1, int pageSize = 10);
 
+    int GetTotalPosts();
 }

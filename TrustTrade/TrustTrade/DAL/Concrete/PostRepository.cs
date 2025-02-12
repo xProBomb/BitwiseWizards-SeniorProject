@@ -23,4 +23,9 @@ public class PostRepository : Repository<Post>, IPostRepository
             .Take(pageSize)
             .ToList();
     }
+
+    public int GetTotalPosts()
+    {
+        return _posts.Count();
+    }
 }
