@@ -1,0 +1,33 @@
+﻿@model TrustTrade.Models.LoginModalViewModel
+
+<form method="post" asp-area="Identity" asp-page="/Account/Login">
+    @Html.AntiForgeryToken()
+    <div class="card-body p-5 text-center">
+        <div class="mb-md-5 mt-md-4 pb-5">
+            <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
+            <p class="text-white-50 mb-5">Please enter your login and password!</p>
+
+            <!-- Email Field with Floating Label -->
+            <div class="form-floating mb-4">
+                <input asp-for="Email" class="form-control bg-dark text-white" id="floatingEmailLogin" placeholder="name@example.com" />
+                <label for="floatingEmailLogin">Email</label>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- Password Field with Floating Label -->
+            <div class="form-floating mb-4">
+                <input asp-for="Password" type="password" class="form-control bg-dark text-white" id="floatingPasswordLogin" placeholder="Password" />
+                <label for="floatingPasswordLogin">Password</label>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <!-- Remember Me Checkbox -->
+            <div class="form-check mb-3">
+                <input asp-for="RememberMe" class="form-check-input" id="rememberMeLogin" type="checkbox" />
+                <label class="form-check-label" for="rememberMeLogin">Remember me?</label>
+            </div>
+
+            <button class="btn btn-outline-light btn-lg px-5" type="submit">Login</button>
+        </div>
+    </div>
+</form>
