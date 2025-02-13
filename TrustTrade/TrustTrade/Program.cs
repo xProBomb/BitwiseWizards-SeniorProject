@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.Models;
+using TrustTrade.Data;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,15 @@ var connectionString = builder.Configuration.GetConnectionString("TrustTradeConn
 builder.Services.AddDbContext<TrustTradeDbContext>(options => options
     .UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
+
+var identityconnectionString = builder.Configuration.GetConnectionString("IdentityConnection") ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
+builder.Services.AddDbContext<AuthenticationDbContext>(options =>
+    options.UseSqlServer(identityconnectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<AuthenticationDbContext>();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -29,9 +40,11 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapRazorPages();
 
 app.Run();
