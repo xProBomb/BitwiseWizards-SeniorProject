@@ -15,7 +15,7 @@ builder.Services.AddDbContext<TrustTradeDbContext>(options => options
 
 var identityconnectionString = builder.Configuration.GetConnectionString("IdentityConnection") ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
 builder.Services.AddDbContext<AuthenticationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(identityconnectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
