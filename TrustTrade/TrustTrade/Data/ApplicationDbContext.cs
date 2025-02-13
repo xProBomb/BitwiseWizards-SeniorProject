@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TrustTrade.Data;
 
-public class ApplicationDbContext : IdentityDbContext
+public class AuthenticationDbContext : IdentityDbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    public AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> options)
         : base(options)
     {
     }

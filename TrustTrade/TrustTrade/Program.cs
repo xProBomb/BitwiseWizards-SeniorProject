@@ -13,13 +13,13 @@ builder.Services.AddDbContext<TrustTradeDbContext>(options => options
     .UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
 
-var identityconnectionString = builder.Configuration.GetConnectionString("IdentityConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+var identityconnectionString = builder.Configuration.GetConnectionString("IdentityConnection") ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
+builder.Services.AddDbContext<AuthenticationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<AuthenticationDbContext>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
