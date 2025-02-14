@@ -2,7 +2,7 @@ namespace TrustTrade.Helpers;
 
 public static class PaginationHelper
 {
-    public static List<int> GetPagination(int currentPage, int totalPages, int maxPages = 5)
+    public static List<int> GetPagination(int currentPage, int totalPages, int maxPages)
     {
         List<int> pages = new List<int>();
         
