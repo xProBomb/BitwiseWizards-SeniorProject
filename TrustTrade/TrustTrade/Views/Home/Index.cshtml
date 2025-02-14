@@ -11,14 +11,64 @@
     <p>TrustTrade is a social platform that revolutionizes how traders interact by requiring portfolio verification through Plaid integration (optional but highlighted). Users who connect their brokerage accounts get a "Verified Portfolio" badge, displaying their real-time portfolio value, current stock positions, option contracts, and quantity of holdings. This verification system creates a hierarchy of trust, where verified users' posts and analyses carry more weight than unverified accounts. The platform would feature a "Performance Score" that tracks verified users' trading history, win rates, and risk-adjusted returns, making it impossible to fake success. Users can create detailed trade journals with entry/exit points, reasoning, and outcome analysis, all backed by verified transaction data.</p>
 </div>
 
+<!-- Post Preview Feed -->
 <h2 class="mb-4">Posts</h2>
 <ul class="list-group">
     @foreach (PostPreviewVM post in Model.Posts)
     {
         <li class="list-group-item">
+            <p>@post.UserName | @post.TimeAgo</p>
             <h3>@post.Title</h3>
             <p>@post.Excerpt</p>
-            <p><strong>By:</strong> @post.UserName | @post.CreatedAt</p>
         </li>
     }
 </ul>
+
+<!-- Pagination Controls -->
+@if (Model.TotalPages > 1)
+{
+    <ul class="pagination justify-content-center mt-5">
+        @if (Model.CurrentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-controller="Home" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)">Previous</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        }
+
+        @foreach(int pageNumber in Model.PagesToShow)
+        {
+            if (pageNumber == Model.CurrentPage)
+            {
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">@pageNumber</span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Home" asp-action="Index" asp-route-page="@pageNumber">@pageNumber</a>
+                </li>
+            }
+
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-controller="Home" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)">Next</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        }
+    </ul>
+}

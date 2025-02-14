@@ -3,6 +3,7 @@ using System.Diagnostics;
 using TrustTrade.Models;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.ViewModels;
+using TrustTrade.Helpers;
 
 namespace TrustTrade.Controllers
 {
@@ -29,9 +30,10 @@ namespace TrustTrade.Controllers
                 UserName = p.User.Username,
                 Title = p.Title,
                 Excerpt = p.Content.Length > 100 ? $"{p.Content.Substring(0, 100)}..." : p.Content,
-                CreatedAt = p.CreatedAt
+                TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt)
             }).ToList();
 
+            // Determine total possible pages
             int totalPosts = _postRepository.GetTotalPosts();
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
@@ -39,7 +41,8 @@ namespace TrustTrade.Controllers
             {
                 Posts = postPreviews,
                 CurrentPage = page,
-                TotalPages = totalPages
+                TotalPages = totalPages,
+                PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7)
             };
             return View(vm);
         }
