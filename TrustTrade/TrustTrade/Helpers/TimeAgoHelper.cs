@@ -18,20 +18,25 @@ public static class TimeAgoHelper
         }
         if (timeSince.TotalMinutes < 60)
         {
-            return $"{timeSince.Minutes} minutes ago";
+            int minutes = timeSince.Minutes;
+            return minutes == 1 ? "1 minute ago" : $"{minutes} minutes ago";
         }
         if (timeSince.TotalHours < 24)
         {
-            return $"{timeSince.Hours} hours ago";
+            int hours = timeSince.Hours;
+            return hours == 1 ? "1 hour ago" : $"{hours} hours ago";
         }
         if (timeSince.TotalDays < 30)
         {
-            return $"{timeSince.Days} days ago";
+            int days = timeSince.Days;
+            return days == 1 ? "1 day ago" : $"{days} days ago";
         }
         if (timeSince.TotalDays < 365)
         {
-            return $"{timeSince.Days / 30} months ago";
+            int months = timeSince.Days / 30;
+            return months == 1 ? "1 month ago" : $"{months} months ago";
         }
-        return $"{timeSince.Days / 365} years ago";
+        int years = timeSince.Days / 365;
+        return years == 1 ? "1 year ago" : $"{years} years ago";
     }
 }
