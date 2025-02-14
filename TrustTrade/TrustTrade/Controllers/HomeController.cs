@@ -22,6 +22,7 @@ namespace TrustTrade.Controllers
         {
             const int PAGE_SIZE = 10;
 
+            // Get posts for current page
             List<Post> posts = _postRepository.GetPagedPosts(page, PAGE_SIZE);
 
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
