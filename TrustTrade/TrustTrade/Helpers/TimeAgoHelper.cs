@@ -2,11 +2,15 @@ namespace TrustTrade.Helpers;
 
 public static class TimeAgoHelper
 {
-    public static string GetTimeAgo(DateTime pastDate, DateTime? currentDate = null)
+    public static string GetTimeAgo(DateTime? pastDate, DateTime? currentDate = null)
     {
-        // If currentDate is not provided, use DateTime.Now
-        DateTime now = currentDate ?? DateTime.UtcNow;
-        TimeSpan timeSince = now - pastDate;
+        DateTime now = currentDate ?? DateTime.UtcNow; // If currentDate is not provided, use DateTime.Now
+        if (pastDate == null)
+        {
+            return "Date not available";
+        }
+
+        TimeSpan timeSince = now - pastDate.Value;
 
         if (timeSince.TotalMinutes < 1)
         {
