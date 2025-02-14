@@ -12,5 +12,5 @@ public class PostPreviewVM
 
     public string? Excerpt { get; set; }
     
-    public string? CreatedAt { get; set; }
+    public string? TimeAgo { get; set; }
 }
