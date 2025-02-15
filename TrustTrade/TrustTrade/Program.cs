@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TrustTrade.Models;
 using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using TrustTrade.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Identity and Authentication Configuration
 builder.Services.AddDefaultIdentity<IdentityUser>(options => {
-    options.SignIn.RequireConfirmedAccount = false; // Set to true in production
+    options.SignIn.RequireConfirmedAccount = true; // Set to true in production
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = true;
@@ -48,6 +50,11 @@ builder.Services.AddPlaid(builder.Configuration.GetSection("Plaid"));
 // MVC Configuration
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// Email Sender Configuration
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
+
 
 var app = builder.Build();
 
