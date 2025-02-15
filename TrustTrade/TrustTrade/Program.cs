@@ -5,7 +5,6 @@ using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Services;
-using TrustTrade.Areas.Identity.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
