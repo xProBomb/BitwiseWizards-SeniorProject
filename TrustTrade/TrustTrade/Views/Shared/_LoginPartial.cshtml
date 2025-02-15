@@ -2,26 +2,25 @@
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<ul class="navbar-nav">
+
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a  class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
+    <li class="dropdown-item">
+        <a  class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Account</a>
     </li>
-    <li class="nav-item">
+    <li class="dropdown-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link">Logout</button>
+            <button  type="submit" class="dropdown-item btn btn-link">Logout</button>
         </form>
     </li>
 }
 else
 {
-    <li class="nav-item">
-        <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+    <li class="dropdown-item">
+        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Register</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    <li class="dropdown-item">
+        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">Login</a>
     </li>
-    //<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#authModal">Login2</a>
 }
-</ul>
+
