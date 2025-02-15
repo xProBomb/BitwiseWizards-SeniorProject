@@ -39,6 +39,7 @@ async function initializePlaidLink() {
 
                     if (!exchangeResponse.ok) {
                         const errorData = await exchangeResponse.json();
+                        console.error('Server error:', errorData);
                         throw new Error(errorData.error || 'Failed to exchange public token');
                     }
 

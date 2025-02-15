@@ -3,6 +3,7 @@ using Going.Plaid.Link;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TrustTrade.Models;
 
 namespace TrustTrade.Controllers.Api;
@@ -89,39 +90,82 @@ public class PlaidController : ControllerBase
     /// </summary>
     /// <param name="publicToken">The public token from Plaid Link</param>
     /// <returns>Success or error response</returns>
-    [HttpPost]
-    public async Task<IActionResult> ExchangePublicToken([FromBody] string publicToken)
+    /// <summary>
+/// Request model for public token exchange
+/// </summary>
+public class ExchangePublicTokenRequest
+{
+    /// <summary>
+    /// The public token received from Plaid Link
+    /// </summary>
+    public string PublicToken { get; set; } = string.Empty;
+}
+
+[HttpPost("exchange-public-token")]
+public async Task<IActionResult> ExchangePublicToken([FromBody] ExchangePublicTokenRequest request)
+{
+    try
     {
-        try
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        // Get our local user record
+        var trustTradeUser = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Email == user.Email);
+        
+        if (trustTradeUser == null)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            _logger.LogError("Failed to find TrustTrade user record for {Email}", user.Email);
+            return StatusCode(500, new { error = "User account not properly synchronized" });
+        }
 
-            var exchangeResponse = await _plaidClient.ItemPublicTokenExchangeAsync(
-                new Going.Plaid.Item.ItemPublicTokenExchangeRequest
-                {
-                    PublicToken = publicToken
-                });
-
-            // Save the Plaid connection in our database
-            var plaidConnection = new PlaidConnection
+        // Exchange the public token
+        var exchangeResponse = await _plaidClient.ItemPublicTokenExchangeAsync(
+            new Going.Plaid.Item.ItemPublicTokenExchangeRequest
             {
-                UserId = int.Parse(user.Id), // Ensure your User table uses int IDs
-                AccessToken = exchangeResponse.AccessToken,
-                ItemId = exchangeResponse.ItemId,
-                // Set other fields as needed
-                LastSyncTimestamp = DateTime.UtcNow
-            };
+                PublicToken = request.PublicToken
+            });
 
-            _dbContext.PlaidConnections.Add(plaidConnection);
-            await _dbContext.SaveChangesAsync();
+        // Get institution details
+        var itemResponse = await _plaidClient.ItemGetAsync(
+            new Going.Plaid.Item.ItemGetRequest
+            {
+                AccessToken = exchangeResponse.AccessToken
+            });
 
-            return Ok(new { success = true });
-        }
-        catch (Exception ex)
+        var institutionResponse = await _plaidClient.InstitutionsGetByIdAsync(
+            new Going.Plaid.Institutions.InstitutionsGetByIdRequest
+            {
+                InstitutionId = itemResponse.Item.InstitutionId,
+                CountryCodes = new[] { Going.Plaid.Entity.CountryCode.Us }
+            });
+
+        // Save the Plaid connection
+        var plaidConnection = new PlaidConnection
         {
-            _logger.LogError(ex, "Error exchanging public token");
-            return StatusCode(500, new { error = "Failed to exchange public token" });
-        }
+            UserId = trustTradeUser.Id,
+            AccessToken = exchangeResponse.AccessToken,
+            ItemId = exchangeResponse.ItemId,
+            InstitutionId = itemResponse.Item.InstitutionId,
+            InstitutionName = institutionResponse.Institution.Name,
+            LastSyncTimestamp = DateTime.UtcNow
+        };
+
+        _dbContext.PlaidConnections.Add(plaidConnection);
+
+        // Update user's Plaid status
+        trustTradeUser.PlaidEnabled = true;
+        trustTradeUser.PlaidStatus = "Connected";
+        trustTradeUser.LastPlaidSync = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { success = true });
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error exchanging public token");
+        return StatusCode(500, new { error = "Failed to exchange public token", details = ex.Message });
+    }
+}
 }
