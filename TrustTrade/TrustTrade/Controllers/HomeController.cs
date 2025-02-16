@@ -30,7 +30,7 @@ namespace TrustTrade.Controllers
                 Id = p.Id,
                 UserName = p.User.Username,
                 Title = p.Title,
-                Excerpt = p.Content.Length > 100 ? $"{p.Content.Substring(0, 100)}..." : p.Content,
+                Excerpt = (p.Content != null && p.Content.Length > 100) ? $"{p.Content.Substring(0, 100)}..." : (p.Content ?? string.Empty), // Display first 100 characters of content
                 TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt)
             }).ToList();
 
