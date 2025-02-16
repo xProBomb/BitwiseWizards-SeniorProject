@@ -6,13 +6,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Services;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Database Contexts
-var trustTradeConnectionString = builder.Configuration.GetConnectionString("TrustTradeConnection");
 builder.Services.AddDbContext<TrustTradeDbContext>(options => options
     .UseLazyLoadingProxies()
-    .UseSqlServer(trustTradeConnectionString));
+    .UseSqlServer(builder.Configuration.GetConnectionString("TrustTradeConnection"), sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure();
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+    }));
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
