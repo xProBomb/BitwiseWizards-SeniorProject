@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using TrustTrade.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrustTrade.Areas.Identity.Pages.Account
 {
@@ -29,13 +31,15 @@ namespace TrustTrade.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly TrustTradeDbContext _dbContext;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            TrustTradeDbContext dbContext)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +47,7 @@ namespace TrustTrade.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _dbContext = dbContext;
         }
 
         /// <summary>
@@ -79,6 +84,10 @@ namespace TrustTrade.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            //[Required]
+            //[Display(Name = "Username")]
+           // public string Username { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -110,10 +119,11 @@ namespace TrustTrade.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
-
+                // Change back to username once configured
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -121,6 +131,28 @@ namespace TrustTrade.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // Use the created user instance directly instead of fetching via User
+                    var identityUser = user;  
+                    var trustTradeUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == identityUser.Email);
+
+                    if (trustTradeUser == null)
+                    {
+                        _logger.LogInformation("Creating new TrustTrade user for {Email}", identityUser.Email);
+                        trustTradeUser = new User
+                        {
+                            // Ensure you're using the correct instance's Id
+                            IdentityId = identityUser.Id,  
+                            Email = identityUser.Email!,
+                            Username = identityUser.Email ?? identityUser.Email!,
+                            ProfileName = identityUser.UserName ?? identityUser.Email!,
+                            PasswordHash = "[MANAGED_BY_IDENTITY]",
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _dbContext.Users.Add(trustTradeUser);
+                        await _dbContext.SaveChangesAsync();
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -144,15 +176,17 @@ namespace TrustTrade.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
-            // If we got this far, something failed, redisplay form
+            // If we got this far, something failed; redisplay the form.
             return Page();
         }
+
 
         private IdentityUser CreateUser()
         {

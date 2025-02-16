@@ -219,6 +219,7 @@ public partial class TrustTradeDbContext : DbContext
             entity.HasIndex(e => e.Email, "UQ__Users__A9D10534AB940664").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.IdentityId).HasColumnName("IdentityId");
             entity.Property(e => e.Bio).HasMaxLength(500);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
