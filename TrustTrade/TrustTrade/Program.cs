@@ -24,12 +24,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Identity and Authentication Configuration
 builder.Services.AddDefaultIdentity<IdentityUser>(options => {
-    options.SignIn.RequireConfirmedAccount = true; // Set to true in production
+    options.SignIn.RequireConfirmedAccount = false; // Set to true in production
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
+    options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<AuthenticationDbContext>();
 

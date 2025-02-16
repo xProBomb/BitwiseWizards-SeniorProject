@@ -128,6 +128,7 @@ namespace TrustTrade.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    _logger.LogWarning(result.ToString());
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
