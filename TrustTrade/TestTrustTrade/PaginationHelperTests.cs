@@ -29,7 +29,7 @@ public class PaginationHelperTests
         var result = PaginationHelper.GetPagination(currentPage, totalPages, maxPages);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -45,7 +45,7 @@ public class PaginationHelperTests
         var result = PaginationHelper.GetPagination(currentPage, totalPages, maxPages);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -61,7 +61,7 @@ public class PaginationHelperTests
         var result = PaginationHelper.GetPagination(currentPage, totalPages, maxPages);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -77,7 +77,7 @@ public class PaginationHelperTests
         var result = PaginationHelper.GetPagination(currentPage, totalPages, maxPages);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -93,7 +93,7 @@ public class PaginationHelperTests
         var result = PaginationHelper.GetPagination(currentPage, totalPages, maxPages);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -109,6 +109,6 @@ public class PaginationHelperTests
         var result = PaginationHelper.GetPagination(currentPage, totalPages, maxPages);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 }

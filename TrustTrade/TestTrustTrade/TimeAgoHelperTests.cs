@@ -23,7 +23,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -37,7 +37,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -65,7 +65,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -79,7 +79,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -93,7 +93,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -107,7 +107,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -121,7 +121,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -135,7 +135,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -149,7 +149,7 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -163,6 +163,6 @@ public class TimeAgoHelperTests
         var result = TimeAgoHelper.GetTimeAgo(_pastDateTime, currentDateTime);
 
         // Assert
-        Assert.AreEqual(expected, result);
+        Assert.That(result, Is.EqualTo(expected));
     }
 }
