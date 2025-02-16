@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace TrustTrade.Models;
 
 public partial class User
 {
     public int Id { get; set; }
+
+    [Column("IdentityId")]
+    public string IdentityId { get; set; } = null!;
 
     public string ProfileName { get; set; } = null!;
 
