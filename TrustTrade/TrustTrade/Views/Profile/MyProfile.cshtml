@@ -32,8 +32,8 @@
     </div>
 
     <!-- Social Stats Row -->
-    <div class="row text-center mb-4">
-        <div class="col-md-3 mb-3">
+    <div class="row text-center mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">@Model.FollowersCount</h5>
@@ -41,7 +41,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">@Model.FollowingCount</h5>
@@ -49,19 +49,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">@((Model.IsVerified) ? "Yes" : "No")</h5>
-                    <p class="card-text">Verified</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">@((Model.PlaidEnabled) ? "Yes" : "No")</h5>
-                    <p class="card-text">Plaid</p>
+                    <p class="card-text">Verified</p>
                 </div>
             </div>
         </div>
