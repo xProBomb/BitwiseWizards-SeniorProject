@@ -1,10 +1,12 @@
+// File: TrustTrade/Controllers/ProfileController.cs
+
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using TrustTrade.Models;        
-using TrustTrade.ViewModels;      
+using TrustTrade.DAL.Abstract;
+using TrustTrade.Models;
+using TrustTrade.ViewModels;
 
 namespace TrustTrade.Controllers
 {
@@ -12,22 +14,27 @@ namespace TrustTrade.Controllers
     public class ProfileController : Controller
     {
         private readonly TrustTradeDbContext _context;
+        private readonly IHoldingsRepository _holdingsRepository;
+        private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(TrustTradeDbContext context)
+        public ProfileController(
+            TrustTradeDbContext context,
+            IHoldingsRepository holdingsRepository,
+            ILogger<ProfileController> logger)
         {
             _context = context;
+            _holdingsRepository = holdingsRepository;
+            _logger = logger;
         }
 
         public async Task<IActionResult> MyProfile()
         {
-            // Get the logged-in user's IdentityId from claims (the ASP.NET Core Identity user id)
             var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(identityId))
             {
                 return Unauthorized();
             }
 
-            // Retrieve the user from TrustTradeDbContext including follower/following navigation properties
             var user = await _context.Users
                 .Include(u => u.FollowerFollowerUsers)
                 .Include(u => u.FollowerFollowingUsers)
@@ -38,7 +45,16 @@ namespace TrustTrade.Controllers
                 return NotFound();
             }
 
-            // Map the user data to the view model
+            var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+            var holdingViewModels = holdings.Select(h => new HoldingViewModel
+            {
+                Symbol = h.Symbol,
+                Quantity = h.Quantity,
+                CurrentPrice = h.CurrentPrice,
+                CostBasis = h.CostBasis,
+                Institution = h.PlaidConnection.InstitutionName
+            }).ToList();
+
             var model = new MyProfileViewModel
             {
                 IdentityId = user.IdentityId,
@@ -49,11 +65,46 @@ namespace TrustTrade.Controllers
                 PlaidEnabled = user.PlaidEnabled ?? false,
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
-                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0
-                // Posts: To be implemented later.
+                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+                Holdings = holdingViewModels,
+                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null
             };
 
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RefreshHoldings()
+        {
+            try
+            {
+                var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(identityId))
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var success = await _holdingsRepository.RefreshHoldingsAsync(user.Id);
+                if (!success)
+                {
+                    return StatusCode(500, new { error = "Failed to refresh holdings" });
+                }
+
+                return RedirectToAction(nameof(MyProfile));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refreshing holdings");
+                return StatusCode(500, new { error = "An unexpected error occurred" });
+            }
         }
     }
 }
