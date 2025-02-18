@@ -11,7 +11,7 @@ public partial class User
     public int Id { get; set; }
 
     [Column("IdentityId")]
-    public string IdentityId { get; set; } = null!;
+    public string? IdentityId { get; set; }
 
     public string ProfileName { get; set; } = null!;
 

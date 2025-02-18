@@ -16,9 +16,9 @@ public class PostRepository : Repository<Post>, IPostRepository
 
     public List<Post> GetPagedPosts(int page = 1, int pageSize = 10)
     {
+
         return _posts
             .Include(p => p.User)
-            .DefaultIfEmpty()
             .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
