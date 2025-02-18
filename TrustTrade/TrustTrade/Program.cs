@@ -1,6 +1,8 @@
 using Going.Plaid;
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.Models;
+using TrustTrade.DAL.Abstract;
+using TrustTrade.DAL.Concrete;
 using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -17,6 +19,9 @@ builder.Services.AddDbContext<TrustTradeDbContext>(options => options
         sqlOptions.EnableRetryOnFailure();
         sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }));
+builder.Services.AddScoped<DbContext, TrustTradeDbContext>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IPostRepository, PostRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");

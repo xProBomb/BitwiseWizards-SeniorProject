@@ -6,6 +6,10 @@ namespace TrustTrade.Models;
 
 public partial class TrustTradeDbContext : DbContext
 {
+    public TrustTradeDbContext()
+    {
+    }
+    
     public TrustTradeDbContext(DbContextOptions<TrustTradeDbContext> options)
         : base(options)
     {
