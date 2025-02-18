@@ -18,6 +18,7 @@ public class PostRepository : Repository<Post>, IPostRepository
     {
         return _posts
             .Include(p => p.User)
+            .DefaultIfEmpty()
             .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
