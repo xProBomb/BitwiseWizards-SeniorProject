@@ -1,0 +1,58 @@
+@model TrustTrade.Models.ViewModels.BrokerageConnectionViewModel
+
+@{
+    ViewData["Title"] = "Connect Brokerage";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Connect Your Brokerage Account</h2>
+                </div>
+                <div class="card-body">
+                    @if (Model.HasExistingConnection)
+                    {
+                        <div class="alert alert-info">
+                            <h4>Existing Connection</h4>
+                            <p>You're currently connected to: @Model.ExistingConnection!.InstitutionName</p>
+                            <p>Last synced: @(Model.ExistingConnection.LastSyncTimestamp?.ToString("g") ?? "Never")</p>
+                        </div>
+
+                        <button id="connect-plaid" class="btn btn-primary">
+                            Update Connection
+                        </button>
+                    }
+                    else
+                    {
+                        <p class="lead mb-4">
+                            Connect your brokerage account to start tracking your investments and participating in the TrustTrade community.
+                        </p>
+
+                        <div class="d-grid gap-2">
+                            <button id="connect-plaid" class="btn btn-primary btn-lg">
+                                <i class="bi bi-link-45deg"></i> Connect Brokerage
+                            </button>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5>Why connect your brokerage?</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success"></i> Track your investments in real-time</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Share verified trades with the community</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Get insights into your portfolio performance</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Participate in investment discussions</li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script src="~/js/plaid.js"></script>
+}

@@ -1,0 +1,115 @@
+@model TrustTrade.ViewModels.MyProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-4">
+    <!-- Cover Photo and Profile Image -->
+    <div class="position-relative mb-5">
+        <!-- Cover photo area (placeholder background) -->
+        <div class="bg-light" style="height: 125px;"></div>
+        <!-- Profile image (overlapping the cover) -->
+        <div class="position-absolute" style="top: 130px; left: 30px;">
+            <img src="https://via.placeholder.com/150" alt="Profile Picture" class="rounded-circle img-thumbnail border border-white" style="width: 150px; height: 100px;">
+        </div>
+    </div>
+
+    <!-- Profile Name and Created Date -->
+    <div class="mb-4" style="padding-left: 200px;">
+        <h2>@Model.ProfileName</h2>
+        <p class="text-muted">
+            Joined:
+            @if (Model.CreatedAt.HasValue)
+            {
+                @Model.CreatedAt.Value.ToString("g")
+            }
+            else
+            {
+                <em>N/A</em>
+            }
+        </p>
+    </div>
+
+    <!-- Social Stats Row -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@Model.FollowersCount</h5>
+                    <p class="card-text">Followers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@Model.FollowingCount</h5>
+                    <p class="card-text">Following</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@((Model.IsVerified) ? "Yes" : "No")</h5>
+                    <p class="card-text">Verified</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@((Model.PlaidEnabled) ? "Yes" : "No")</h5>
+                    <p class="card-text">Plaid</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bio Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            About
+        </div>
+        <div class="card-body">
+            <p class="card-text">@Model.Bio</p>
+        </div>
+    </div>
+
+    <!-- Plaid Sync Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Last Plaid Sync
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                @if (Model.LastPlaidSync.HasValue)
+                {
+                    @Model.LastPlaidSync.Value.ToString("g")
+                }
+                else
+                {
+                    <em>N/A</em>
+                }
+            </p>
+        </div>
+    </div>
+
+    <!-- Posts Placeholder Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Posts
+        </div>
+        <div class="card-body">
+            <p class="card-text">Posts coming soon...</p>
+        </div>
+    </div>
+    <!-- Personalization button that goes nowhere -->
+    <button class="btn btn-primary">Edit Profile</button>
+    <!-- Manage Account -- Future User Story-->
+    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">Manage Account</a>
+    <!-- Brokerage Connection link -->
+    <a class="btn btn-primary" asp-controller="Brokerage" asp-action="Connect">Connect Brokerage</a>
+
+</div>
