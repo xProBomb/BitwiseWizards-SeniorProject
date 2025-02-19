@@ -40,6 +40,8 @@ public partial class User
     public string? PlaidStatus { get; set; }
 
     public string? PlaidSettings { get; set; }
+    
+    public string? UserTag { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

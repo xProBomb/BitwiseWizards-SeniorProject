@@ -17,7 +17,7 @@
 
     <!-- Profile Name and Created Date -->
     <div class="mb-4" style="padding-left: 200px;">
-        <h2>@Model.ProfileName</h2>
+        <h2>@Model.ProfileName @if(Model.PlaidEnabled){<i class ="bi bi-patch-check" ></i>}</h2>
         <p class="text-muted">
             Joined:
             @if (Model.CreatedAt.HasValue)
@@ -33,7 +33,7 @@
 
     <!-- Social Stats Row -->
     <div class="row text-center mb-3">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">@Model.FollowersCount</h5>
@@ -41,7 +41,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">@Model.FollowingCount</h5>
@@ -49,42 +49,127 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">@((Model.PlaidEnabled) ? "Yes" : "No")</h5>
-                    <p class="card-text">Verified</p>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     <!-- Bio Card -->
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             About
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                <i class="bi bi-pencil"></i> Edit
+            </button>
         </div>
         <div class="card-body">
-            <p class="card-text">@Model.Bio</p>
+            <p class="card-text" id="bioText">@Model.Bio</p>
+        </div>
+        @if (Model.UserTag != null)
+        {
+            <div class="card-footer">
+                <small class="text-muted">Trading Preference: @Model.UserTag</small>
+            </div>
+        }
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="UpdateProfile" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Profile</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">About</label>
+                            <textarea name="Bio" class="form-control" rows="4">@Model.Bio</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Trading Preference</label>
+                            <select name="UserTag" class="form-select">
+                                <option value="">Select preference...</option>
+                                <option value="Stocks"> @(Model.UserTag == "Stocks" ? "selected " : "")Stocks</option>
+                                <option value="Options"> @(Model.UserTag == "Options" ? "selected " : "")Options</option>
+                                <option value="Crypto"> @(Model.UserTag == "Crypto" ? "selected " : "")Crypto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Plaid Sync Card -->
+    <!-- Holdings for user -->
     <div class="card mb-4">
-        <div class="card-header">
-            Last Plaid Sync
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Investment Holdings</h5>
+            <div>
+                @if (Model.LastHoldingsUpdate.HasValue)
+                {
+                    <small class="text-muted me-3">Last updated: @Model.LastHoldingsUpdate.Value.ToString("g")</small>
+                }
+                <form asp-action="RefreshHoldings" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </form>
+            </div>
         </div>
         <div class="card-body">
-            <p class="card-text">
-                @if (Model.LastPlaidSync.HasValue)
-                {
-                    @Model.LastPlaidSync.Value.ToString("g")
-                }
-                else
-                {
-                    <em>N/A</em>
-                }
-            </p>
+            @if (!Model.Holdings.Any())
+            {
+                <p class="text-muted">No holdings found. Connect your brokerage account to see your investments.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Cost Basis</th>
+                            <th class="text-end">Quantity</th>
+                            <th class="text-end">Current Price</th>
+                            <th class="text-end">Current Value</th>
+                            <th class="text-end">Return</th>
+                            <th class="text-end">Return %</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var holding in Model.Holdings)
+                        {
+                            <tr>
+                                <td>@holding.Symbol</td>
+                                <td>@holding.CostBasis</td>
+                                <td class="text-end">@holding.Quantity.ToString("N4")</td>
+                                <td class="text-end">$@holding.CurrentPrice.ToString("N2")</td>
+                                <td class="text-end">$@holding.CurrentValue.ToString("N2")</td>
+                                <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
+                                    $@Math.Abs(holding.ReturnAmount).ToString("N2")
+                                    @(holding.ReturnAmount >= 0 ? "+" : "-")
+                                </td>
+                                <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
+                                    @Math.Abs(holding.ReturnPercentage).ToString("N2")%
+                                    @(holding.ReturnPercentage >= 0 ? "+" : "-")
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                        <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="4">Total Portfolio Value</td>
+                            <td class="text-end">$@Model.TotalPortfolioValue.ToString("N2")</td>
+                            <td colspan="2"></td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
         </div>
     </div>
 
@@ -97,8 +182,7 @@
             <p class="card-text">Posts coming soon...</p>
         </div>
     </div>
-    <!-- Personalization button that goes nowhere -->
-    <button class="btn btn-primary">Edit Profile</button>
+   
     <!-- Manage Account -- Future User Story-->
     <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">Manage Account</a>
     <!-- Brokerage Connection link -->

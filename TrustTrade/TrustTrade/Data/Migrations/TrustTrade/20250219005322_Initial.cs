@@ -23,7 +23,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Stock__3214EC2751A28057", x => x.ID);
+                    table.PrimaryKey("PK__Stock__3214EC275CD17266", x => x.ID);
                     table.UniqueConstraint("AK_Stock_TickerSymbol", x => x.TickerSymbol);
                 });
 
@@ -33,6 +33,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    IdentityId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Profile_Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Username = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -43,14 +44,15 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     Is_Admin = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
                     Is_Verified = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
                     EncryptedAPIKey = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    PlaidEnabled = table.Column<bool>(type: "bit", nullable: true),
+                    PlaidEnabled = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
                     LastPlaidSync = table.Column<DateTime>(type: "datetime", nullable: true),
-                    PlaidStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    PlaidSettings = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    PlaidStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValue: "Not Connected"),
+                    PlaidSettings = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserTag = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Users__3214EC27D63A1A35", x => x.ID);
+                    table.PrimaryKey("PK__Users__3214EC276FA1AE70", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,7 +67,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Follower__3214EC276AFC0274", x => x.ID);
+                    table.PrimaryKey("PK__Follower__3214EC27F91512A2", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Followers_Follower",
                         column: x => x.FollowerUserID,
@@ -80,7 +82,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaidConnection",
+                name: "PlaidConnections",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -90,13 +92,13 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     InstitutionID = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     InstitutionName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastSyncTimestamp = table.Column<DateTime>(type: "datetime", nullable: true)
+                    LastSyncTimestamp = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlaidConnection", x => x.ID);
+                    table.PrimaryKey("PK__PlaidCon__3214EC270FDE352D", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PlaidConnection_Users_UserID",
+                        name: "FK_PlaidConnections_User",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "ID",
@@ -118,7 +120,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Posts__3214EC2757B225A3", x => x.ID);
+                    table.PrimaryKey("PK__Posts__3214EC27B8094D9F", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Posts_User",
                         column: x => x.UserID,
@@ -143,7 +145,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Trade__3214EC271BE9AF7E", x => x.ID);
+                    table.PrimaryKey("PK__Trade__3214EC27C999C95A", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Trade_Stock",
                         column: x => x.TickerSymbol,
@@ -158,7 +160,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 });
 
             migrationBuilder.CreateTable(
-                name: "InvestmentPosition",
+                name: "InvestmentPositions",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -169,15 +171,16 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     Quantity = table.Column<decimal>(type: "decimal(18,8)", nullable: false),
                     CostBasis = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CurrentPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime", nullable: true)
+                    TypeOfSecurity = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InvestmentPosition", x => x.ID);
+                    table.PrimaryKey("PK__Investme__3214EC27E2A465AA", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_InvestmentPosition_PlaidConnection_PlaidConnectionID",
+                        name: "FK_InvestmentPositions_PlaidConnection",
                         column: x => x.PlaidConnectionID,
-                        principalTable: "PlaidConnection",
+                        principalTable: "PlaidConnections",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -195,7 +198,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Comments__3214EC275D142D0B", x => x.ID);
+                    table.PrimaryKey("PK__Comments__3214EC27F40245E7", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Comments_Post",
                         column: x => x.PostID,
@@ -221,7 +224,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Likes__3214EC27FF87C594", x => x.ID);
+                    table.PrimaryKey("PK__Likes__3214EC2754DB71E6", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Likes_Post",
                         column: x => x.PostID,
@@ -256,8 +259,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 column: "FollowingUserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InvestmentPosition_PlaidConnectionID",
-                table: "InvestmentPosition",
+                name: "IX_InvestmentPositions_PlaidConnectionID",
+                table: "InvestmentPositions",
                 column: "PlaidConnectionID");
 
             migrationBuilder.CreateIndex(
@@ -271,13 +274,13 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaidConnection_UserID",
-                table: "PlaidConnection",
+                name: "IX_PlaidConnections_UserID",
+                table: "PlaidConnections",
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "UQ__PlaidCon__727E83EAA3D35DB3",
-                table: "PlaidConnection",
+                table: "PlaidConnections",
                 column: "ItemID",
                 unique: true);
 
@@ -325,7 +328,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 name: "Followers");
 
             migrationBuilder.DropTable(
-                name: "InvestmentPosition");
+                name: "InvestmentPositions");
 
             migrationBuilder.DropTable(
                 name: "Likes");
@@ -334,7 +337,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                 name: "Trade");
 
             migrationBuilder.DropTable(
-                name: "PlaidConnection");
+                name: "PlaidConnections");
 
             migrationBuilder.DropTable(
                 name: "Posts");

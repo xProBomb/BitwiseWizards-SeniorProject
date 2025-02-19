@@ -18,6 +18,8 @@ public partial class InvestmentPosition
     public decimal CostBasis { get; set; }
 
     public decimal CurrentPrice { get; set; }
+    
+    public string TypeOfSecurity { get; set; }
 
     public DateTime? LastUpdated { get; set; }
 
