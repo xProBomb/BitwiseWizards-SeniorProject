@@ -29,7 +29,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #676767;
+    background-color: #3b3b3b;
     transition: .4s;
     display: flex;
     align-items: center;
@@ -61,7 +61,7 @@
 
 /* Active State */
 input:checked + .slider {
-    background-color: #2196F3;
+    background-color: #d1d1d1;
 }
 
 input:checked + .slider:before {
