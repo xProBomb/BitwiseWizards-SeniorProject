@@ -42,8 +42,10 @@ CREATE TABLE Trade (
 CREATE TABLE Posts (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     UserID INT NOT NULL,
+    Title NVARCHAR(100),
     Content NVARCHAR(MAX),
     CreatedAt DATETIME DEFAULT GETDATE(),
+    Tag NVARCHAR(50),
     PrivacySetting NVARCHAR(20) DEFAULT 'Public'
 );
 

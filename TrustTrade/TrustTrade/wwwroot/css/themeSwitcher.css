@@ -1,0 +1,84 @@
+/* Theme Switch Container */
+.theme-switch-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Main Switch Styling */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    margin: 0 10px;
+}
+
+/* Hide Default Checkbox */
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Slider Base Style */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3b3b3b;
+    transition: .4s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+}
+
+/* Slider Button */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    z-index: 2;
+}
+
+/* Rounded Edges */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Active State */
+input:checked + .slider {
+    background-color: #d1d1d1;
+}
+
+input:checked + .slider:before {
+    transform: translateX(30px);
+}
+
+/* Icon Styling */
+.sun-icon, .moon-icon {
+    color: white;
+    font-size: 14px;
+    z-index: 1;
+}
+
+.sun-icon {
+    margin-right: 4px;
+}
+
+.moon-icon {
+    margin-left: 4px;
+}
