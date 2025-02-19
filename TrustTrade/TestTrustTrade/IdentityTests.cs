@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,15 +14,14 @@ namespace TestIdentity
         private Mock<IUserPasswordStore<IdentityUser>> _mockUserStore;
         private Mock<IPasswordHasher<IdentityUser>> _mockPasswordHasher;
         private Mock<IPasswordValidator<IdentityUser>> _mockPasswordValidator;
+        private Mock<IUserValidator<IdentityUser>> _mockUserValidator;
         private UserManager<IdentityUser> _userManager;
 
         [SetUp]
         public void Setup()
         {
-            // 1) Mock the IUserPasswordStore instead of just IUserStore
+            // 1) Mock the IUserPasswordStore (which implements IUserStore)
             _mockUserStore = new Mock<IUserPasswordStore<IdentityUser>>();
-
-            // Minimal setups so UserManager can set/get the password hash
             _mockUserStore
                 .Setup(s => s.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(IdentityResult.Success);
@@ -39,11 +37,10 @@ namespace TestIdentity
 
             // 2) Mock the password hasher
             _mockPasswordHasher = new Mock<IPasswordHasher<IdentityUser>>();
-            // By default, let's not override VerifyHashedPassword (we'll do it in specific tests)
+            
 
-            // 3) Mock the password validator
+            // 3) Mock the password validator to succeed by default
             _mockPasswordValidator = new Mock<IPasswordValidator<IdentityUser>>();
-            // By default, let the password validator succeed
             _mockPasswordValidator
                 .Setup(v => v.ValidateAsync(
                     It.IsAny<UserManager<IdentityUser>>(),
@@ -51,16 +48,25 @@ namespace TestIdentity
                     It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // 4) Create the UserManager
+            // 4) Mock the user validator (for validating email, username, etc.)
+            _mockUserValidator = new Mock<IUserValidator<IdentityUser>>();
+            // By default, let the user validator succeed.
+            _mockUserValidator
+                .Setup(v => v.ValidateAsync(
+                    It.IsAny<UserManager<IdentityUser>>(),
+                    It.IsAny<IdentityUser>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            // 5) Create the UserManager with our mocks.
             _userManager = new UserManager<IdentityUser>(
                 _mockUserStore.Object,
                 Options.Create(new IdentityOptions()),
                 _mockPasswordHasher.Object,
-                new IUserValidator<IdentityUser>[0],  // or provide your own user validator mocks
+                new IUserValidator<IdentityUser>[] { _mockUserValidator.Object },
                 new[] { _mockPasswordValidator.Object },
                 new Mock<ILookupNormalizer>().Object,
                 new IdentityErrorDescriber(),
-                null, // No IServiceProvider
+                null, 
                 new Mock<ILogger<UserManager<IdentityUser>>>().Object
             );
         }
@@ -70,6 +76,8 @@ namespace TestIdentity
         {
             _userManager?.Dispose();
         }
+
+        #region Password Tests
 
         [Test]
         public async Task CreateUserAsync_ValidPassword_ShouldSucceed()
@@ -102,12 +110,9 @@ namespace TestIdentity
             var user = new IdentityUser { UserName = "invalidUser", Email = "invalid@example.com" };
             var invalidPassword = "short";
 
-            // Force the password validator to return an error
+            // Force the password validator to return an error.
             _mockPasswordValidator
-                .Setup(v => v.ValidateAsync(
-                    It.IsAny<UserManager<IdentityUser>>(),
-                    user,
-                    invalidPassword))
+                .Setup(v => v.ValidateAsync(_userManager, user, invalidPassword))
                 .ReturnsAsync(IdentityResult.Failed(
                     new IdentityError { Description = "Password too short." }));
 
@@ -131,7 +136,7 @@ namespace TestIdentity
             var user = new IdentityUser { UserName = "testuser" };
             var correctPassword = "CorrectPassword123!";
 
-            // Mock the password hasher to succeed if the provided password matches
+            // Mock the password hasher to succeed if the provided password matches.
             _mockPasswordHasher
                 .Setup(h => h.VerifyHashedPassword(user, "FakeHashedPassword", correctPassword))
                 .Returns(PasswordVerificationResult.Success);
@@ -150,7 +155,7 @@ namespace TestIdentity
             var user = new IdentityUser { UserName = "testuser" };
             var incorrectPassword = "WrongPassword";
 
-            // Mock the password hasher to fail if the provided password doesn't match
+            // Mock the password hasher to fail if the provided password doesn't match.
             _mockPasswordHasher
                 .Setup(h => h.VerifyHashedPassword(user, "FakeHashedPassword", incorrectPassword))
                 .Returns(PasswordVerificationResult.Failed);
@@ -161,7 +166,80 @@ namespace TestIdentity
             // Assert
             Assert.That(result, Is.False, "CheckPasswordAsync should return false for an incorrect password.");
         }
-    }
 
-    
+        #endregion
+
+        #region Email Validation Tests
+
+        [Test]
+        public async Task CreateUserAsync_ValidEmail_ShouldSucceed()
+        {
+            // Arrange
+            var user = new IdentityUser { UserName = "validEmailUser", Email = "user@example.com" };
+            var password = "ValidPassword123!";
+
+            // Ensure the user validator returns success for a valid email.
+            _mockUserValidator
+                .Setup(v => v.ValidateAsync(_userManager, user))
+                .ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _userManager.CreateAsync(user, password);
+
+            // Assert
+            Assert.That(result.Succeeded, Is.True, "Expected user creation to succeed with a valid email.");
+        }
+
+        [Test]
+        public async Task CreateUserAsync_InvalidEmail_ShouldFail()
+        {
+            // Arrange
+            var user = new IdentityUser { UserName = "invalidEmailUser", Email = "invalidemail" };
+            var password = "ValidPassword123!";
+
+            // Setup the user validator to return an error for an invalid email.
+            _mockUserValidator
+                .Setup(v => v.ValidateAsync(_userManager, user))
+                .ReturnsAsync(IdentityResult.Failed(
+                    new IdentityError { Description = "Invalid email format." }
+                ));
+
+            // Act
+            var result = await _userManager.CreateAsync(user, password);
+
+            // Assert
+            Assert.That(result.Succeeded, Is.False, "Expected user creation to fail with an invalid email.");
+            Assert.That(result.Errors, Has.One.Items, "Should have exactly one error.");
+            Assert.That(result.Errors,
+                Has.Some.Matches<IdentityError>(e => e.Description.Contains("Invalid email")),
+                "Expected error message about invalid email.");
+        }
+
+        [Test]
+        public async Task CreateUserAsync_NullEmail_ShouldFail()
+        {
+            // Arrange
+            var user = new IdentityUser { UserName = "nullEmailUser", Email = null };
+            var password = "ValidPassword123!";
+
+            // Setup the user validator to return an error when email is null.
+            _mockUserValidator
+                .Setup(v => v.ValidateAsync(_userManager, user))
+                .ReturnsAsync(IdentityResult.Failed(
+                    new IdentityError { Description = "Email cannot be null." }
+                ));
+
+            // Act
+            var result = await _userManager.CreateAsync(user, password);
+
+            // Assert
+            Assert.That(result.Succeeded, Is.False, "Expected user creation to fail with a null email.");
+            Assert.That(result.Errors, Has.One.Items, "Should have exactly one error.");
+            Assert.That(result.Errors,
+                Has.Some.Matches<IdentityError>(e => e.Description.Contains("cannot be null")),
+                "Expected error message about null email.");
+        }
+
+        #endregion
+    }
 }
