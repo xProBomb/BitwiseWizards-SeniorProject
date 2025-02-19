@@ -89,7 +89,8 @@ public class HoldingsRepository : Repository<InvestmentPosition>, IHoldingsRepos
                         CostBasis = holding.CostBasis ?? 0,
                         // will change institution price later with another api probably
                         CurrentPrice = holding.InstitutionPrice,
-                        LastUpdated = DateTime.Now
+                        LastUpdated = DateTime.Now,
+                        TypeOfSecurity = security.Type
                     };
 
                     _context.InvestmentPositions.Add(position);

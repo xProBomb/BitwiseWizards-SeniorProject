@@ -4,6 +4,7 @@ namespace TrustTrade.ViewModels;
 
 public class MyProfileViewModel
 {
+    public string? UserTag { get; set; }
     public string IdentityId { get; set; }
     public string ProfileName { get; set; }
     public DateTime? CreatedAt { get; set; }
@@ -30,4 +31,5 @@ public class HoldingViewModel
     public decimal ReturnAmount => CurrentValue - (Quantity * CostBasis);
     public decimal ReturnPercentage => CostBasis != 0 ? (((ReturnAmount - (CostBasis * Quantity)) / (CostBasis * Quantity)) + 1 ): 0;
     public string Institution { get; set; } = string.Empty;
+    public string TypeOfSecurity { get; set; } = string.Empty;
 }

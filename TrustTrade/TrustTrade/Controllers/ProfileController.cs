@@ -52,7 +52,8 @@ namespace TrustTrade.Controllers
                 Quantity = h.Quantity,
                 CurrentPrice = h.CurrentPrice,
                 CostBasis = h.CostBasis,
-                Institution = h.PlaidConnection.InstitutionName
+                Institution = h.PlaidConnection.InstitutionName,
+                TypeOfSecurity = h.TypeOfSecurity
             }).ToList();
 
             var model = new MyProfileViewModel
@@ -67,7 +68,8 @@ namespace TrustTrade.Controllers
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
                 Holdings = holdingViewModels,
-                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null
+                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
+                UserTag = user.UserTag
             };
 
             return View(model);
@@ -103,6 +105,45 @@ namespace TrustTrade.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error refreshing holdings");
+                return StatusCode(500, new { error = "An unexpected error occurred" });
+            }
+        }
+        
+        /// <summary>
+        /// Updates the user's profile information
+        /// </summary>
+        /// <param name="bio">The user's updated bio</param>
+        /// <param name="userTag">The user's selected trading preference</param>
+        /// <returns>Redirects to MyProfile page</returns>
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(string bio, string userTag)
+        {
+            try
+            {
+                var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(identityId))
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                user.Bio = bio;
+                user.UserTag = userTag;
+        
+                await _context.SaveChangesAsync();
+        
+                return RedirectToAction(nameof(MyProfile));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating profile");
                 return StatusCode(500, new { error = "An unexpected error occurred" });
             }
         }
