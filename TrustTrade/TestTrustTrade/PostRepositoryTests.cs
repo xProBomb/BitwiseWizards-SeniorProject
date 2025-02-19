@@ -3,6 +3,7 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.DAL.Concrete;
 using TrustTrade.Models;
 using Microsoft.EntityFrameworkCore;
+using Azure;
 
 namespace TestTrustTrade;
 
@@ -68,7 +69,7 @@ public class PostRepositoryTests
         };
 
         // Set up the to-one navigation property for Post to User
-        _posts.ForEach(p => p.User = _users.FirstOrDefault(u => u.Id == p.UserId));
+        _posts.ForEach(p => p.User = _users.FirstOrDefault(u => u.Id == p.UserId)!);
 
         // Set up the to-many navigation property for User to Post
         _users.ForEach(u => u.Posts = _posts.Where(p => p.UserId == u.Id).ToList());
@@ -91,5 +92,74 @@ public class PostRepositoryTests
 
         // Assert
         Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [TestCase(1, 10, 10)]
+    [TestCase(2, 10, 10)]
+    [TestCase(3, 10, 0)] // Pages after the last page should be empty
+    public void GetPagedPosts_WhenCalledWithPageSizeOfTen_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
+    {
+        // Arrange
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+        // Act
+        var posts = postRepository.GetPagedPosts(page, pageSize);
+        var result = posts.Count;
+
+        // Assert
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [TestCase(1, 1, 1)]
+    [TestCase(20, 1, 1)]
+    [TestCase(21, 1, 0)] // Pages after the last page should be empty
+    public void GetPagedPosts_WhenCalledWithPageSizeOfOne_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
+    {
+        // Arrange
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+        // Act
+        var posts = postRepository.GetPagedPosts(page, pageSize);
+        var result = posts.Count;
+
+        // Assert
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GetPagedPosts_WhenNoPosts_ReturnsEmptyList()
+    {
+        // Arrange
+        _posts.Clear();
+        var page = 1;
+        var pageSize = 10;
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+        // Act
+        var posts = postRepository.GetPagedPosts(page, pageSize);
+
+        // Assert
+        Assert.That(posts, Is.Empty);
+    }
+
+    [Test]
+    public void GetPagePosts_WhenCalled_ReturnsPostsInDescendingOrder()
+    {
+        // Arrange
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+        var page = 1;
+        var pageSize = 10;
+
+        // Act
+        var posts = postRepository.GetPagedPosts(page, pageSize);
+        var result = posts;
+
+        // Assert
+        DateTime? previousPostCreatedAt = DateTime.MaxValue;
+        foreach (var post in result)
+        {
+            Assert.That(post.CreatedAt, Is.LessThanOrEqualTo(previousPostCreatedAt));
+            previousPostCreatedAt = post.CreatedAt;
+        }
     }
 }
