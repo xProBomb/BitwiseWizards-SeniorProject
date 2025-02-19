@@ -18,13 +18,15 @@ namespace TrustTrade.Controllers
             _postRepository = postRepository;
         }
 
-        public IActionResult Index(int page = 1)
+        public IActionResult Index(int page = 1, string sortOrder = "DateDesc")
         {
             const int PAGE_SIZE = 10;
 
-            // Get posts for current page
-            List<Post> posts = _postRepository.GetPagedPosts(page, PAGE_SIZE);
+            // Retrieve paged posts from your repository.
+            // (Assumes your repository supports sorting; if not, you can sort here with LINQ.)
+            List<Post> posts = _postRepository.GetPagedPosts(page, PAGE_SIZE, sortOrder);
 
+            // Map to your view model for the post preview
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
             {
                 Id = p.Id,
@@ -32,21 +34,24 @@ namespace TrustTrade.Controllers
                 Title = p.Title,
                 Excerpt = p.Content != null && p.Content.Length > 100 
                     ? $"{p.Content.Substring(0, 100)}..." 
-                    : p.Content ?? string.Empty, // Display first 100 characters of content
+                    : p.Content ?? string.Empty,
                 TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt)
             }).ToList();
 
-            // Determine total possible pages
+            // Determine total pages
             int totalPosts = _postRepository.GetTotalPosts();
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
+            // Build the view model, including the current sort order
             IndexVM vm = new()
             {
                 Posts = postPreviews,
                 CurrentPage = page,
                 TotalPages = totalPages,
-                PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7)
+                PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7),
+                SortOrder = sortOrder  // Make sure your IndexVM includes this property
             };
+
             return View(vm);
         }
 
