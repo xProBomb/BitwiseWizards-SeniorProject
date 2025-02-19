@@ -8,4 +8,5 @@ public class IndexVM
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public List<int>? PagesToShow { get; set; }
+    public string? SortOrder { get; set; }
 }

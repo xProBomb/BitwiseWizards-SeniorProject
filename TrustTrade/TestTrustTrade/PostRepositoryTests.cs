@@ -92,4 +92,68 @@ public class PostRepositoryTests
         // Assert
         Assert.That(result, Is.EqualTo(expected));
     }
+
+    [Test]
+        public void GetPagedPosts_WhenNoParametersGiven_Returns10PostsSortedByDateDesc()
+        {
+            // Arrange
+            IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+            // Act
+            // By default, sortOrder = "DateDesc", page=1, pageSize=10
+            var results = postRepository.GetPagedPosts();
+
+            // Assert
+            Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default.");
+            // Verify descending order by CreatedAt
+            for (int i = 0; i < results.Count - 1; i++)
+            {
+                Assert.That(
+                    results[i].CreatedAt >= results[i + 1].CreatedAt,
+                    $"Posts are not sorted by descending CreatedAt at index {i}."
+                );
+            }
+        }
+
+        [Test]
+        public void GetPagedPosts_WhenDateAscSortOrderUsed_Returns10PostsSortedByDateAsc()
+        {
+            // Arrange
+            IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+            // Act
+            var results = postRepository.GetPagedPosts(page: 1, pageSize: 10, sortOrder: "DateAsc");
+
+            // Assert
+            Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
+            // Verify ascending order by CreatedAt
+            for (int i = 0; i < results.Count - 1; i++)
+            {
+                Assert.That(
+                    results[i].CreatedAt <= results[i + 1].CreatedAt,
+                    $"Posts are not sorted by ascending CreatedAt at index {i}."
+                );
+            }
+        }
+
+        [Test]
+        public void GetPagedPosts_WhenTitleAscSortOrderUsed_Returns10PostsSortedByTitleAsc()
+        {
+            // Arrange
+            IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+            // Act
+            var results = postRepository.GetPagedPosts(page: 1, pageSize: 10, sortOrder: "TitleAsc");
+
+            // Assert
+            Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
+            // Verify ascending order by Title
+            for (int i = 0; i < results.Count - 1; i++)
+            {
+                Assert.That(
+                    string.Compare(results[i].Title, results[i + 1].Title, StringComparison.Ordinal) <= 0,
+                    $"Posts are not sorted by ascending Title at index {i}."
+                );
+            }
+        }
 }
