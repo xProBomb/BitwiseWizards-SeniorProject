@@ -5,11 +5,6 @@ namespace TestTrustTrade;
 [TestFixture]
 public class PaginationHelperTests
 {
-    [SetUp]
-    public void Setup()
-    {
-    }
-
     [TestCase(1, 10, 5, new[] { 1, 2, 3, 4, 5 })]
     [TestCase(2, 10, 5, new[] { 1, 2, 3, 4, 5 })]
     [TestCase(3, 10, 5, new[] { 1, 2, 3, 4, 5 })]
