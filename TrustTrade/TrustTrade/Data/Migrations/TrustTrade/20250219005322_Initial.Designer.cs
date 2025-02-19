@@ -12,7 +12,7 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    [Migration("20250215035439_Initial")]
+    [Migration("20250219005322_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -54,7 +54,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("UserID");
 
                     b.HasKey("Id")
-                        .HasName("PK__Comments__3214EC275D142D0B");
+                        .HasName("PK__Comments__3214EC27F40245E7");
 
                     b.HasIndex("PostId");
 
@@ -86,7 +86,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("FollowingUserID");
 
                     b.HasKey("Id")
-                        .HasName("PK__Follower__3214EC276AFC0274");
+                        .HasName("PK__Follower__3214EC27F91512A2");
 
                     b.HasIndex("FollowerUserId");
 
@@ -111,7 +111,9 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("datetime");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<int>("PlaidConnectionId")
                         .HasColumnType("int")
@@ -131,11 +133,16 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("TypeOfSecurity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id")
+                        .HasName("PK__Investme__3214EC27E2A465AA");
 
                     b.HasIndex("PlaidConnectionId");
 
-                    b.ToTable("InvestmentPosition");
+                    b.ToTable("InvestmentPositions");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Like", b =>
@@ -161,7 +168,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("UserID");
 
                     b.HasKey("Id")
-                        .HasName("PK__Likes__3214EC27FF87C594");
+                        .HasName("PK__Likes__3214EC2754DB71E6");
 
                     b.HasIndex("PostId");
 
@@ -201,20 +208,23 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("ItemID");
 
                     b.Property<DateTime?>("LastSyncTimestamp")
-                        .HasColumnType("datetime");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int")
                         .HasColumnName("UserID");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("PK__PlaidCon__3214EC270FDE352D");
 
                     b.HasIndex("UserId");
 
                     b.HasIndex(new[] { "ItemId" }, "UQ__PlaidCon__727E83EAA3D35DB3")
                         .IsUnique();
 
-                    b.ToTable("PlaidConnection");
+                    b.ToTable("PlaidConnections");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Post", b =>
@@ -253,7 +263,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("UserID");
 
                     b.HasKey("Id")
-                        .HasName("PK__Posts__3214EC2757B225A3");
+                        .HasName("PK__Posts__3214EC27B8094D9F");
 
                     b.HasIndex("UserId");
 
@@ -284,12 +294,12 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("varchar(10)");
 
                     b.HasKey("Id")
-                        .HasName("PK__Stock__3214EC2751A28057");
+                        .HasName("PK__Stock__3214EC275CD17266");
 
                     b.HasIndex(new[] { "TickerSymbol" }, "UQ__Stock__F144591B01402E14")
                         .IsUnique();
 
-                    b.ToTable("Stock");
+                    b.ToTable("Stock", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Trade", b =>
@@ -332,13 +342,13 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("UserID");
 
                     b.HasKey("Id")
-                        .HasName("PK__Trade__3214EC271BE9AF7E");
+                        .HasName("PK__Trade__3214EC27C999C95A");
 
                     b.HasIndex("TickerSymbol");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Trade");
+                    b.ToTable("Trade", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.User", b =>
@@ -368,6 +378,11 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("varbinary(max)")
                         .HasColumnName("EncryptedAPIKey");
 
+                    b.Property<string>("IdentityId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("IdentityId");
+
                     b.Property<bool?>("IsAdmin")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -389,14 +404,18 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<bool?>("PlaidEnabled")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("PlaidSettings")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PlaidStatus")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Not Connected");
 
                     b.Property<string>("ProfileName")
                         .IsRequired()
@@ -408,13 +427,16 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("UserTag")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id")
-                        .HasName("PK__Users__3214EC27D63A1A35");
+                        .HasName("PK__Users__3214EC276FA1AE70");
 
                     b.HasIndex(new[] { "Username" }, "UQ__Users__536C85E43599A86E")
                         .IsUnique();
@@ -471,7 +493,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .WithMany("InvestmentPositions")
                         .HasForeignKey("PlaidConnectionId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_InvestmentPositions_PlaidConnection");
 
                     b.Navigation("PlaidConnection");
                 });
@@ -502,7 +525,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .WithMany("PlaidConnections")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_PlaidConnections_User");
 
                     b.Navigation("User");
                 });
