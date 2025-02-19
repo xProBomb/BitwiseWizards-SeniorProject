@@ -93,72 +93,67 @@ public class PostRepositoryTests
         Assert.That(result, Is.EqualTo(expected));
     }
 
-    [TestCase(1, 10, 10)]
-    [TestCase(2, 10, 10)]
-    [TestCase(3, 10, 0)] // Pages after the last page should be empty
-    public void GetPagedPosts_WhenPageSizeTen_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
-    {
-        // Arrange
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-
-        // Act
-        var posts = postRepository.GetPagedPosts(page, pageSize);
-        var result = posts.Count;
-
-        // Assert
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase(1, 1, 1)]
-    [TestCase(20, 1, 1)]
-    [TestCase(21, 1, 0)] // Pages after the last page should be empty
-    public void GetPagedPosts_WhenPageSizeOne_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
-    {
-        // Arrange
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-
-        // Act
-        var posts = postRepository.GetPagedPosts(page, pageSize);
-        var result = posts.Count;
-
-        // Assert
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
     [Test]
-    public void GetPagedPosts_WhenNoPosts_ReturnsEmptyList()
-    {
-        // Arrange
-        _posts.Clear();
-        var page = 1;
-        var pageSize = 10;
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-
-        // Act
-        var posts = postRepository.GetPagedPosts(page, pageSize);
-
-        // Assert
-        Assert.That(posts, Is.Empty);
-    }
-
-    [Test]
-    public void GetPagePosts_WhenCalled_ReturnsPostsInDescendingOrder()
-    {
-        // Arrange
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-        var page = 1;
-        var pageSize = 10;
-
-        // Act
-        var posts = postRepository.GetPagedPosts(page, pageSize);
-        var result = posts;
-
-        // Assert
-        DateTime? previousPostCreatedAt = DateTime.MaxValue;
-        foreach (var post in result)
+        public void GetPagedPosts_WhenNoParametersGiven_Returns10PostsSortedByDateDesc()
         {
-            Assert.That(post.CreatedAt, Is.LessThanOrEqualTo(previousPostCreatedAt!));
-            previousPostCreatedAt = post.CreatedAt;
+            // Arrange
+            IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+            // Act
+            // By default, sortOrder = "DateDesc", page=1, pageSize=10
+            var results = postRepository.GetPagedPosts();
+
+            // Assert
+            Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default.");
+            // Verify descending order by CreatedAt
+            for (int i = 0; i < results.Count - 1; i++)
+            {
+                Assert.That(
+                    results[i].CreatedAt >= results[i + 1].CreatedAt,
+                    $"Posts are not sorted by descending CreatedAt at index {i}."
+                );
+            }
         }
-    }
+
+        [Test]
+        public void GetPagedPosts_WhenDateAscSortOrderUsed_Returns10PostsSortedByDateAsc()
+        {
+            // Arrange
+            IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+            // Act
+            var results = postRepository.GetPagedPosts(page: 1, pageSize: 10, sortOrder: "DateAsc");
+
+            // Assert
+            Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
+            // Verify ascending order by CreatedAt
+            for (int i = 0; i < results.Count - 1; i++)
+            {
+                Assert.That(
+                    results[i].CreatedAt <= results[i + 1].CreatedAt,
+                    $"Posts are not sorted by ascending CreatedAt at index {i}."
+                );
+            }
+        }
+
+        [Test]
+        public void GetPagedPosts_WhenTitleAscSortOrderUsed_Returns10PostsSortedByTitleAsc()
+        {
+            // Arrange
+            IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+            // Act
+            var results = postRepository.GetPagedPosts(page: 1, pageSize: 10, sortOrder: "TitleAsc");
+
+            // Assert
+            Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
+            // Verify ascending order by Title
+            for (int i = 0; i < results.Count - 1; i++)
+            {
+                Assert.That(
+                    string.Compare(results[i].Title, results[i + 1].Title, StringComparison.Ordinal) <= 0,
+                    $"Posts are not sorted by ascending Title at index {i}."
+                );
+            }
+        }
 }

@@ -89,7 +89,7 @@ public class BrokerageController : Controller
                     Username = identityUser.UserName ?? identityUser.Email!,
                     ProfileName = identityUser.UserName ?? identityUser.Email!,
                     PasswordHash = "[MANAGED_BY_IDENTITY]",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
 
                 _dbContext.Users.Add(trustTradeUser);

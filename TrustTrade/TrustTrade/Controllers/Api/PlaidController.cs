@@ -148,7 +148,7 @@ public async Task<IActionResult> ExchangePublicToken([FromBody] ExchangePublicTo
             ItemId = exchangeResponse.ItemId,
             InstitutionId = itemResponse.Item.InstitutionId,
             InstitutionName = institutionResponse.Institution.Name,
-            LastSyncTimestamp = DateTime.UtcNow
+            LastSyncTimestamp = DateTime.Now
         };
 
         _dbContext.PlaidConnections.Add(plaidConnection);
@@ -156,7 +156,7 @@ public async Task<IActionResult> ExchangePublicToken([FromBody] ExchangePublicTo
         // Update user's Plaid status
         trustTradeUser.PlaidEnabled = true;
         trustTradeUser.PlaidStatus = "Connected";
-        trustTradeUser.LastPlaidSync = DateTime.UtcNow;
+        trustTradeUser.LastPlaidSync = DateTime.Now;
 
         await _dbContext.SaveChangesAsync();
 
