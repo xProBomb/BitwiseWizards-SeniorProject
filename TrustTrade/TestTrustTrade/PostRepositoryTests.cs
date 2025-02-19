@@ -3,7 +3,6 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.DAL.Concrete;
 using TrustTrade.Models;
 using Microsoft.EntityFrameworkCore;
-using Azure;
 
 namespace TestTrustTrade;
 
