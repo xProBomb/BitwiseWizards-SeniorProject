@@ -7,13 +7,8 @@ public class TimeAgoHelperTests
 {
     private readonly DateTime _pastDateTime = new(2025, 1, 1, 0, 0, 0);
 
-    [SetUp]
-    public void Setup()
-    {
-    }
-
     [Test]
-    public void GetTimeAgo_WhenCalledWithOneSecondDifference_ReturnsJustNow()
+    public void GetTimeAgo_WhenOneSecondDifference_ReturnsJustNow()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddSeconds(1);
@@ -27,7 +22,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithOneMinuteDifference_ReturnsOneMinuteAgo()
+    public void GetTimeAgo_WhenOneMinuteDifference_ReturnsOneMinuteAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddMinutes(1);
@@ -41,7 +36,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithFiveMinutesDifference_ReturnsFiveMinutesAgo()
+    public void GetTimeAgo_WhenFiveMinutesDifference_ReturnsFiveMinutesAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddMinutes(5);
@@ -55,7 +50,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithOneHourDifference_ReturnsOneHourAgo()
+    public void GetTimeAgo_WhenOneHourDifference_ReturnsOneHourAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddHours(1);
@@ -69,7 +64,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithFiveHoursDifference_ReturnsFiveHoursAgo()
+    public void GetTimeAgo_WhenFiveHoursDifference_ReturnsFiveHoursAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddHours(5);
@@ -83,7 +78,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithOneDayDifference_ReturnsOneDayAgo()
+    public void GetTimeAgo_WhenOneDayDifference_ReturnsOneDayAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddDays(1);
@@ -97,7 +92,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithFiveDaysDifference_ReturnsFiveDaysAgo()
+    public void GetTimeAgo_WhenFiveDaysDifference_ReturnsFiveDaysAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddDays(5);
@@ -111,7 +106,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithOneMonthDifference_ReturnsOneMonthAgo()
+    public void GetTimeAgo_WhenOneMonthDifference_ReturnsOneMonthAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddMonths(1);
@@ -125,7 +120,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithFiveMonthsDifference_ReturnsFiveMonthsAgo()
+    public void GetTimeAgo_WhenFiveMonthsDifference_ReturnsFiveMonthsAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddMonths(5);
@@ -139,7 +134,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithOneYearDifference_ReturnsOneYearAgo()
+    public void GetTimeAgo_WhenOneYearDifference_ReturnsOneYearAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddYears(1);
@@ -153,7 +148,7 @@ public class TimeAgoHelperTests
     }
 
     [Test]
-    public void GetTimeAgo_WhenCalledWithFiveYearsDifference_ReturnsFiveYearsAgo()
+    public void GetTimeAgo_WhenFiveYearsDifference_ReturnsFiveYearsAgo()
     {
         // Arrange
         var currentDateTime = _pastDateTime.AddYears(5);

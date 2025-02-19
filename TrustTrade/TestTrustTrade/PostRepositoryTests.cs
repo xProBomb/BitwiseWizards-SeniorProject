@@ -97,7 +97,7 @@ public class PostRepositoryTests
     [TestCase(1, 10, 10)]
     [TestCase(2, 10, 10)]
     [TestCase(3, 10, 0)] // Pages after the last page should be empty
-    public void GetPagedPosts_WhenCalledWithPageSizeOfTen_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
+    public void GetPagedPosts_WhenPageSizeTen_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
@@ -113,7 +113,7 @@ public class PostRepositoryTests
     [TestCase(1, 1, 1)]
     [TestCase(20, 1, 1)]
     [TestCase(21, 1, 0)] // Pages after the last page should be empty
-    public void GetPagedPosts_WhenCalledWithPageSizeOfOne_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
+    public void GetPagedPosts_WhenPageSizeOne_ReturnsExpectedNumberOfPosts(int page, int pageSize, int expected)
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
