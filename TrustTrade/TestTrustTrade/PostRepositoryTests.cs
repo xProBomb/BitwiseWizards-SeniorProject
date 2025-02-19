@@ -158,7 +158,7 @@ public class PostRepositoryTests
         DateTime? previousPostCreatedAt = DateTime.MaxValue;
         foreach (var post in result)
         {
-            Assert.That(post.CreatedAt, Is.LessThanOrEqualTo(previousPostCreatedAt));
+            Assert.That(post.CreatedAt, Is.LessThanOrEqualTo(previousPostCreatedAt!));
             previousPostCreatedAt = post.CreatedAt;
         }
     }
