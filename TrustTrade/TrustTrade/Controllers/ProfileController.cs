@@ -25,7 +25,8 @@ namespace TrustTrade.Controllers
             _logger = logger;
         }
 
-        // Map the logged-in user's profile to "/Profile"
+        // route to get to logged in users profile "/Profile"
+        // This is the method for accessing the owner's profile
         [HttpGet("/Profile")]
         public async Task<IActionResult> MyProfile()
         {
@@ -75,7 +76,8 @@ namespace TrustTrade.Controllers
             return View("Profile",model);
         }
 
-        // Map public profiles to "/Profile/User/{username}"
+        // In order to access the profile of a user, use the route below
+        // This is the method for accessing a non-owners profile
         [AllowAnonymous]
         [HttpGet("/Profile/User/{username}")]
         public async Task<IActionResult> UserProfile(string username)
@@ -160,8 +162,11 @@ namespace TrustTrade.Controllers
         }
 
         /// <summary>
-        /// Updates the user's profile information.
+        /// Updates the user's profile information
         /// </summary>
+        /// <param name="bio">The user's updated bio</param>
+        /// <param name="userTag">The user's selected trading preference</param>
+        /// <returns>Redirects to Profile page</returns>
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(string bio, string userTag)
         {
