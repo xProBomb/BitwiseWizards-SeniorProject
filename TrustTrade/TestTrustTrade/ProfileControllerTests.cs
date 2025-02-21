@@ -141,7 +141,7 @@ namespace TestTrustTrade
             var viewResult = result as ViewResult;
             Assert.That(viewResult?.Model, Is.Not.Null);
             
-            var model = viewResult.Model as MyProfileViewModel;
+            var model = viewResult.Model as ProfileViewModel;
             Assert.Multiple(() =>
             {
                 Assert.That(model.IdentityId, Is.EqualTo(testIdentityId));

@@ -1,5 +1,3 @@
-// File: TrustTrade/Controllers/ProfileController.cs
-
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +25,8 @@ namespace TrustTrade.Controllers
             _logger = logger;
         }
 
+        // Map the logged-in user's profile to "/Profile"
+        [HttpGet("/Profile")]
         public async Task<IActionResult> MyProfile()
         {
             var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -56,7 +56,7 @@ namespace TrustTrade.Controllers
                 TypeOfSecurity = h.TypeOfSecurity
             }).ToList();
 
-            var model = new MyProfileViewModel
+            var model = new ProfileViewModel
             {
                 IdentityId = user.IdentityId,
                 ProfileName = user.ProfileName,
@@ -72,7 +72,57 @@ namespace TrustTrade.Controllers
                 UserTag = user.UserTag
             };
 
-            return View(model);
+            return View("Profile",model);
+        }
+
+        // Map public profiles to "/Profile/User/{username}"
+        [AllowAnonymous]
+        [HttpGet("/Profile/User/{username}")]
+        public async Task<IActionResult> UserProfile(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction(nameof(MyProfile));
+            }
+
+            var user = await _context.Users
+                .Include(u => u.FollowerFollowerUsers)
+                .Include(u => u.FollowerFollowingUsers)
+                .FirstOrDefaultAsync(u => u.ProfileName == username);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+            var holdingViewModels = holdings.Select(h => new HoldingViewModel
+            {
+                Symbol = h.Symbol,
+                Quantity = h.Quantity,
+                CurrentPrice = h.CurrentPrice,
+                CostBasis = h.CostBasis,
+                Institution = h.PlaidConnection.InstitutionName,
+                TypeOfSecurity = h.TypeOfSecurity
+            }).ToList();
+
+            var model = new ProfileViewModel
+            {
+                IdentityId = user.IdentityId,
+                ProfileName = user.ProfileName,
+                CreatedAt = user.CreatedAt,
+                Bio = user.Bio,
+                IsVerified = user.IsVerified ?? false,
+                PlaidEnabled = user.PlaidEnabled ?? false,
+                LastPlaidSync = user.LastPlaidSync,
+                FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
+                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+                Holdings = holdingViewModels,
+                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
+                UserTag = user.UserTag
+            };
+
+            return View("Profile", model);
         }
 
         [HttpPost]
@@ -108,13 +158,10 @@ namespace TrustTrade.Controllers
                 return StatusCode(500, new { error = "An unexpected error occurred" });
             }
         }
-        
+
         /// <summary>
-        /// Updates the user's profile information
+        /// Updates the user's profile information.
         /// </summary>
-        /// <param name="bio">The user's updated bio</param>
-        /// <param name="userTag">The user's selected trading preference</param>
-        /// <returns>Redirects to MyProfile page</returns>
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(string bio, string userTag)
         {
@@ -136,9 +183,9 @@ namespace TrustTrade.Controllers
 
                 user.Bio = bio;
                 user.UserTag = userTag;
-        
+
                 await _context.SaveChangesAsync();
-        
+
                 return RedirectToAction(nameof(MyProfile));
             }
             catch (Exception ex)
