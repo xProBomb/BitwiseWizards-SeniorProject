@@ -35,8 +35,16 @@ namespace TrustTrade.Controllers
                 Excerpt = p.Content != null && p.Content.Length > 100 
                     ? $"{p.Content.Substring(0, 100)}..." 
                     : p.Content ?? string.Empty,
-                TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt)
+                TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt),
+                IsPlaidEnabled = p.User.PlaidEnabled ?? false,
+                PortfolioValueAtPosting = p.PortfolioValueAtPosting
             }).ToList();
+            
+            // For debugging 
+            foreach (var post in postPreviews)
+            {
+                _logger.LogInformation($"Post {post.Id} by {post.UserName}: PlaidEnabled={post.IsPlaidEnabled}, PortfolioValue={post.PortfolioValueAtPosting}");
+            }
 
             // Determine total pages
             int totalPosts = _postRepository.GetTotalPosts();
