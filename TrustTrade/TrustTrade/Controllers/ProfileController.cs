@@ -79,7 +79,7 @@ namespace TrustTrade.Controllers
         // In order to access the profile of a user, use the route below
         // This is the method for accessing a non-owners profile
         [AllowAnonymous]
-        [HttpGet("/Profile/User/{username}")]
+        [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
         public async Task<IActionResult> UserProfile(string username)
         {
             if (string.IsNullOrEmpty(username))
