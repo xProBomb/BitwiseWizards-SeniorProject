@@ -19,10 +19,13 @@ builder.Services.AddDbContext<TrustTradeDbContext>(options => options
         sqlOptions.EnableRetryOnFailure();
         sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }));
+
+// Repositories
 builder.Services.AddScoped<DbContext, TrustTradeDbContext>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IHoldingsRepository, HoldingsRepository>();
+builder.Services.AddScoped<ISearchUserRepository, SearchUserRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
