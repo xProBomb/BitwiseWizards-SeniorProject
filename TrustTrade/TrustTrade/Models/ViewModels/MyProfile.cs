@@ -1,8 +1,6 @@
-// File: TrustTrade/Models/ViewModels/MyProfile.cs
-
 namespace TrustTrade.ViewModels;
 
-public class MyProfileViewModel
+public class ProfileViewModel
 {
     public string? UserTag { get; set; }
     public string IdentityId { get; set; }
