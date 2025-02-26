@@ -13,4 +13,8 @@ public class PostPreviewVM
     public string? Excerpt { get; set; }
     
     public string? TimeAgo { get; set; }
+    
+    
+    public bool IsPlaidEnabled { get; set; }
+    public decimal? PortfolioValueAtPosting { get; set; }
 }
