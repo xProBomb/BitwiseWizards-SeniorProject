@@ -1,0 +1,33 @@
+@model IEnumerable<TrustTrade.Models.User>
+
+@if (Model == null || !Model.Any())
+{
+    <div>No users found</div>
+}
+else
+{
+    <ul class="list-unstyled">
+        @foreach (var user in Model)
+        {
+            <li class="search-result-item" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center;">
+                    <!-- Profile Picture  -->
+                    <img src="@user.ProfilePicture" alt="Profile Picture" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;" />
+                    
+                    <!-- Username & Created Date -->
+                    <div>
+                        <strong>@user.Username</strong><br />
+                        <small>Created at: @user.CreatedAt?.ToString("MM/dd/yyyy")</small>
+                    </div>
+                </div>
+
+                <!-- Link to profile -->
+                <div>
+                    <a asp-controller="User" asp-action="Profile" asp-route-id="@user.Id">
+                        View Profile
+                    </a>
+                </div>
+            </li>
+        }
+    </ul>
+}
