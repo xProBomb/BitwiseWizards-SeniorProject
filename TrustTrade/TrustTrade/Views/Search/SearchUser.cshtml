@@ -2,14 +2,17 @@
     ViewData["Title"] = "Search Users";
 }
 
-<h1>Search for Users</h1>
+<div class="container my-4">
+    <h1 class="mb-4">Search for Users</h1>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Search by username..." aria-label="Search by username">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+    </div>
 
-<input type="text" id="searchTerm" name="searchTerm" placeholder="Search by username..." />
-<div id="searchResults">
-    <!-- Results will be injected here by fetch call -->
+    <!-- Container for injected search results -->
+    <div id="searchResults"></div>
 </div>
 
 @section Scripts {
-    <!-- Reference your external JS file -->
     <script src="~/js/searchuser.js"></script>
 }
