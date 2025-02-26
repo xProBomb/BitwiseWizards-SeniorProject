@@ -60,7 +60,18 @@
             foreach (var post in Model.Posts)
             {
                 <li class="list-group-item">
-                    <p>@post.UserName | @post.TimeAgo</p>
+                    <p>
+                        @post.UserName
+                        @if (post.IsPlaidEnabled)
+                        {
+                            if (post.PortfolioValueAtPosting.HasValue)
+                            {
+                                <span class="text-success">$@post.PortfolioValueAtPosting.Value.ToString("N0") </span>
+                            }
+                            <i class="bi bi-patch-check-fill text-success"></i>
+                        }
+                        | @post.TimeAgo
+                    </p>
                     <h3>@post.Title</h3>
                     <p>@post.Excerpt</p>
                 </li>
