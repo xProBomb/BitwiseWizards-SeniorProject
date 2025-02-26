@@ -6,7 +6,7 @@
 }
 else
 {
-    <ul class="list-unstyled">
+    <ul class="">
         @foreach (var user in Model)
         {
             <li class="search-result-item" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -23,7 +23,7 @@ else
 
                 <!-- Link to profile -->
                 <div>
-                    <a asp-controller="User" asp-action="Profile" asp-route-id="@user.Id">
+                    <a href="@Url.RouteUrl("UserProfileRoute", new { username = user.Username })">
                         View Profile
                     </a>
                 </div>
