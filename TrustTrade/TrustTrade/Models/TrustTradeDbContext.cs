@@ -158,6 +158,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.Tag).HasMaxLength(50);
             entity.Property(e => e.Title).HasMaxLength(100);
             entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.PortfolioValueAtPosting)
+                .HasColumnType("decimal(18, 2)")
+                .IsRequired(false);
 
             entity.HasOne(d => d.User).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.UserId)
