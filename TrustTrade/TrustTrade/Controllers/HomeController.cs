@@ -18,7 +18,7 @@ namespace TrustTrade.Controllers
             _postRepository = postRepository;
         }
 
-        public IActionResult Index(int page = 1, string sortOrder = "DateDesc")
+        public IActionResult Index(string? categoryFilter, int page = 1, string sortOrder = "DateDesc")
         {
             const int PAGE_SIZE = 10;
 
@@ -49,7 +49,9 @@ namespace TrustTrade.Controllers
                 CurrentPage = page,
                 TotalPages = totalPages,
                 PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7),
-                SortOrder = sortOrder  // Make sure your IndexVM includes this property
+                SortOrder = sortOrder,
+                Categories = new List<string> {},
+                SelectedCategory = categoryFilter
             };
 
             return View(vm);
