@@ -68,7 +68,7 @@ public class PostRepositoryTests
         };
 
         // Set up the to-one navigation property for Post to User
-        _posts.ForEach(p => p.User = _users.FirstOrDefault(u => u.Id == p.UserId));
+        _posts.ForEach(p => p.User = _users.FirstOrDefault(u => u.Id == p.UserId)!);
 
         // Set up the to-many navigation property for User to Post
         _users.ForEach(u => u.Posts = _posts.Where(p => p.UserId == u.Id).ToList());
