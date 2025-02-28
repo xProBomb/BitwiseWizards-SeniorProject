@@ -67,13 +67,13 @@ CREATE TABLE Likes (
 CREATE TABLE Tags (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     TagName NVARCHAR(100) UNIQUE
-)
+);
 
 CREATE TABLE PostTags (
     PostID INT,
     TagID INT
     PRIMARY KEY (PostID, TagID)
-)
+);
 
 
 
