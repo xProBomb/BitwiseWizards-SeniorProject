@@ -1,0 +1,23 @@
+@model TrustTrade.ViewModels.ContactSupportViewModel
+
+<h2>Contact Support</h2>
+<form asp-action="ContactSupport" method="post">
+    <div>
+        <label for="Tag">Issue Type</label>
+        <select asp-for="Tag">
+            <option value="Bug">Bug</option>
+            <option value="Appeal">Appeal</option>
+            <option value="Question">Question</option>
+            <option value="Comment">Comment</option>
+        </select>
+    </div>
+    <div>
+        <label for="Name">Your Name</label>
+        <input asp-for="Name" />
+    </div>
+    <div>
+        <label for="Message">Message</label>
+        <textarea asp-for="Message"></textarea>
+    </div>
+    <button type="submit">Send Request</button>
+</form>
