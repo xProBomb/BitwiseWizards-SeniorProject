@@ -189,19 +189,6 @@ public partial class TrustTradeDbContext : DbContext
                 });
         });
 
-        modelBuilder.Entity<Tag>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Tags__3214EC2786A0DFD7");
-
-            entity.HasIndex(e => e.TagName, "UQ__Tags__A2F1B0E1A3A3D3A4").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.TagName)
-                .HasColumnName("TagName")
-                .HasMaxLength(100)
-                .IsRequired();
-        });
-
         modelBuilder.Entity<Stock>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Stock__3214EC275CD17266");
@@ -217,6 +204,20 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.StockPrice).HasColumnType("decimal(13, 2)");
             entity.Property(e => e.TickerSymbol)
                 .HasMaxLength(10)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Tags__3214EC2786A0DFD7");
+
+            entity.HasIndex(e => e.TagName, "UQ__Tags__A2F1B0E1A3A3D3A4").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.TagName)
+                .HasColumnName("TagName")
+                .HasMaxLength(100)
+                .IsRequired()
                 .IsUnicode(false);
         });
 
