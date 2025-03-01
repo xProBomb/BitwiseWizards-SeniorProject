@@ -52,9 +52,19 @@ public class PostRepository : Repository<Post>, IPostRepository
             .ToList();
     }
 
-    public int GetTotalPosts()
+    public int GetTotalPosts(string? category)
     {
-        return _posts.Count();
+        // Start with a query that includes the related Tags.
+        IQueryable<Post> query = _posts
+            .Include(p => p.Tags);
+
+        // Apply filtering based on the category parameter
+        if (!string.IsNullOrEmpty(category))
+        {
+            query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
+        }
+
+        return query.Count();
     }
 }
 
