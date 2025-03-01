@@ -13,7 +13,7 @@ public class TagRepository : Repository<Tag>, ITagRepository
         _tags = context.Tags;
     }
 
-    public List<string?> GetAllTagNames()
+    public List<string> GetAllTagNames()
     {
         return _tags
             .Select(t => t.TagName)
