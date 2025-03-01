@@ -17,6 +17,7 @@ namespace TestTrustTrade
     {
         private Mock<ILogger<HomeController>> _loggerMock;
         private Mock<IPostRepository> _postRepositoryMock;
+        private Mock<ITagRepository> _tagRepositoryMock;
         private HomeController _controller;
         private List<Post> _mockPosts;
         private List<User> _mockUsers;
@@ -26,7 +27,8 @@ namespace TestTrustTrade
         {
             _loggerMock = new Mock<ILogger<HomeController>>();
             _postRepositoryMock = new Mock<IPostRepository>();
-            _controller = new HomeController(_loggerMock.Object, _postRepositoryMock.Object);
+            _tagRepositoryMock = new Mock<ITagRepository>();
+            _controller = new HomeController(_loggerMock.Object, _postRepositoryMock.Object, _tagRepositoryMock.Object);
 
             // Setup mock users
             _mockUsers = new List<User>
@@ -108,9 +110,9 @@ namespace TestTrustTrade
         public void Index_PlaidEnabledUser_ShowsCheckmarkInViewModel()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts())
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(_mockPosts.Count);
 
             // Act
@@ -140,9 +142,9 @@ namespace TestTrustTrade
         public void Index_PlaidEnabledUserWithPortfolioValue_IncludesValueInViewModel()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts())
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(_mockPosts.Count);
 
             // Act
@@ -171,9 +173,9 @@ namespace TestTrustTrade
         {
             // Arrange
             var sortedPosts = _mockPosts.OrderBy(p => p.CreatedAt).ToList(); // Sort by date ascending
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<int>(), It.IsAny<int>(), "DateAsc"))
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "DateAsc"))
                 .Returns(sortedPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts())
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(_mockPosts.Count);
 
             // Act
@@ -214,9 +216,9 @@ namespace TestTrustTrade
                 }
             };
 
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(mockPostsWithUsers);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts())
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(1);
 
             // Act
