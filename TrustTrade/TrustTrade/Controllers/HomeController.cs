@@ -11,11 +11,13 @@ namespace TrustTrade.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IPostRepository _postRepository;
+        private readonly ITagRepository _tagRepository;
 
-        public HomeController(ILogger<HomeController> logger, IPostRepository postRepository)
+        public HomeController(ILogger<HomeController> logger, IPostRepository postRepository, ITagRepository tagRepository)
         {
             _logger = logger;
             _postRepository = postRepository;
+            _tagRepository = tagRepository;
         }
 
         public IActionResult Index(string? categoryFilter, int page = 1, string sortOrder = "DateDesc")
@@ -23,8 +25,7 @@ namespace TrustTrade.Controllers
             const int PAGE_SIZE = 10;
 
             // Retrieve paged posts from your repository.
-            // (Assumes your repository supports sorting; if not, you can sort here with LINQ.)
-            List<Post> posts = _postRepository.GetPagedPosts(page, PAGE_SIZE, sortOrder);
+            List<Post> posts = _postRepository.GetPagedPosts(categoryFilter, page, PAGE_SIZE, sortOrder);
 
             // Map to your view model for the post preview
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
@@ -50,6 +51,9 @@ namespace TrustTrade.Controllers
             int totalPosts = _postRepository.GetTotalPosts();
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
+            // Retrieve all tag names for the category filter
+            List<string> tagNames = _tagRepository.GetAllTagNames();
+
             // Build the view model, including the current sort order
             IndexVM vm = new()
             {
@@ -58,7 +62,7 @@ namespace TrustTrade.Controllers
                 TotalPages = totalPages,
                 PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7),
                 SortOrder = sortOrder,
-                Categories = new List<string> {},
+                Categories = tagNames,
                 SelectedCategory = categoryFilter
             };
 
