@@ -157,7 +157,6 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.PrivacySetting)
                 .HasMaxLength(20)
                 .HasDefaultValue("Public");
-            entity.Property(e => e.Tag).HasMaxLength(50);
             entity.Property(e => e.Title).HasMaxLength(100);
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.PortfolioValueAtPosting)
