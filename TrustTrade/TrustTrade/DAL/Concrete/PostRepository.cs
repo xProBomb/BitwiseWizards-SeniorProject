@@ -14,12 +14,18 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
-   public List<Post> GetPagedPosts(int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public List<Post> GetPagedPosts(string? category, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
 {
-    // Start with your existing query, including the related User and defaulting if empty.
-    var query = _posts
+    // Start with a query that includes the related User and Tags.
+    IQueryable<Post> query = _posts
         .Include(p => p.User)
-        .DefaultIfEmpty();
+        .Include(p => p.Tags);
+
+    // Apply filtering based on the category parameter
+    if (!string.IsNullOrEmpty(category))
+    {
+        query = query.Where(p => p.Tags.Any(t => t.TagName.Equals(category, StringComparison.OrdinalIgnoreCase)));
+    }
 
     // Apply sorting based on the sortOrder parameter while keeping your original structure
     switch (sortOrder)
