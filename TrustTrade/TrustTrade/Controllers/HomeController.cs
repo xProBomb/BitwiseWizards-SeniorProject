@@ -48,7 +48,7 @@ namespace TrustTrade.Controllers
             }
 
             // Determine total pages
-            int totalPosts = _postRepository.GetTotalPosts();
+            int totalPosts = _postRepository.GetTotalPosts(categoryFilter);
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
             // Retrieve all tag names for the category filter

@@ -148,10 +148,11 @@
         {
             <li class="page-item">
                 <a class="page-link"
-                   asp-controller="Home"
-                   asp-action="Index"
-                   asp-route-page="@(Model.CurrentPage - 1)"
-                   asp-route-sortOrder="@Model.SortOrder">
+                    asp-controller="Home"
+                    asp-action="Index"
+                    asp-route-page="@(Model.CurrentPage - 1)"
+                    asp-route-sortOrder="@Model.SortOrder"
+                    asp-route-categoryFilter="@Model.SelectedCategory">
                     Previous
                 </a>
             </li>
@@ -175,10 +176,11 @@
             {
                 <li class="page-item">
                     <a class="page-link"
-                       asp-controller="Home"
-                       asp-action="Index"
-                       asp-route-page="@pageNumber"
-                       asp-route-sortOrder="@Model.SortOrder">
+                        asp-controller="Home"
+                        asp-action="Index"
+                        asp-route-page="@pageNumber"
+                        asp-route-sortOrder="@Model.SortOrder"
+                        asp-route-categoryFilter="@Model.SelectedCategory">
                         @pageNumber
                     </a>
                 </li>
@@ -189,10 +191,11 @@
         {
             <li class="page-item">
                 <a class="page-link"
-                   asp-controller="Home"
-                   asp-action="Index"
-                   asp-route-page="@(Model.CurrentPage + 1)"
-                   asp-route-sortOrder="@Model.SortOrder">
+                    asp-controller="Home"
+                    asp-action="Index"
+                    asp-route-page="@(Model.CurrentPage + 1)"
+                    asp-route-sortOrder="@Model.SortOrder"
+                    asp-route-categoryFilter="@Model.SelectedCategory">
                     Next
                 </a>
             </li>
