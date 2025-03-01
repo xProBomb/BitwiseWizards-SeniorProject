@@ -24,7 +24,7 @@ public class PostRepository : Repository<Post>, IPostRepository
         // Apply filtering based on the category parameter
         if (!string.IsNullOrEmpty(category))
         {
-            query = query.Where(p => p.Tags.Any(t => t.TagName.Equals(category, StringComparison.OrdinalIgnoreCase)));
+            query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
         }
 
         // Apply sorting based on the sortOrder parameter while keeping your original structure
