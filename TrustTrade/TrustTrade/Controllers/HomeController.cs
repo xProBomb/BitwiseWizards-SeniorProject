@@ -20,7 +20,7 @@ namespace TrustTrade.Controllers
             _tagRepository = tagRepository;
         }
 
-        public IActionResult Index(string? categoryFilter, int page = 1, string sortOrder = "DateDesc")
+        public IActionResult Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
         {
             const int PAGE_SIZE = 10;
 

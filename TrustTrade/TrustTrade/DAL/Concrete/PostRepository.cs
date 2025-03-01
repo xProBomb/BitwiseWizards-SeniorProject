@@ -14,7 +14,7 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
-    public List<Post> GetPagedPosts(string? category, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public List<Post> GetPagedPosts(string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
     {
         // Start with a query that includes the related User and Tags.
         IQueryable<Post> query = _posts
@@ -52,7 +52,7 @@ public class PostRepository : Repository<Post>, IPostRepository
             .ToList();
     }
 
-    public int GetTotalPosts(string? category)
+    public int GetTotalPosts(string? category = null)
     {
         // Start with a query that includes the related Tags.
         IQueryable<Post> query = _posts
