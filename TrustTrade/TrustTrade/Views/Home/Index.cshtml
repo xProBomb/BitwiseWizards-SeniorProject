@@ -52,11 +52,12 @@
 
         <!-- Reset page to 1 when sort order changes -->
         <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="categoryFilter" value="@Model.SelectedCategory" />
     </form>
 
     <!-- Category Filter Drop-down -->
     <form id="filterForm" method="get" asp-controller="Home" asp-action="Index">
-        <label for="categoryFilter" class="mt-3"></label>Category Filter:</label>
+        <label for="categoryFilter" class="mt-3"></label>Category filter:</label>
         <select id="categoryFilter" name="categoryFilter" class="mt-3" onchange="this.form.submit();">
             @if (Model.SelectedCategory == null)
             {
