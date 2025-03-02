@@ -46,7 +46,7 @@ public class TagRepositoryTests
     }
 
     [Test]
-    public void GetAllTagNames_WhenCalled_ReturnsAllTagNames()
+    public void GetAllTagNames_WhenTagsExist_ReturnsAllTagNames()
     {
         // Arrange
         ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
@@ -57,5 +57,19 @@ public class TagRepositoryTests
 
         // Assert
         Assert.That(result, Is.EquivalentTo(expected));
+    }
+
+    [Test]
+    public void GetAllTagNames_WhenNoTags_ReturnsEmptyList()
+    {
+        // Arrange
+        _tags.Clear();
+        ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
+
+        // Act
+        var result = tagRepository.GetAllTagNames();
+
+        // Assert
+        Assert.That(result, Is.Empty);
     }
 }
