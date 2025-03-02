@@ -152,6 +152,8 @@ namespace TestTrustTrade
                 .Returns(_mockPosts);
             _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = _controller.Index() as ViewResult;
@@ -184,6 +186,8 @@ namespace TestTrustTrade
                 .Returns(_mockPosts);
             _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = _controller.Index() as ViewResult;
@@ -215,6 +219,8 @@ namespace TestTrustTrade
                 .Returns(sortedPosts);
             _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = _controller.Index(sortOrder: "DateAsc") as ViewResult;
@@ -258,6 +264,8 @@ namespace TestTrustTrade
                 .Returns(mockPostsWithUsers);
             _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(1);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = _controller.Index() as ViewResult;

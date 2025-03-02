@@ -158,6 +158,8 @@ namespace TestTrustTrade
                 .Returns(new List<Post> { plaidPost });
             _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(1);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = _controller.Index() as ViewResult;
