@@ -12,6 +12,8 @@ public class ProfileViewModel
     public DateTime? LastPlaidSync { get; set; }
     public int FollowersCount { get; set; }
     public int FollowingCount { get; set; }
+    public List<string> Followers { get; set; } = new();
+    public List<string> Following { get; set; } = new();
     
     // New properties for holdings
     public List<HoldingViewModel> Holdings { get; set; } = new();
