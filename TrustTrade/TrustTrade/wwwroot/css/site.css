@@ -234,3 +234,12 @@ body {
   background-color: #b6b6b6;
   border-color: #b6b6b6;
 }
+
+.modal-body ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.modal-body li {
+    padding: 5px 0;
+}
