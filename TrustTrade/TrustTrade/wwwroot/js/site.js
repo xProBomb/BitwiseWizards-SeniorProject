@@ -11,4 +11,18 @@ $(document).ready(function () {
     $('#followingModal').modal({
         show: false
     });
+
+    // Handle follow/unfollow button click
+    $('form.follow-unfollow-form').on('submit', function (e) {
+        e.preventDefault();
+        var form = $(this);
+        var actionUrl = form.attr('action');
+        var formData = form.serialize();
+
+        $.post(actionUrl, formData, function (response) {
+            location.reload();
+        }).fail(function () {
+            alert('An error occurred. Please try again.');
+        });
+    });
 });

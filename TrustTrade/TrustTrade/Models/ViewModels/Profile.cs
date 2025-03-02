@@ -14,6 +14,7 @@ public class ProfileViewModel
     public int FollowingCount { get; set; }
     public List<string> Followers { get; set; } = new();
     public List<string> Following { get; set; } = new();
+    public bool IsFollowing { get; set; }
     
     // New properties for holdings
     public List<HoldingViewModel> Holdings { get; set; } = new();
