@@ -11,20 +11,21 @@ namespace TrustTrade.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IPostRepository _postRepository;
+        private readonly ITagRepository _tagRepository;
 
-        public HomeController(ILogger<HomeController> logger, IPostRepository postRepository)
+        public HomeController(ILogger<HomeController> logger, IPostRepository postRepository, ITagRepository tagRepository)
         {
             _logger = logger;
             _postRepository = postRepository;
+            _tagRepository = tagRepository;
         }
 
-        public IActionResult Index(int page = 1, string sortOrder = "DateDesc")
+        public IActionResult Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
         {
             const int PAGE_SIZE = 10;
 
             // Retrieve paged posts from your repository.
-            // (Assumes your repository supports sorting; if not, you can sort here with LINQ.)
-            List<Post> posts = _postRepository.GetPagedPosts(page, PAGE_SIZE, sortOrder);
+            List<Post> posts = _postRepository.GetPagedPosts(categoryFilter, page, PAGE_SIZE, sortOrder);
 
             // Map to your view model for the post preview
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
@@ -47,8 +48,11 @@ namespace TrustTrade.Controllers
             }
 
             // Determine total pages
-            int totalPosts = _postRepository.GetTotalPosts();
+            int totalPosts = _postRepository.GetTotalPosts(categoryFilter);
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
+
+            // Retrieve all tag names for the category filter
+            List<string> tagNames = _tagRepository.GetAllTagNames();
 
             // Build the view model, including the current sort order
             IndexVM vm = new()
@@ -57,7 +61,9 @@ namespace TrustTrade.Controllers
                 CurrentPage = page,
                 TotalPages = totalPages,
                 PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7),
-                SortOrder = sortOrder  // Make sure your IndexVM includes this property
+                SortOrder = sortOrder,
+                Categories = tagNames,
+                SelectedCategory = categoryFilter
             };
 
             return View(vm);

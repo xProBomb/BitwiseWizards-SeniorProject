@@ -13,6 +13,7 @@ public class PostRepositoryTests
     private Mock<DbSet<Post>> _mockPostDbSet;
     private List<Post> _posts;
     private List<User> _users;
+    private List<Tag> _tags;
 
     // A helper to make dbset queryable
     private Mock<DbSet<T>> GetMockDbSet<T>(IQueryable<T> entities) where T : class
@@ -67,6 +68,15 @@ public class PostRepositoryTests
             new User { Id = 10, ProfileName = "User 10", Username = "user10", Email = "user10@gmail.com", PasswordHash = "password10" }
         };
 
+        _tags = new List<Tag>
+        {
+            new Tag { Id = 1, TagName = "Memes" },
+            new Tag { Id = 2, TagName = "Gain" },
+            new Tag { Id = 3, TagName = "Loss" },
+            new Tag { Id = 4, TagName = "Stocks" },
+            new Tag { Id = 5, TagName = "Crypto" }
+        };
+
         // Set up the to-one navigation property for Post to User
         _posts.ForEach(p => p.User = _users.FirstOrDefault(u => u.Id == p.UserId)!);
 
@@ -80,7 +90,7 @@ public class PostRepositoryTests
     }
 
     [Test]
-    public void GetTotalPosts_WhenCalled_ReturnsTotalNumberOfPosts()
+    public void GetTotalPosts_WhenNoParameterUsed_ReturnsTotalNumberOfPosts()
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);

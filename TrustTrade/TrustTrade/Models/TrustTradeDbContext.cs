@@ -29,6 +29,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<Stock> Stocks { get; set; }
 
+    public virtual DbSet<Tag> Tags { get; set; }
+
     public virtual DbSet<Trade> Trades { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -155,7 +157,6 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.PrivacySetting)
                 .HasMaxLength(20)
                 .HasDefaultValue("Public");
-            entity.Property(e => e.Tag).HasMaxLength(50);
             entity.Property(e => e.Title).HasMaxLength(100);
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.PortfolioValueAtPosting)
@@ -165,6 +166,26 @@ public partial class TrustTradeDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Posts_User");
+
+            entity.HasMany(p => p.Tags)
+            .WithMany(t => t.Posts)
+            .UsingEntity<Dictionary<string, object>>(
+                "PostTags",
+                j => j.HasOne<Tag>().WithMany()
+                    .HasForeignKey("TagID")
+                    .HasConstraintName("FK_PostTags_Tag")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j => j.HasOne<Post>().WithMany()
+                    .HasForeignKey("PostID")
+                    .HasConstraintName("FK_PostTags_Post")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("PostID", "TagID").HasName("PK__PostTags__7C45AF9C52906CEA");
+                    j.ToTable("PostTags");
+                    j.Property<int>("PostID").HasColumnName("PostID");
+                    j.Property<int>("TagID").HasColumnName("TagID");
+                });
         });
 
         modelBuilder.Entity<Stock>(entity =>
@@ -182,6 +203,20 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.StockPrice).HasColumnType("decimal(13, 2)");
             entity.Property(e => e.TickerSymbol)
                 .HasMaxLength(10)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Tags__3214EC2786A0DFD7");
+
+            entity.HasIndex(e => e.TagName, "UQ__Tags__A2F1B0E1A3A3D3A4").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.TagName)
+                .HasColumnName("TagName")
+                .HasMaxLength(100)
+                .IsRequired()
                 .IsUnicode(false);
         });
 

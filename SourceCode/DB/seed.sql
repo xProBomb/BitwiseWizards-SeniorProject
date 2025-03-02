@@ -92,3 +92,21 @@ SELECT
 FROM Users U
 JOIN Posts P ON U.ID <> P.UserID
 WHERE U.ID < 100;
+
+-- Insert Tags
+INSERT INTO Tags (TagName)
+VALUES
+('Stocks'),
+('Trading'),
+('Investing'),
+('Finance'),
+('Markets');
+
+-- Insert PostTags
+INSERT INTO PostTags (PostID, TagID)
+SELECT 
+    P.ID, 
+    T.ID
+FROM Posts P
+JOIN Tags T ON T.ID % 4 = P.ID % 4
+WHERE P.ID < 100;
