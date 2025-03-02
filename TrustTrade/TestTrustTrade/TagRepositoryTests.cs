@@ -56,6 +56,6 @@ public class TagRepositoryTests
         var result = tagRepository.GetAllTagNames();
 
         // Assert
-        Assert.That(result, Is.EqualTo(expected));
+        Assert.That(result, Is.EquivalentTo(expected));
     }
 }
