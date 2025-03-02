@@ -42,16 +42,16 @@ public class PostRepositoryTests
             new Post { Id = 8, UserId = 8, Title = "Post 8", Content = "Content 8", CreatedAt = DateTime.Now.AddDays(-3) },
             new Post { Id = 9, UserId = 9, Title = "Post 9", Content = "Content 9", CreatedAt = DateTime.Now.AddMonths(-3) },
             new Post { Id = 10, UserId = 10, Title = "Post 10", Content = "Content 10", CreatedAt = DateTime.Now.AddYears(-3) },
-            new Post { Id = 1, UserId = 11, Title = "Post 11", Content = "Content 11", CreatedAt = DateTime.Now.AddMinutes(-2) },
-            new Post { Id = 2, UserId = 12, Title = "Post 12", Content = "Content 12", CreatedAt = DateTime.Now.AddHours(-2) },
-            new Post { Id = 3, UserId = 13, Title = "Post 13", Content = "Content 13", CreatedAt = DateTime.Now.AddDays(-2) },
-            new Post { Id = 4, UserId = 14, Title = "Post 14", Content = "Content 14", CreatedAt = DateTime.Now.AddMonths(-2) },
-            new Post { Id = 5, UserId = 15, Title = "Post 15", Content = "Content 15", CreatedAt = DateTime.Now.AddYears(-2) },
-            new Post { Id = 6, UserId = 16, Title = "Post 16", Content = "Content 16", CreatedAt = DateTime.Now.AddMinutes(-4) },
-            new Post { Id = 7, UserId = 17, Title = "Post 17", Content = "Content 17", CreatedAt = DateTime.Now.AddHours(-4) },
-            new Post { Id = 8, UserId = 18, Title = "Post 18", Content = "Content 18", CreatedAt = DateTime.Now.AddDays(-4) },
-            new Post { Id = 9, UserId = 19, Title = "Post 19", Content = "Content 19", CreatedAt = DateTime.Now.AddMonths(-4) },
-            new Post { Id = 10, UserId = 20, Title = "Post 20", Content = "Content 20", CreatedAt = DateTime.Now.AddYears(-4) }
+            new Post { Id = 11, UserId = 11, Title = "Post 11", Content = "Content 11", CreatedAt = DateTime.Now.AddMinutes(-2) },
+            new Post { Id = 12, UserId = 12, Title = "Post 12", Content = "Content 12", CreatedAt = DateTime.Now.AddHours(-2) },
+            new Post { Id = 13, UserId = 13, Title = "Post 13", Content = "Content 13", CreatedAt = DateTime.Now.AddDays(-2) },
+            new Post { Id = 14, UserId = 14, Title = "Post 14", Content = "Content 14", CreatedAt = DateTime.Now.AddMonths(-2) },
+            new Post { Id = 15, UserId = 15, Title = "Post 15", Content = "Content 15", CreatedAt = DateTime.Now.AddYears(-2) },
+            new Post { Id = 16, UserId = 16, Title = "Post 16", Content = "Content 16", CreatedAt = DateTime.Now.AddMinutes(-4) },
+            new Post { Id = 17, UserId = 17, Title = "Post 17", Content = "Content 17", CreatedAt = DateTime.Now.AddHours(-4) },
+            new Post { Id = 18, UserId = 18, Title = "Post 18", Content = "Content 18", CreatedAt = DateTime.Now.AddDays(-4) },
+            new Post { Id = 19, UserId = 19, Title = "Post 19", Content = "Content 19", CreatedAt = DateTime.Now.AddMonths(-4) },
+            new Post { Id = 20, UserId = 20, Title = "Post 20", Content = "Content 20", CreatedAt = DateTime.Now.AddYears(-4) }
         };
 
         _users = new List<User>
@@ -83,6 +83,40 @@ public class PostRepositoryTests
         // Set up the to-many navigation property for User to Post
         _users.ForEach(u => u.Posts = _posts.Where(p => p.UserId == u.Id).ToList());
 
+        // Set up the many-to-many relationship between Posts and Tags
+        // Ensure the first 10 posts have one tag each
+        _posts[0].Tags.Add(_tags[0]); // Post 1 -> Tag 1 (Memes)
+        _posts[0].Tags.Add(_tags[1]); // Post 1 -> Tag 2 (Gain)
+        _posts[1].Tags.Add(_tags[1]); // Post 2 -> Tag 2 (Gain)
+        _posts[0].Tags.Add(_tags[2]); // Post 1 -> Tag 3 (Loss)
+        _posts[1].Tags.Add(_tags[2]); // Post 2 -> Tag 3 (Loss)
+        _posts[2].Tags.Add(_tags[2]); // Post 3 -> Tag 3 (Loss)
+        _posts[0].Tags.Add(_tags[3]); // Post 1 -> Tag 4 (Stocks)
+        _posts[1].Tags.Add(_tags[3]); // Post 2 -> Tag 4 (Stocks)
+        _posts[2].Tags.Add(_tags[3]); // Post 3 -> Tag 4 (Stocks)
+        _posts[3].Tags.Add(_tags[3]); // Post 4 -> Tag 4 (Stocks)
+        _posts[0].Tags.Add(_tags[4]); // Post 1 -> Tag 5 (Crypto)
+        _posts[1].Tags.Add(_tags[4]); // Post 2 -> Tag 5 (Crypto)
+        _posts[2].Tags.Add(_tags[4]); // Post 3 -> Tag 5 (Crypto)
+        _posts[3].Tags.Add(_tags[4]); // Post 4 -> Tag 5 (Crypto)
+        _posts[4].Tags.Add(_tags[4]); // Post 5 -> Tag 5 (Crypto)
+
+        _tags[0].Posts.Add(_posts[0]); // Tag 1 (Memes) -> Post 1
+        _tags[1].Posts.Add(_posts[0]); // Tag 2 (Gain) -> Post 1
+        _tags[1].Posts.Add(_posts[1]); // Tag 2 (Gain) -> Post 2
+        _tags[2].Posts.Add(_posts[0]); // Tag 3 (Loss) -> Post 1
+        _tags[2].Posts.Add(_posts[1]); // Tag 3 (Loss) -> Post 2
+        _tags[2].Posts.Add(_posts[2]); // Tag 3 (Loss) -> Post 3
+        _tags[3].Posts.Add(_posts[0]); // Tag 4 (Stocks) -> Post 1
+        _tags[3].Posts.Add(_posts[1]); // Tag 4 (Stocks) -> Post 2
+        _tags[3].Posts.Add(_posts[2]); // Tag 4 (Stocks) -> Post 3
+        _tags[3].Posts.Add(_posts[3]); // Tag 4 (Stocks) -> Post 4
+        _tags[4].Posts.Add(_posts[0]); // Tag 5 (Crypto) -> Post 1
+        _tags[4].Posts.Add(_posts[1]); // Tag 5 (Crypto) -> Post 2
+        _tags[4].Posts.Add(_posts[2]); // Tag 5 (Crypto) -> Post 3
+        _tags[4].Posts.Add(_posts[3]); // Tag 5 (Crypto) -> Post 4
+        _tags[4].Posts.Add(_posts[4]); // Tag 5 (Crypto) -> Post 5
+
         _mockDbContext = new Mock<TrustTradeDbContext>();
         _mockPostDbSet = GetMockDbSet(_posts.AsQueryable());
         _mockDbContext.Setup(c => c.Posts).Returns(_mockPostDbSet.Object);
@@ -90,7 +124,7 @@ public class PostRepositoryTests
     }
 
     [Test]
-    public void GetTotalPosts_WhenNoParameterUsed_ReturnsTotalNumberOfPosts()
+    public void GetTotalPosts_WhenNoParametersGiven_ReturnsTotalNumberOfPosts()
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
@@ -103,6 +137,23 @@ public class PostRepositoryTests
         Assert.That(result, Is.EqualTo(expected));
     }
 
+    [TestCase("Memes", 1)]
+    [TestCase("Gain", 2)]
+    [TestCase("Loss", 3)]
+    [TestCase("Stocks", 4)]
+    [TestCase("Crypto", 5)]
+    public void GetTotalPosts_WhenCategoryFilterUsed_ReturnsTotalNumberOfPostsInCategory(string category, int expected)
+    {
+        // Arrange
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+
+        // Act
+        var result = postRepository.GetTotalPosts(category);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
     [Test]
         public void GetPagedPosts_WhenNoParametersGiven_Returns10PostsSortedByDateDesc()
         {
@@ -110,7 +161,7 @@ public class PostRepositoryTests
             IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
             // Act
-            // By default, sortOrder = "DateDesc", page=1, pageSize=10
+            // By default, category = null, sortOrder = "DateDesc", page=1, pageSize=10
             var results = postRepository.GetPagedPosts();
 
             // Assert
