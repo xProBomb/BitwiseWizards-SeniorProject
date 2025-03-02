@@ -47,16 +47,67 @@
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">@Model.FollowersCount</h5>
-                    <p class="card-text">Followers</p>
+
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followersModal">
+                        Followers (@Model.FollowersCount)
+                    </button>
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">@Model.FollowingCount</h5>
-                    <p class="card-text">Following</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followingModal">
+                        Following (@Model.FollowingCount)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Followers Modal -->
+    <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        @foreach (var follower in Model.Followers)
+                        {
+                            <li class="mb-2">
+                                <a asp-controller="Profile" asp-action="User" asp-route-id="@follower" class="btn">@follower</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Following Modal -->
+    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        @foreach (var following in Model.Following)
+                        {
+                            <li class="mb-2">
+                                <a asp-controller="Profile" asp-action="User" asp-route-id="@following" class="btn">@following</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </div>

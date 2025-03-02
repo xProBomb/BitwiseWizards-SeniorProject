@@ -68,8 +68,8 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(),
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(), 
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag
@@ -121,8 +121,8 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(),
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(),
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag
