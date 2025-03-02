@@ -107,6 +107,44 @@ namespace TestTrustTrade
         }
 
         [Test]
+        public void Index_ReturnsAViewResult()
+        {
+            // Arrange
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Returns(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
+                .Returns(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
+
+            // Act
+            var result = _controller.Index();
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<ViewResult>());
+        }
+
+        [Test]
+        public void Index_ReturnsCorrectModelType()
+        {
+            // Arrange
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Returns(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
+                .Returns(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
+
+            // Act
+            var result = _controller.Index() as ViewResult;
+
+            // Assert
+            Assert.That(result?.Model, Is.Not.Null);
+            Assert.That(result?.Model, Is.InstanceOf<IndexVM>());
+        }
+
+        [Test]
         public void Index_PlaidEnabledUser_ShowsCheckmarkInViewModel()
         {
             // Arrange
