@@ -70,6 +70,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
+// Add services to the container.
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 var app = builder.Build();
 

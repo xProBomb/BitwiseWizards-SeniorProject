@@ -6,6 +6,7 @@
     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     // Determine if the profile being viewed belongs to the logged-in user.
     bool isOwner = !string.IsNullOrEmpty(currentUserId) && currentUserId == Model.IdentityId;
+    bool isFollowing = Model.IsFollowing;
 }
 
 <div class="container mt-4">
@@ -24,10 +25,13 @@
         </h2>
         @if (!isOwner)
         {
-            <!-- Follow button appears only for non-owners -->
-            <button class="btn btn-primary">Follow</button>
-            // This is un-written code for different UserStory, we may need to re-write to allow for unfollowing to appear 
-            // and to path this to the correct controller action
+            <!-- Follow/Unfollow button appears only for non-owners -->
+            <form asp-action="@((isFollowing) ? "Unfollow" : "Follow")" method="post" class="d-inline follow-unfollow-form">
+                <input type="hidden" name="profileId" value="@Model.IdentityId" />
+                <button type="submit" class="btn btn-primary">
+                    @(isFollowing ? "Unfollow" : "Follow")
+                </button>
+            </form>
         }
         <p class="text-muted">
             Joined:
@@ -47,16 +51,67 @@
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">@Model.FollowersCount</h5>
-                    <p class="card-text">Followers</p>
+
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followersModal">
+                        Followers (@Model.FollowersCount)
+                    </button>
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">@Model.FollowingCount</h5>
-                    <p class="card-text">Following</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followingModal">
+                        Following (@Model.FollowingCount)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Followers Modal -->
+    <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        @foreach (var follower in Model.Followers)
+                        {
+                            <li class="mb-2">
+                                <a asp-controller="Profile" asp-action="User" asp-route-id="@follower" class="btn">@follower</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Following Modal -->
+    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        @foreach (var following in Model.Following)
+                        {
+                            <li class="mb-2">
+                                <a asp-controller="Profile" asp-action="User" asp-route-id="@following" class="btn">@following</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </div>
