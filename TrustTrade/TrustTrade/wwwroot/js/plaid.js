@@ -1,9 +1,3 @@
-// UPDATED VERSION - March 2, 2025
-// Version 2.0 - with automatic refresh
-
-// Add a version log to verify we're running the latest code
-console.log("Running plaid.js version 2.0 - with auto-refresh");
-
 // Initialize the Plaid Link handler
 let linkHandler = null;
 
@@ -13,9 +7,7 @@ async function initializePlaidLink() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            // Add cache-busting query parameter
-            cache: 'no-store'
+            }
         });
 
         if (!response.ok) {
@@ -37,13 +29,12 @@ async function initializePlaidLink() {
             onSuccess: async (public_token, metadata) => {
                 console.log('Link success - exchanging public token');
                 try {
-                    // First, exchange the public token
                     const exchangeResponse = await fetch('/api/plaid/exchange-public-token', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({publicToken: public_token})
+                        body: JSON.stringify({ publicToken: public_token })
                     });
 
                     if (!exchangeResponse.ok) {
@@ -54,42 +45,11 @@ async function initializePlaidLink() {
 
                     const exchangeData = await exchangeResponse.json();
                     if (exchangeData.success) {
-                        // NEW DISTINCTIVE MESSAGE to verify this code is running
-                        alert('VERSION 2.0: Account linked! Now refreshing your holdings...');
+                        // Show success message
+                        alert('Successfully connected your brokerage account!');
 
-                        // Directly submit form to refresh holdings
-                        const formData = new FormData();
-
-                        // Get any CSRF token that might be on the page
-                        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
-                        if (tokenElement) {
-                            formData.append('__RequestVerificationToken', tokenElement.value);
-                        }
-
-                        // Log that we're about to refresh
-                        console.log('Submitting refresh request to /Profile/RefreshHoldings');
-
-                        // Use fetch for the refresh request
-                        fetch('/Profile/RefreshHoldings', {
-                            method: 'POST',
-                            body: formData,
-                            credentials: 'same-origin',
-                            redirect: 'follow'
-                        }).then(response => {
-                            console.log('Refresh request completed with status:', response.status);
-                            if (response.redirected) {
-                                console.log('Redirecting to:', response.url);
-                                window.location.href = response.url;
-                            } else {
-                                // If not redirected automatically, redirect to Profile
-                                console.log('No redirect detected, manually navigating to /Profile');
-                                window.location.href = '/Profile';
-                            }
-                        }).catch(error => {
-                            console.error('Error during refresh:', error);
-                            // Still redirect to profile
-                            window.location.href = '/Profile';
-                        });
+                        // Optionally reload or update UI
+                        window.location.reload();
                     } else {
                         throw new Error('Failed to process brokerage connection');
                     }

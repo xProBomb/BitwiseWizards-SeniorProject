@@ -35,8 +35,6 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Comment>(entity =>
@@ -97,8 +95,6 @@ public partial class TrustTradeDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("SecurityID");
             entity.Property(e => e.Symbol).HasMaxLength(10);
-            entity.Property(e => e.IsHidden)
-                .HasDefaultValue(false);
 
             entity.HasOne(d => d.PlaidConnection).WithMany(p => p.InvestmentPositions)
                 .HasForeignKey(d => d.PlaidConnectionId)
@@ -289,20 +285,6 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnName("Profile_Name");
             entity.Property(e => e.ProfilePicture).HasMaxLength(255);
             entity.Property(e => e.Username).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<PortfolioVisibilitySettings>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.LastUpdated)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-
-            entity.HasOne(d => d.User)
-                .WithOne()
-                .HasForeignKey<PortfolioVisibilitySettings>(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);
