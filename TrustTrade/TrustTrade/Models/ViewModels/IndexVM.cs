@@ -9,4 +9,6 @@ public class IndexVM
     public int TotalPages { get; set; }
     public List<int>? PagesToShow { get; set; }
     public string? SortOrder { get; set; }
+    public required List<string> Categories { get; set; }
+    public string? SelectedCategory { get; set; }
 }

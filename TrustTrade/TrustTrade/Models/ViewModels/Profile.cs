@@ -1,8 +1,6 @@
-// File: TrustTrade/Models/ViewModels/MyProfile.cs
-
 namespace TrustTrade.ViewModels;
 
-public class MyProfileViewModel
+public class ProfileViewModel
 {
     public string? UserTag { get; set; }
     public string IdentityId { get; set; }
@@ -14,6 +12,15 @@ public class MyProfileViewModel
     public DateTime? LastPlaidSync { get; set; }
     public int FollowersCount { get; set; }
     public int FollowingCount { get; set; }
+    public List<string> Followers { get; set; } = new();
+    public List<string> Following { get; set; } = new();
+    public bool IsFollowing { get; set; }
+
+    public bool HideDetailedInformation { get; set; }
+    public bool HideAllPositions { get; set; }
+    public decimal HiddenAssetsValue => Holdings.Where(h => h.IsHidden).Sum(h => h.CurrentValue);
+    public int HiddenAssetsCount => Holdings.Count(h => h.IsHidden);
+    public decimal VisibleAssetsValue => Holdings.Where(h => !h.IsHidden).Sum(h => h.CurrentValue);
     
     // New properties for holdings
     public List<HoldingViewModel> Holdings { get; set; } = new();
@@ -32,4 +39,6 @@ public class HoldingViewModel
     public decimal ReturnPercentage => CostBasis != 0 ? (((ReturnAmount - (CostBasis * Quantity)) / (CostBasis * Quantity)) + 1 ): 0;
     public string Institution { get; set; } = string.Empty;
     public string TypeOfSecurity { get; set; } = string.Empty;
+
+    public bool IsHidden { get; set; }
 }
