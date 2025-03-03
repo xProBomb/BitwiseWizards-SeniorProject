@@ -25,6 +25,24 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PostTags", b =>
+                {
+                    b.Property<int>("PostID")
+                        .HasColumnType("int")
+                        .HasColumnName("PostID");
+
+                    b.Property<int>("TagID")
+                        .HasColumnType("int")
+                        .HasColumnName("TagID");
+
+                    b.HasKey("PostID", "TagID")
+                        .HasName("PK__PostTags__7C45AF9C52906CEA");
+
+                    b.HasIndex("TagID");
+
+                    b.ToTable("PostTags", (string)null);
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -106,6 +124,11 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.Property<decimal>("CurrentPrice")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<bool>("IsHidden")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("LastUpdated")
                         .ValueGeneratedOnAdd()
@@ -224,6 +247,36 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.ToTable("PlaidConnections");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.PortfolioVisibilitySettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("HideAllPositions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HideDetailedInformation")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("PortfolioVisibilitySettings");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -241,15 +294,14 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<decimal?>("PortfolioValueAtPosting")
+                        .HasColumnType("decimal(18, 2)");
+
                     b.Property<string>("PrivacySetting")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
                         .HasDefaultValue("Public");
-
-                    b.Property<string>("Tag")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Title")
                         .HasMaxLength(100)
@@ -297,6 +349,31 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .IsUnique();
 
                     b.ToTable("Stock", (string)null);
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("TagName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("TagName");
+
+                    b.HasKey("Id")
+                        .HasName("PK__Tags__3214EC2786A0DFD7");
+
+                    b.HasIndex(new[] { "TagName" }, "UQ__Tags__A2F1B0E1A3A3D3A4")
+                        .IsUnique();
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Trade", b =>
@@ -376,7 +453,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("EncryptedAPIKey");
 
                     b.Property<string>("IdentityId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("IdentityId");
 
@@ -442,6 +518,23 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("PostTags", b =>
+                {
+                    b.HasOne("TrustTrade.Models.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PostTags_Post");
+
+                    b.HasOne("TrustTrade.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PostTags_Tag");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Comment", b =>
@@ -524,6 +617,17 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_PlaidConnections_User");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.PortfolioVisibilitySettings", b =>
+                {
+                    b.HasOne("TrustTrade.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("TrustTrade.Models.PortfolioVisibilitySettings", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
