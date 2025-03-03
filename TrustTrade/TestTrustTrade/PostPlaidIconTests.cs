@@ -169,7 +169,8 @@ namespace TestTrustTrade
             // Arrange
             var loggerMock = new Mock<ILogger<HomeController>>();
             var postRepoMock = new Mock<IPostRepository>();
-            var controller = new HomeController(loggerMock.Object, postRepoMock.Object);
+            var tagRepoMock = new Mock<ITagRepository>();
+            var controller = new HomeController(loggerMock.Object, postRepoMock.Object, tagRepoMock.Object);
 
             var plaidUser = new User
             {
@@ -189,10 +190,12 @@ namespace TestTrustTrade
                 PortfolioValueAtPosting = 10000.00M
             };
 
-            postRepoMock.Setup(repo => repo.GetPagedPosts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+            postRepoMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(new List<Post> { plaidPost });
-            postRepoMock.Setup(repo => repo.GetTotalPosts())
+            postRepoMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(1);
+            tagRepoMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = controller.Index() as ViewResult;

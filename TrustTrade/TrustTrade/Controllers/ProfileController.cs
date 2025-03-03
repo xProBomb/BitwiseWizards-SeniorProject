@@ -14,15 +14,18 @@ namespace TrustTrade.Controllers
         private readonly TrustTradeDbContext _context;
         private readonly IHoldingsRepository _holdingsRepository;
         private readonly ILogger<ProfileController> _logger;
+        private readonly IProfileService _profileService;
 
         public ProfileController(
             TrustTradeDbContext context,
             IHoldingsRepository holdingsRepository,
-            ILogger<ProfileController> logger)
+            ILogger<ProfileController> logger,
+            IProfileService profileService)
         {
             _context = context;
             _holdingsRepository = holdingsRepository;
             _logger = logger;
+            _profileService = profileService;
         }
 
         // route to get to logged in users profile "/Profile"
@@ -68,9 +71,12 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(), 
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
-                UserTag = user.UserTag
+                UserTag = user.UserTag,
+                IsFollowing = false
             };
 
             return View("Profile",model);
@@ -82,6 +88,9 @@ namespace TrustTrade.Controllers
         [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
         public async Task<IActionResult> UserProfile(string username)
         {
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+
             if (string.IsNullOrEmpty(username))
             {
                 return RedirectToAction(nameof(MyProfile));
@@ -94,8 +103,11 @@ namespace TrustTrade.Controllers
 
             if (user == null)
             {
+                _logger.LogDebug("User not found: {Username}", username);
                 return NotFound();
             }
+
+            _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
 
             var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
             var holdingViewModels = holdings.Select(h => new HoldingViewModel
@@ -119,9 +131,12 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(),
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
-                UserTag = user.UserTag
+                UserTag = user.UserTag,
+                IsFollowing = !string.IsNullOrEmpty(currentUserId) && (user.FollowerFollowingUsers?.Any(f => f.FollowingUserId == user.Id) == true)
             };
 
             return View("Profile", model);
@@ -198,6 +213,32 @@ namespace TrustTrade.Controllers
                 _logger.LogError(ex, "Error updating profile");
                 return StatusCode(500, new { error = "An unexpected error occurred" });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Follow(string profileId)
+        {
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            _profileService.FollowUser(currentUserId, profileId);
+            return RedirectToAction(nameof(UserProfile), new { username = profileId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Unfollow(string profileId)
+        {
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            _profileService.UnfollowUser(currentUserId, profileId);
+            return RedirectToAction(nameof(UserProfile), new { username = profileId });
         }
     }
 }

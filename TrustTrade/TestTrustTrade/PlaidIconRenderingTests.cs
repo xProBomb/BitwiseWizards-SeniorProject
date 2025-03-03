@@ -23,6 +23,7 @@ namespace TestTrustTrade
     {
         private Mock<ILogger<HomeController>> _loggerMock;
         private Mock<IPostRepository> _postRepositoryMock;
+        private Mock<ITagRepository> _tagRepositoryMock;
         private HomeController _controller;
         private List<PostPreviewVM> _testPosts;
 
@@ -31,7 +32,8 @@ namespace TestTrustTrade
         {
             _loggerMock = new Mock<ILogger<HomeController>>();
             _postRepositoryMock = new Mock<IPostRepository>();
-            _controller = new HomeController(_loggerMock.Object, _postRepositoryMock.Object);
+            _tagRepositoryMock = new Mock<ITagRepository>();
+            _controller = new HomeController(_loggerMock.Object, _postRepositoryMock.Object, _tagRepositoryMock.Object);
 
             // Create test post preview view models
             _testPosts = new List<PostPreviewVM>
@@ -152,10 +154,12 @@ namespace TestTrustTrade
                 }
             };
 
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(new List<Post> { plaidPost });
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts())
+            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
                 .Returns(1);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
+                .Returns(new List<string>());
 
             // Act
             var result = _controller.Index() as ViewResult;

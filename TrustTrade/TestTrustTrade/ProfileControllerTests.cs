@@ -20,6 +20,7 @@ namespace TestTrustTrade
         private Mock<TrustTradeDbContext> _contextMock;
         private Mock<IHoldingsRepository> _holdingsRepoMock;
         private Mock<ILogger<ProfileController>> _loggerMock;
+        private Mock<IProfileService> _profileServiceMock;
         private ProfileController _controller;
         
         [TearDown]
@@ -34,11 +35,13 @@ namespace TestTrustTrade
             _contextMock = new Mock<TrustTradeDbContext>();
             _holdingsRepoMock = new Mock<IHoldingsRepository>();
             _loggerMock = new Mock<ILogger<ProfileController>>();
+            _profileServiceMock = new Mock<IProfileService>();
 
             _controller = new ProfileController(
                 _contextMock.Object,
                 _holdingsRepoMock.Object,
-                _loggerMock.Object
+                _loggerMock.Object,
+                _profileServiceMock.Object
             );
         }
 
