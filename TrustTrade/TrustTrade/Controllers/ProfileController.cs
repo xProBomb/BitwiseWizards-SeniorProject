@@ -76,7 +76,7 @@ namespace TrustTrade.Controllers
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = false // Owner cannot follow themselves
+                IsFollowing = false
             };
 
             return View("Profile",model);
@@ -89,6 +89,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> UserProfile(string username)
         {
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
             if (string.IsNullOrEmpty(username))
             {
@@ -102,8 +103,11 @@ namespace TrustTrade.Controllers
 
             if (user == null)
             {
+                _logger.LogDebug("User not found: {Username}", username);
                 return NotFound();
             }
+
+            _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
 
             var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
             var holdingViewModels = holdings.Select(h => new HoldingViewModel
@@ -132,7 +136,7 @@ namespace TrustTrade.Controllers
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = currentUserId != null && user.FollowerFollowerUsers.Any(f => f.FollowerUserId.ToString() == currentUserId)
+                IsFollowing = !string.IsNullOrEmpty(currentUserId) && (user.FollowerFollowingUsers?.Any(f => f.FollowingUserId == user.Id) == true)
             };
 
             return View("Profile", model);
