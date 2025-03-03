@@ -23,6 +23,7 @@ public class SupportController : Controller
     [HttpGet]
     public IActionResult ContactSupport()
     {
+        ViewBag.SuccessMessage = TempData["SuccessMessage"];
         return View();
     }
 
@@ -83,7 +84,7 @@ public class SupportController : Controller
         // Send the email to correct email address
         await _emailSender.SendEmailAsync("trusttrade.auth@gmail.com", subject, body);
 
-        TempData["SuccessMessage"] = "Your support request has been sent successfully.";
+        TempData["SuccessMessage"] = "Your request has been submitted. We will get back to you shortly.";
         return RedirectToAction("ContactSupport");
     }
 }
