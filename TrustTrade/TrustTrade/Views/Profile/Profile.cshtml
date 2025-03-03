@@ -229,7 +229,7 @@
                 }
                 @if (isOwner)
                 {
-                    <a asp-action="PortfolioVisibilitySettings" class="btn btn-outline-secondary btn-sm me-2 @(Model.PlaidEnabled ? "" : "disabled")">
+                    <a asp-action="PortfolioVisibilitySettings" class="btn btn-secondary btn-sm me-2 @(Model.PlaidEnabled ? "" : "disabled")">
                         <i class="bi bi-eye"></i> Visibility Settings
                     </a>
                     <form asp-action="RefreshHoldings" method="post" class="d-inline">
