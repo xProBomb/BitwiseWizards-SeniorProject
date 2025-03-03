@@ -14,20 +14,26 @@
     <div class="position-relative mb-5">
         <div class="bg-light" style="height: 125px;"></div>
         <div class="position-absolute" style="top: 130px; left: 30px;">
-            <img src="https://via.placeholder.com/150" alt="Profile Picture" class="rounded-circle img-thumbnail border border-white" style="width: 150px; height: 100px;">
+            <img src="https://via.placeholder.com/150" alt="Profile Picture"
+                 class="rounded-circle img-thumbnail border border-white" style="width: 150px; height: 100px;">
         </div>
     </div>
 
     <!-- Profile Name, Joined Date and Follow Button -->
     <div class="mb-4" style="padding-left: 200px;">
         <h2>
-            @Model.ProfileName @if(Model.PlaidEnabled){<i class="bi bi-patch-check"></i>}
+            @Model.ProfileName
+            @if (Model.PlaidEnabled)
+            {
+                <i class="bi bi-patch-check"></i>
+            }
         </h2>
         @if (!isOwner)
         {
             <!-- Follow/Unfollow button appears only for non-owners -->
-            <form asp-action="@((isFollowing) ? "Unfollow" : "Follow")" method="post" class="d-inline follow-unfollow-form">
-                <input type="hidden" name="profileId" value="@Model.IdentityId" />
+            <form asp-action="@((isFollowing) ? "Unfollow" : "Follow")" method="post"
+                  class="d-inline follow-unfollow-form">
+                <input type="hidden" name="profileId" value="@Model.IdentityId"/>
                 <button type="submit" class="btn btn-primary">
                     @(isFollowing ? "Unfollow" : "Follow")
                 </button>
@@ -52,7 +58,8 @@
             <div class="card">
                 <div class="card-body">
 
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followersModal">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#followersModal">
                         Followers (@Model.FollowersCount)
                     </button>
                 </div>
@@ -61,7 +68,8 @@
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followingModal">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#followingModal">
                         Following (@Model.FollowingCount)
                     </button>
                 </div>
@@ -70,7 +78,8 @@
     </div>
 
     <!-- Followers Modal -->
-    <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
+    <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -84,7 +93,8 @@
                         @foreach (var follower in Model.Followers)
                         {
                             <li class="mb-2">
-                                <a asp-controller="Profile" asp-action="User" asp-route-id="@follower" class="btn">@follower</a>
+                                <a asp-controller="Profile" asp-action="User" asp-route-id="@follower"
+                                   class="btn">@follower</a>
                             </li>
                         }
                     </ul>
@@ -94,7 +104,8 @@
     </div>
 
     <!-- Following Modal -->
-    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
+    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -108,7 +119,8 @@
                         @foreach (var following in Model.Following)
                         {
                             <li class="mb-2">
-                                <a asp-controller="Profile" asp-action="User" asp-route-id="@following" class="btn">@following</a>
+                                <a asp-controller="Profile" asp-action="User" asp-route-id="@following"
+                                   class="btn">@following</a>
                             </li>
                         }
                     </ul>
@@ -121,7 +133,7 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             About
-            @if(isOwner)
+            @if (isOwner)
             {
                 <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                     <i class="bi bi-pencil"></i> Edit
@@ -139,7 +151,7 @@
         }
     </div>
 
-    @if(isOwner)
+    @if (isOwner)
     {
         <!-- Edit Profile Modal -->
         <div class="modal fade" id="editProfileModal" tabindex="-1">
@@ -169,7 +181,7 @@
                                 <label class="form-label">Trading Preference</label>
                                 <select name="UserTag" class="form-select">
                                     <option value="">Select preference...</option>
-                                    @if(Model.UserTag == "Stocks")
+                                    @if (Model.UserTag == "Stocks")
                                     {
                                         <option value="Stocks" selected>Stocks</option>
                                     }
@@ -177,7 +189,7 @@
                                     {
                                         <option value="Stocks">Stocks</option>
                                     }
-                                    @if(Model.UserTag == "Options")
+                                    @if (Model.UserTag == "Options")
                                     {
                                         <option value="Options" selected>Options</option>
                                     }
@@ -185,7 +197,7 @@
                                     {
                                         <option value="Options">Options</option>
                                     }
-                                    @if(Model.UserTag == "Crypto")
+                                    @if (Model.UserTag == "Crypto")
                                     {
                                         <option value="Crypto" selected>Crypto</option>
                                     }
@@ -215,10 +227,13 @@
                 {
                     <small class="text-muted me-3">Last updated: @Model.LastHoldingsUpdate.Value.ToString("g")</small>
                 }
-                @if(isOwner)
+                @if (isOwner)
                 {
+                    <a asp-action="PortfolioVisibilitySettings" class="btn btn-outline-secondary btn-sm me-2 @(Model.PlaidEnabled ? "" : "disabled")">
+                        <i class="bi bi-eye"></i> Visibility Settings
+                    </a>
                     <form asp-action="RefreshHoldings" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-primary btn-sm">
+                        <button type="submit" @(Model.PlaidEnabled ? "" : "disabled") class="btn btn-primary btn-sm">
                             <i class="bi bi-arrow-clockwise"></i> Refresh
                         </button>
                     </form>
@@ -237,39 +252,80 @@
                         <thead>
                         <tr>
                             <th>Symbol</th>
-                            <th>Cost Basis</th>
-                            <th class="text-end">Quantity</th>
+                            @if (!Model.HideDetailedInformation)
+                            {
+                                <th>Cost Basis</th>
+                                <th class="text-end">Quantity</th>
+                            }
                             <th class="text-end">Current Price</th>
                             <th class="text-end">Current Value</th>
-                            <th class="text-end">Return</th>
-                            <th class="text-end">Return %</th>
+                            @if (!Model.HideDetailedInformation)
+                            {
+                                <th class="text-end">Return</th>
+                                <th class="text-end">Return %</th>
+                            }
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var holding in Model.Holdings)
+                        @{
+                            var visibleHoldings = Model.Holdings.Where(h => !h.IsHidden).ToList();
+                        }
+
+                        @foreach (var holding in visibleHoldings)
                         {
                             <tr>
                                 <td>@holding.Symbol</td>
-                                <td>@holding.CostBasis</td>
-                                <td class="text-end">@holding.Quantity.ToString("N4")</td>
+                                @if (!Model.HideDetailedInformation)
+                                {
+                                    <td>@holding.CostBasis</td>
+                                    <td class="text-end">@holding.Quantity.ToString("N4")</td>
+                                }
                                 <td class="text-end">$@holding.CurrentPrice.ToString("N2")</td>
                                 <td class="text-end">$@holding.CurrentValue.ToString("N2")</td>
-                                <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
-                                    $@Math.Abs(holding.ReturnAmount).ToString("N2")
-                                    @(holding.ReturnAmount >= 0 ? "+" : "-")
+                                @if (!Model.HideDetailedInformation)
+                                {
+                                    <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
+                                        $@Math.Abs(holding.ReturnAmount).ToString("N2")
+                                        @(holding.ReturnAmount >= 0 ? "+" : "-")
+                                    </td>
+                                    <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
+                                        @Math.Abs(holding.ReturnPercentage).ToString("N2")%
+                                        @(holding.ReturnPercentage >= 0 ? "+" : "-")
+                                    </td>
+                                }
+                            </tr>
+                        }
+
+                        @if (Model.HiddenAssetsCount > 0)
+                        {
+                            <tr class="table-secondary">
+                                <td>
+                                    <i class="bi bi-eye-slash"></i> Hidden Assets (@Model.HiddenAssetsCount)
                                 </td>
-                                <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
-                                    @Math.Abs(holding.ReturnPercentage).ToString("N2")%
-                                    @(holding.ReturnPercentage >= 0 ? "+" : "-")
-                                </td>
+                                @if (!Model.HideDetailedInformation)
+                                {
+                                    <td>-</td>
+                                    <td class="text-end">-</td>
+                                }
+                                <td class="text-end">-</td>
+                                <td class="text-end">$@Model.HiddenAssetsValue.ToString("N2")</td>
+                                @if (!Model.HideDetailedInformation)
+                                {
+                                    <td class="text-end">-</td>
+                                    <td class="text-end">-</td>
+                                }
                             </tr>
                         }
                         </tbody>
                         <tfoot>
                         <tr class="fw-bold">
-                            <td colspan="4">Total Portfolio Value</td>
-                            <td class="text-end">$@Model.TotalPortfolioValue.ToString("N2")</td>
-                            <td colspan="2"></td>
+                            <td colspan="@(Model.HideDetailedInformation ? 1 : 3)">Total Portfolio Value</td>
+                            <td class="text-end" colspan="@(Model.HideDetailedInformation ? 1 : 2)">
+                                $@Model.TotalPortfolioValue.ToString("N2")</td>
+                            @if (!Model.HideDetailedInformation)
+                            {
+                                <td colspan="2"></td>
+                            }
                         </tr>
                         </tfoot>
                     </table>
@@ -278,7 +334,7 @@
         </div>
     </div>
 
-    @if(isOwner)
+    @if (isOwner)
     {
         <!-- Manage Account and Brokerage Connection Links -->
         <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">Manage Account</a>
