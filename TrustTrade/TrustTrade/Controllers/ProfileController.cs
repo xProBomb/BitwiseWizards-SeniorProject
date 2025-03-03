@@ -88,13 +88,17 @@ namespace TrustTrade.Controllers
         [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
         public async Task<IActionResult> UserProfile(string username)
         {
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
 
             if (string.IsNullOrEmpty(username))
             {
                 return RedirectToAction(nameof(MyProfile));
             }
+
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            var currentUserId = currentUser?.Id;
+            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
             var user = await _context.Users
                 .Include(u => u.FollowerFollowerUsers)
@@ -136,7 +140,7 @@ namespace TrustTrade.Controllers
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = !string.IsNullOrEmpty(currentUserId) && (user.FollowerFollowingUsers?.Any(f => f.FollowingUserId == user.Id) == true)
+                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false
             };
 
             return View("Profile", model);
