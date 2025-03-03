@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
+using TrustTrade.Models.ViewModels;
 using TrustTrade.ViewModels;
 
 namespace TrustTrade.Controllers
@@ -49,6 +50,19 @@ namespace TrustTrade.Controllers
                 return NotFound();
             }
 
+            // Get visibility settings
+            var visibilitySettings = await _context.PortfolioVisibilitySettings
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            bool hideDetails = false;
+            bool hideAll = false;
+
+            if (visibilitySettings != null)
+            {
+                hideDetails = visibilitySettings.HideDetailedInformation;
+                hideAll = visibilitySettings.HideAllPositions;
+            }
+
             var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
             var holdingViewModels = holdings.Select(h => new HoldingViewModel
             {
@@ -57,7 +71,8 @@ namespace TrustTrade.Controllers
                 CurrentPrice = h.CurrentPrice,
                 CostBasis = h.CostBasis,
                 Institution = h.PlaidConnection.InstitutionName,
-                TypeOfSecurity = h.TypeOfSecurity
+                TypeOfSecurity = h.TypeOfSecurity,
+                IsHidden = hideAll || h.IsHidden
             }).ToList();
 
             var model = new ProfileViewModel
@@ -71,15 +86,19 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(), 
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ??
+                            new List<string>(),
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ??
+                            new List<string>(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = false
+                IsFollowing = false,
+                HideDetailedInformation = hideDetails,
+                HideAllPositions = hideAll
             };
 
-            return View("Profile",model);
+            return View("Profile", model);
         }
 
         // In order to access the profile of a user, use the route below
@@ -117,8 +136,23 @@ namespace TrustTrade.Controllers
                 CurrentPrice = h.CurrentPrice,
                 CostBasis = h.CostBasis,
                 Institution = h.PlaidConnection.InstitutionName,
-                TypeOfSecurity = h.TypeOfSecurity
+                TypeOfSecurity = h.TypeOfSecurity,
+                IsHidden = h.IsHidden
             }).ToList();
+
+            var visibilitySettings = await _context.PortfolioVisibilitySettings
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            bool hideDetails = false;
+            bool hideAll = false;
+
+            if (visibilitySettings != null)
+            {
+                hideDetails = visibilitySettings.HideDetailedInformation;
+                hideAll = visibilitySettings.HideAllPositions;
+            }
+
+            var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
 
             var model = new ProfileViewModel
             {
@@ -131,12 +165,17 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ?? new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ?? new List<string>(),
-                Holdings = holdingViewModels,
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ??
+                            new List<string>(),
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ??
+                            new List<string>(),
+                Holdings = filteredHoldings,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = !string.IsNullOrEmpty(currentUserId) && (user.FollowerFollowingUsers?.Any(f => f.FollowingUserId == user.Id) == true)
+                IsFollowing = !string.IsNullOrEmpty(currentUserId) &&
+                              (user.FollowerFollowingUsers?.Any(f => f.FollowingUserId == user.Id) == true),
+                HideAllPositions = hideAll,
+                HideDetailedInformation = hideDetails
             };
 
             return View("Profile", model);
@@ -174,6 +213,125 @@ namespace TrustTrade.Controllers
                 _logger.LogError(ex, "Error refreshing holdings");
                 return StatusCode(500, new { error = "An unexpected error occurred" });
             }
+        }
+
+        /// <summary>
+        /// Displays the portfolio visibility settings page
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> PortfolioVisibilitySettings()
+        {
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Get user's visibility settings
+            var settings = await _context.PortfolioVisibilitySettings
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            if (settings == null)
+            {
+                // Create default settings if none exist
+                settings = new PortfolioVisibilitySettings
+                {
+                    UserId = user.Id,
+                    HideDetailedInformation = false,
+                    HideAllPositions = false
+                };
+                _context.PortfolioVisibilitySettings.Add(settings);
+                await _context.SaveChangesAsync();
+            }
+
+            // Get user's holdings
+            var holdings = await _context.InvestmentPositions
+                .Include(i => i.PlaidConnection)
+                .Where(i => i.PlaidConnection.UserId == user.Id)
+                .ToListAsync();
+
+            var viewModel = new PortfolioVisibilityViewModel
+            {
+                HideDetailedInformation = settings.HideDetailedInformation,
+                HideAllPositions = settings.HideAllPositions,
+                Holdings = holdings.Select(h => new HoldingVisibilityViewModel
+                {
+                    Id = h.Id,
+                    Symbol = h.Symbol,
+                    IsHidden = h.IsHidden
+                }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Handles saving portfolio visibility settings
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> SavePortfolioVisibilitySettings(PortfolioVisibilityViewModel model)
+        {
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Update global visibility settings
+            var settings = await _context.PortfolioVisibilitySettings
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            if (settings == null)
+            {
+                settings = new PortfolioVisibilitySettings
+                {
+                    UserId = user.Id
+                };
+                _context.PortfolioVisibilitySettings.Add(settings);
+            }
+
+            settings.HideDetailedInformation = model.HideDetailedInformation;
+            settings.HideAllPositions = model.HideAllPositions;
+            settings.LastUpdated = DateTime.UtcNow;
+
+            // Update individual holding visibility
+            if (model.Holdings != null)
+            {
+                foreach (var holdingModel in model.Holdings)
+                {
+                    var holding = await _context.InvestmentPositions
+                        .Include(i => i.PlaidConnection)
+                        .FirstOrDefaultAsync(i => i.Id == holdingModel.Id && i.PlaidConnection.UserId == user.Id);
+
+                    if (holding != null)
+                    {
+                        // If "Hide All" is enabled, hide all positions
+                        // Otherwise, use the individual setting
+                        holding.IsHidden = model.HideAllPositions || holdingModel.IsHidden;
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Redirect back to profile
+            return RedirectToAction(nameof(MyProfile));
         }
 
         /// <summary>
