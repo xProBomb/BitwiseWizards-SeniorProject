@@ -107,13 +107,17 @@ namespace TrustTrade.Controllers
         [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
         public async Task<IActionResult> UserProfile(string username)
         {
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
 
             if (string.IsNullOrEmpty(username))
             {
                 return RedirectToAction(nameof(MyProfile));
             }
+
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            var currentUserId = currentUser?.Id;
+            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
             var user = await _context.Users
                 .Include(u => u.FollowerFollowerUsers)
@@ -172,10 +176,7 @@ namespace TrustTrade.Controllers
                 Holdings = filteredHoldings,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = !string.IsNullOrEmpty(currentUserId) &&
-                              (user.FollowerFollowingUsers?.Any(f => f.FollowingUserId == user.Id) == true),
-                HideAllPositions = hideAll,
-                HideDetailedInformation = hideDetails
+                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false
             };
 
             return View("Profile", model);
@@ -376,27 +377,68 @@ namespace TrustTrade.Controllers
         [HttpPost]
         public async Task<IActionResult> Follow(string profileId)
         {
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(currentUserId))
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
             {
                 return Unauthorized();
             }
 
-            _profileService.FollowUser(currentUserId, profileId);
-            return RedirectToAction(nameof(UserProfile), new { username = profileId });
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var userToFollow = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToFollow == null)
+            {
+                return NotFound();
+            }
+
+            var follower = new Follower
+            {
+                FollowerUserId = userToFollow.Id,
+                FollowingUserId = currentUser.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Followers.Add(follower);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
 
         [HttpPost]
         public async Task<IActionResult> Unfollow(string profileId)
         {
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(currentUserId))
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
             {
                 return Unauthorized();
             }
 
-            _profileService.UnfollowUser(currentUserId, profileId);
-            return RedirectToAction(nameof(UserProfile), new { username = profileId });
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var userToUnfollow = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToUnfollow == null)
+            {
+                return NotFound();
+            }
+
+            var follower = await _context.Followers
+                .FirstOrDefaultAsync(f => f.FollowingUserId == currentUser.Id && f.FollowerUserId == userToUnfollow.Id);
+
+            if (follower != null)
+            {
+                _context.Followers.Remove(follower);
+                await _context.SaveChangesAsync();
+            }
+
+            return Json(new { success = true });
         }
     }
 }
