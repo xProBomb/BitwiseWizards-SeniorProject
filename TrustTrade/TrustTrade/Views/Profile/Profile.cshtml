@@ -2,9 +2,7 @@
 
 @{
     ViewData["Title"] = "Profile";
-    // Get the logged-in user's identity id.
     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-    // Determine if the profile being viewed belongs to the logged-in user.
     bool isOwner = !string.IsNullOrEmpty(currentUserId) && currentUserId == Model.IdentityId;
     bool isFollowing = Model.IsFollowing;
 }
@@ -26,7 +24,7 @@
         @if (!isOwner)
         {
             <!-- Follow/Unfollow button appears only for non-owners -->
-            <form asp-action="@((isFollowing) ? "Unfollow" : "Follow")" method="post" class="d-inline follow-unfollow-form">
+            <form asp-action="@(isFollowing ? "Unfollow" : "Follow")" method="post" class="d-inline follow-unfollow-form">
                 <input type="hidden" name="profileId" value="@Model.IdentityId" />
                 <button type="submit" class="btn btn-primary">
                     @(isFollowing ? "Unfollow" : "Follow")
@@ -285,3 +283,7 @@
         <a class="btn btn-primary" asp-controller="Brokerage" asp-action="Connect">Connect Brokerage</a>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/profile.js"></script>
+}
