@@ -125,6 +125,11 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Property<decimal>("CurrentPrice")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<bool>("IsHidden")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<DateTime?>("LastUpdated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -240,6 +245,36 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .IsUnique();
 
                     b.ToTable("PlaidConnections");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.PortfolioVisibilitySettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("HideAllPositions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HideDetailedInformation")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("PortfolioVisibilitySettings");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Post", b =>
@@ -582,6 +617,17 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_PlaidConnections_User");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.PortfolioVisibilitySettings", b =>
+                {
+                    b.HasOne("TrustTrade.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("TrustTrade.Models.PortfolioVisibilitySettings", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
