@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -25,6 +26,7 @@ public class EmailSender : IEmailSender
             throw new Exception("Null SendGridKey");
         }
         await Execute(Options.SendGridKey, subject, message, toEmail);
+        
     }
 
     public async Task Execute(string apiKey, string subject, string message, string toEmail)
@@ -32,19 +34,17 @@ public class EmailSender : IEmailSender
         var client = new SendGridClient(apiKey);
         var msg = new SendGridMessage()
         {
-            From = new EmailAddress("trusttrade.auth@gmail.com", "Email Confirmation"),
+            From = new EmailAddress("trusttrade.auth@gmail.com", "New Message"),
             Subject = subject,
             PlainTextContent = message,
             HtmlContent = message
         };
         msg.AddTo(new EmailAddress(toEmail));
-
-        // Disable click tracking.
-        // See https://sendgrid.com/docs/User_Guide/Settings/tracking.html
         msg.SetClickTracking(false, false);
         var response = await client.SendEmailAsync(msg);
         _logger.LogInformation(response.IsSuccessStatusCode 
                                ? $"Email to {toEmail} queued successfully!"
                                : $"Failure Email to {toEmail}");
     }
+
 }
