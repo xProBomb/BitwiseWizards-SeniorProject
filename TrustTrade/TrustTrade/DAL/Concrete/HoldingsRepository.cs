@@ -41,71 +41,87 @@ public class HoldingsRepository : Repository<InvestmentPosition>, IHoldingsRepos
 
     /// <inheritdoc />
     public async Task<bool> RefreshHoldingsAsync(int userId)
+{
+    try
     {
-        try
+        // Get user's Plaid connections
+        var plaidConnections = await _context.PlaidConnections
+            .Where(pc => pc.UserId == userId)
+            .ToListAsync();
+
+        // Dictionary to store visibility settings before removing holdings
+        var visibilitySettings = new Dictionary<string, bool>();
+
+        // Get existing holdings to preserve visibility settings
+        var existingHoldings = await _context.InvestmentPositions
+            .Include(ip => ip.PlaidConnection)
+            .Where(ip => ip.PlaidConnection.UserId == userId)
+            .ToListAsync();
+
+        // Store current visibility settings
+        foreach (var holding in existingHoldings)
         {
-            // Get user's Plaid connections
-            var plaidConnections = await _context.PlaidConnections
-                .Where(pc => pc.UserId == userId)
-                .ToListAsync();
+            // Use SecurityId as the unique key
+            visibilitySettings[holding.SecurityId] = holding.IsHidden;
+        }
 
-            foreach (var connection in plaidConnections)
+        // Remove ALL existing holdings for this user
+        _context.InvestmentPositions.RemoveRange(existingHoldings);
+
+        foreach (var connection in plaidConnections)
+        {
+            // Set access token for this connection
+            _plaidClient.AccessToken = connection.AccessToken;
+
+            // Get holdings from Plaid
+            var holdingsResponse = await _plaidClient.InvestmentsHoldingsGetAsync(
+                new InvestmentsHoldingsGetRequest());
+
+            if (holdingsResponse.Error != null)
             {
-                // Set access token for this connection
-                _plaidClient.AccessToken = connection.AccessToken;
-
-                // Get holdings from Plaid
-                var holdingsResponse = await _plaidClient.InvestmentsHoldingsGetAsync(
-                    new InvestmentsHoldingsGetRequest());
-
-                if (holdingsResponse.Error != null)
-                {
-                    _logger.LogError("Error getting holdings for connection {ConnectionId}: {Error}",
-                        connection.Id, holdingsResponse.Error.ErrorMessage);
-                    continue;
-                }
-
-                // Remove existing holdings for this connection
-                var existingHoldings = await _context.InvestmentPositions
-                    .Where(ip => ip.PlaidConnectionId == connection.Id)
-                    .ToListAsync();
-                _context.InvestmentPositions.RemoveRange(existingHoldings);
-
-                // Add new holdings
-                foreach (var holding in holdingsResponse.Holdings)
-                {
-                    var security = holdingsResponse.Securities
-                        .FirstOrDefault(s => s.SecurityId == holding.SecurityId);
-
-                    if (security == null) continue;
-                    if (security.Type == "cryptocurrency") continue;
-
-                    var position = new InvestmentPosition
-                    {
-                        PlaidConnectionId = connection.Id,
-                        SecurityId = holding.SecurityId,
-                        Symbol = security.TickerSymbol ?? security.SecurityId,
-                        Quantity = holding.Quantity,
-                        CostBasis = holding.CostBasis ?? 0,
-                        // will change institution price later with another api probably
-                        CurrentPrice = holding.InstitutionPrice,
-                        LastUpdated = DateTime.Now,
-                        TypeOfSecurity = security.Type
-                    };
-
-                    _context.InvestmentPositions.Add(position);
-                }
+                _logger.LogError("Error getting holdings for connection {ConnectionId}: {Error}",
+                    connection.Id, holdingsResponse.Error.ErrorMessage);
+                continue;
             }
 
-            await _context.SaveChangesAsync();
-            return true;
+            // Add new holdings
+            foreach (var holding in holdingsResponse.Holdings)
+            {
+                var security = holdingsResponse.Securities
+                    .FirstOrDefault(s => s.SecurityId == holding.SecurityId);
+
+                if (security == null) continue;
+                if (security.Type == "cryptocurrency") continue;
+
+                var position = new InvestmentPosition
+                {
+                    PlaidConnectionId = connection.Id,
+                    SecurityId = holding.SecurityId,
+                    Symbol = security.TickerSymbol ?? security.SecurityId,
+                    Quantity = holding.Quantity,
+                    CostBasis = holding.CostBasis ?? 0,
+                    CurrentPrice = holding.InstitutionPrice,
+                    LastUpdated = DateTime.Now,
+                    TypeOfSecurity = security.Type,
+                    // Apply previous visibility setting if it exists
+                    IsHidden = visibilitySettings.ContainsKey(holding.SecurityId) 
+                        ? visibilitySettings[holding.SecurityId] 
+                        : false
+                };
+
+                _context.InvestmentPositions.Add(position);
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error refreshing holdings for user {UserId}", userId);
-            return false;
-        }
+
+        await _context.SaveChangesAsync();
+        return true;
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error refreshing holdings for user {UserId}", userId);
+        return false;
+    }
+}
 
     /// <inheritdoc />
     public async Task<int> RemoveHoldingsForUserAsync(int userId)

@@ -23,5 +23,8 @@ public partial class InvestmentPosition
 
     public DateTime? LastUpdated { get; set; }
 
+    // New field for individual position visibility
+    public bool IsHidden { get; set; } = false;
+
     public virtual PlaidConnection PlaidConnection { get; set; } = null!;
 }

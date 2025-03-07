@@ -73,6 +73,10 @@ builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 // Add services to the container.
 builder.Services.AddScoped<IProfileService, ProfileService>();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 var app = builder.Build();
 
 // Development vs Production Configuration
