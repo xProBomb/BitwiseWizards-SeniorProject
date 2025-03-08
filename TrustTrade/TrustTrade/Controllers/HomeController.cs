@@ -6,7 +6,6 @@ using TrustTrade.ViewModels;
 using TrustTrade.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
 
 namespace TrustTrade.Controllers
 {
@@ -16,13 +15,20 @@ namespace TrustTrade.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly IUserRepository _userRepository;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<IdentityUser> userManager, IPostRepository postRepository, ITagRepository tagRepository)
+        public HomeController(
+            ILogger<HomeController> logger, 
+            UserManager<IdentityUser> userManager, 
+            IPostRepository postRepository, 
+            ITagRepository tagRepository, 
+            IUserRepository userRepository)
         {
             _logger = logger;
             _userManager = userManager;
             _postRepository = postRepository;
             _tagRepository = tagRepository;
+            _userRepository = userRepository;
         }
 
         public IActionResult Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
@@ -93,16 +99,23 @@ namespace TrustTrade.Controllers
         {
             if (ModelState.IsValid)
             {
-                string? userId = _userManager.GetUserId(User);
-                if (userId.IsNullOrEmpty())
+                string? identityUserId = _userManager.GetUserId(User);
+                if (identityUserId == null)
                 {
                     return Unauthorized();
+                }
+
+                // Retrieve the user from the database
+                User? user = _userRepository.FindByIdentityId(identityUserId);
+                if (user == null)
+                {
+                    return NotFound();
                 }
 
                 // Map the CreatePostVM to the Post entity
                 Post post = new Post
                 {
-                    UserId = 1, // Hardcoded for now
+                    UserId = user.Id,
                     Title = createPostVM.Title,
                     Content = createPostVM.Content
                 };
