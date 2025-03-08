@@ -72,7 +72,7 @@ namespace TrustTrade.Controllers
                 // Add the selected tags to the post
                 foreach (string tagName in createPostVM.SelectedTags)
                 {
-                    Tag? tag = _tagRepository.GetTagByName(tagName);
+                    Tag? tag = _tagRepository.FindByTagName(tagName);
                     if (tag != null)
                     {
                         // Add the tag to the post and the post to the tag
