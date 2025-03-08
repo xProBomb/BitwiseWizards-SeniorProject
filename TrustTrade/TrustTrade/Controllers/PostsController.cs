@@ -34,7 +34,7 @@ namespace TrustTrade.Controllers
         public IActionResult Create()
         {
             // Retrieve all existing tags for the view model
-            CreatePostVM vm = new CreatePostVM
+            var vm = new CreatePostVM
             {
                 ExistingTags = _tagRepository.GetAllTagNames()
             };
@@ -62,7 +62,7 @@ namespace TrustTrade.Controllers
                 }
 
                 // Map the CreatePostVM to the Post entity
-                Post post = new Post
+                var post = new Post
                 {
                     UserId = user.Id,
                     Title = createPostVM.Title,
