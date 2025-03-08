@@ -13,7 +13,10 @@ namespace TrustTrade.Controllers
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
 
-        public HomeController(ILogger<HomeController> logger, IPostRepository postRepository, ITagRepository tagRepository)
+        public HomeController(
+            ILogger<HomeController> logger, 
+            IPostRepository postRepository, 
+            ITagRepository tagRepository)
         {
             _logger = logger;
             _postRepository = postRepository;

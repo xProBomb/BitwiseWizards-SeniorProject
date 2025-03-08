@@ -1,5 +1,3 @@
-using TrustTrade.Models;
-
 namespace TrustTrade.ViewModels;
 
 public class IndexVM
