@@ -281,14 +281,26 @@
                                 <td class="text-end">$@holding.CurrentValue.ToString("N2")</td>
                                 @if (!Model.HideDetailedInformation)
                                 {
-                                    <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
-                                        $@Math.Abs(holding.ReturnAmount).ToString("N2")
-                                        @(holding.ReturnAmount >= 0 ? "+" : "-")
-                                    </td>
-                                    <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
-                                        @Math.Abs(holding.ReturnPercentage).ToString("N2")%
-                                        @(holding.ReturnPercentage >= 0 ? "+" : "-")
-                                    </td>
+                                    @if (holding.ReturnAmount == 0 && holding.ReturnPercentage == 0)
+                                    {
+                                        <td class="text-end">
+                                            N/A
+                                        </td>
+                                        <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
+                                            N/A
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
+                                            $@Math.Abs(holding.ReturnAmount).ToString("N2")
+                                            @(holding.ReturnAmount >= 0 ? "+" : "-")
+                                        </td>
+                                        <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
+                                            @Math.Abs(holding.ReturnPercentage).ToString("N2")%
+                                            @(holding.ReturnPercentage >= 0 ? "+" : "-")
+                                        </td>
+                                    }
                                 }
                             </tr>
                         }

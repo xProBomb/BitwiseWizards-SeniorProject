@@ -36,7 +36,7 @@ public class HoldingViewModel
     public decimal CostBasis { get; set; }
     public decimal CurrentValue => Quantity * CurrentPrice;
     public decimal ReturnAmount => CurrentValue - (Quantity * CostBasis);
-    public decimal ReturnPercentage => CostBasis != 0 ? (((ReturnAmount - (CostBasis * Quantity)) / (CostBasis * Quantity)) + 1 ): 0;
+    public decimal ReturnPercentage => CostBasis != 0 ? (100 *((CurrentValue - (Quantity * CostBasis)) / (Quantity * CostBasis))) : 0;
     public string Institution { get; set; } = string.Empty;
     public string TypeOfSecurity { get; set; } = string.Empty;
 
