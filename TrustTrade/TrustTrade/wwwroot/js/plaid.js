@@ -1,8 +1,8 @@
-// UPDATED VERSION - March 2, 2025
-// Version 2.0 - with automatic refresh
+// UPDATED VERSION - March 9, 2025
+// Version 2.1 - with delete functionality and update connection improvements
 
 // Add a version log to verify we're running the latest code
-console.log("Running plaid.js version 2.0 - with auto-refresh");
+console.log("Running plaid.js version 2.1 - with delete functionality");
 
 // Initialize the Plaid Link handler
 let linkHandler = null;
@@ -55,7 +55,7 @@ async function initializePlaidLink() {
                     const exchangeData = await exchangeResponse.json();
                     if (exchangeData.success) {
                         // NEW DISTINCTIVE MESSAGE to verify this code is running
-                        alert('VERSION 2.0: Account linked! Now refreshing your holdings...');
+                        alert('VERSION 2.1: Account linked! Now refreshing your holdings...');
 
                         // Directly submit form to refresh holdings
                         const formData = new FormData();
@@ -132,11 +132,87 @@ function openPlaidLink() {
     }
 }
 
+// Function to delete Plaid connection
+async function deletePlaidConnection() {
+    try {
+        const confirmed = confirm("Are you sure you want to delete your brokerage connection? This will remove all your portfolio data.");
+
+        if (!confirmed) {
+            return false;
+        }
+
+        // Show loading state
+        document.body.style.cursor = 'wait';
+
+        const response = await fetch('/Brokerage/DeleteConnection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error deleting connection:', errorData);
+            throw new Error(errorData.error || 'Failed to delete connection');
+        }
+
+        const data = await response.json();
+        return data.success;
+    } catch (error) {
+        console.error('Error deleting Plaid connection:', error);
+        alert('Error deleting connection. Please try again.');
+        return false;
+    } finally {
+        document.body.style.cursor = 'default';
+    }
+}
+
 // Initialize when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    const plaidButton = document.getElementById('connect-plaid');
-    if (plaidButton) {
+    const connectPlaidButton = document.getElementById('connect-plaid');
+    const updatePlaidButton = document.getElementById('update-plaid');
+    const deletePlaidButton = document.getElementById('delete-plaid');
+
+    // Initialize Plaid Link for any button that might use it
+    if (connectPlaidButton || updatePlaidButton) {
         initializePlaidLink();
-        plaidButton.addEventListener('click', openPlaidLink);
+    }
+
+    // Regular connection button (new users)
+    if (connectPlaidButton) {
+        connectPlaidButton.addEventListener('click', openPlaidLink);
+    }
+
+    // Update connection button (existing users)
+    if (updatePlaidButton) {
+        updatePlaidButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            // First delete existing connection
+            const deleteSuccess = await deletePlaidConnection();
+
+            if (deleteSuccess) {
+                // Then open Plaid Link to create a new connection
+                openPlaidLink();
+            }
+        });
+    }
+
+    // Delete connection button
+    if (deletePlaidButton) {
+        deletePlaidButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            // Delete connection
+            const deleteSuccess = await deletePlaidConnection();
+
+            // Refresh the page to show updated UI
+            if (deleteSuccess) {
+                window.location.reload();
+            }
+        });
     }
 });
