@@ -243,3 +243,19 @@ body {
 .modal-body li {
     padding: 5px 0;
 }
+
+.performance-score {
+  display: inline-block;
+  padding: 0.25rem 0.25rem;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-left: 0.5rem;
+  font-size: 1.45rem;
+}
+
+.score-red { background-color: #dc3545; color: white; }
+.score-yellow { background-color: #ffc107; color: black; }
+.score-green { background-color: #28a745; color: white; }
+.score-purple { background-color: #6f42c1; color: white; }
+
+.not-rated-badge { color: #6c757d; margin-left: 0.5rem; }

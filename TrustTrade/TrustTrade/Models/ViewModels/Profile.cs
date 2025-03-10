@@ -22,6 +22,11 @@ public class ProfileViewModel
     public int HiddenAssetsCount => Holdings.Count(h => h.IsHidden);
     public decimal VisibleAssetsValue => Holdings.Where(h => !h.IsHidden).Sum(h => h.CurrentValue);
     
+    // New properties for performance
+    public decimal PerformanceScore { get; set; }
+    public bool HasRatedScore { get; set; }
+    public Dictionary<string, decimal> ScoreBreakdown { get; set; } = new();
+    
     // New properties for holdings
     public List<HoldingViewModel> Holdings { get; set; } = new();
     public DateTime? LastHoldingsUpdate { get; set; }
