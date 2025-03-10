@@ -16,17 +16,21 @@ namespace TrustTrade.Controllers
         private readonly IHoldingsRepository _holdingsRepository;
         private readonly ILogger<ProfileController> _logger;
         private readonly IProfileService _profileService;
+        private readonly IPerformanceScoreRepository _performanceScoreRepository;
 
         public ProfileController(
             TrustTradeDbContext context,
             IHoldingsRepository holdingsRepository,
             ILogger<ProfileController> logger,
-            IProfileService profileService)
+            IProfileService profileService,
+            IPerformanceScoreRepository performanceScoreRepository
+            )
         {
             _context = context;
             _holdingsRepository = holdingsRepository;
             _logger = logger;
             _profileService = profileService;
+            _performanceScoreRepository = performanceScoreRepository;
         }
 
         // route to get to logged in users profile "/Profile"
@@ -64,6 +68,7 @@ namespace TrustTrade.Controllers
             }
 
             var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+            
             var holdingViewModels = holdings.Select(h => new HoldingViewModel
             {
                 Symbol = h.Symbol,
@@ -74,7 +79,9 @@ namespace TrustTrade.Controllers
                 TypeOfSecurity = h.TypeOfSecurity,
                 IsHidden = hideAll || h.IsHidden
             }).ToList();
-
+            
+            var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
+            
             var model = new ProfileViewModel
             {
                 IdentityId = user.IdentityId,
@@ -95,7 +102,10 @@ namespace TrustTrade.Controllers
                 UserTag = user.UserTag,
                 IsFollowing = false,
                 HideDetailedInformation = hideDetails,
-                HideAllPositions = hideAll
+                HideAllPositions = hideAll,
+                PerformanceScore = score,
+                HasRatedScore = isRated,
+                ScoreBreakdown = breakdown
             };
 
             return View("Profile", model);
@@ -157,6 +167,8 @@ namespace TrustTrade.Controllers
             }
 
             var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
+            
+            var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
 
             var model = new ProfileViewModel
             {
@@ -176,7 +188,10 @@ namespace TrustTrade.Controllers
                 Holdings = filteredHoldings,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
-                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false
+                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
+                PerformanceScore = score,
+                HasRatedScore = isRated,
+                ScoreBreakdown = breakdown
             };
 
             return View("Profile", model);

@@ -44,11 +44,11 @@ namespace TrustTrade.Controllers
                 PortfolioValueAtPosting = p.PortfolioValueAtPosting
             }).ToList();
             
-            // For debugging 
-            foreach (var post in postPreviews)
-            {
-                _logger.LogInformation($"Post {post.Id} by {post.UserName}: PlaidEnabled={post.IsPlaidEnabled}, PortfolioValue={post.PortfolioValueAtPosting}");
-            }
+            //            // For debugging 
+//            foreach (var post in postPreviews)
+//            {
+//                _logger.LogInformation($"Post {post.Id} by {post.UserName}: PlaidEnabled={post.IsPlaidEnabled}, PortfolioValue={post.PortfolioValueAtPosting}");
+//            }
 
             // Determine total pages
             int totalPosts = _postRepository.GetTotalPosts(categoryFilter);

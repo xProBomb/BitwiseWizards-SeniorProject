@@ -13,4 +13,6 @@ public class CreatePostVM
     public List<string> ExistingTags { get; set; } = new List<string>();
 
     public List<string> SelectedTags { get; set; } = new List<string>();
+    
+    public decimal? PortfolioValueAtPosting { get; set; }
 }

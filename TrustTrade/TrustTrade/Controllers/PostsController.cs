@@ -13,20 +13,27 @@ namespace TrustTrade.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
+
         private readonly IUserRepository _userRepository;
 
+        // Add holdings repository to refresh and fetch portfolio data
+        private readonly IHoldingsRepository _holdingsRepository;
+
         public PostsController(
-            ILogger<PostsController> logger, 
-            UserManager<IdentityUser> userManager, 
-            IPostRepository postRepository, 
-            ITagRepository tagRepository, 
-            IUserRepository userRepository)
+            ILogger<PostsController> logger,
+            UserManager<IdentityUser> userManager,
+            IPostRepository postRepository,
+            ITagRepository tagRepository,
+            IUserRepository userRepository,
+            // Inject holdings repository
+            IHoldingsRepository holdingsRepository)
         {
             _logger = logger;
             _userManager = userManager;
             _postRepository = postRepository;
             _tagRepository = tagRepository;
             _userRepository = userRepository;
+            _holdingsRepository = holdingsRepository;
         }
 
         [Authorize]
@@ -42,9 +49,9 @@ namespace TrustTrade.Controllers
             return View(vm);
         }
 
-        [Authorize]        
+        [Authorize]
         [HttpPost]
-        public IActionResult Create(CreatePostVM createPostVM)
+        public async Task<IActionResult> Create(CreatePostVM createPostVM)
         {
             if (ModelState.IsValid)
             {
@@ -66,7 +73,8 @@ namespace TrustTrade.Controllers
                 {
                     UserId = user.Id,
                     Title = createPostVM.Title,
-                    Content = createPostVM.Content
+                    Content = createPostVM.Content,
+                    // PortfolioValueAtPosting will be set below if available
                 };
 
                 // Add the selected tags to the post
@@ -79,6 +87,53 @@ namespace TrustTrade.Controllers
                         post.Tags.Add(tag);
                         tag.Posts.Add(post);
                     }
+                }
+
+                // Only attempt to refresh and calculate portfolio value if Plaid is enabled
+                if (user.PlaidEnabled == true)
+                {
+                    try
+                    {
+                        // Refresh the user's holdings using the repository method
+                        bool refreshSuccess = await _holdingsRepository.RefreshHoldingsAsync(user.Id);
+
+                        if (refreshSuccess)
+                        {
+                            // Get the latest holdings after refresh
+                            var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+
+                            // Calculate total portfolio value by summing (quantity * current price)
+                            decimal totalPortfolioValue = 0;
+                            foreach (var holding in holdings)
+                            {
+                                totalPortfolioValue += holding.Quantity * holding.CurrentPrice;
+                            }
+
+                            // Set the portfolio value in the post
+                            post.PortfolioValueAtPosting = totalPortfolioValue;
+
+                            // Log the portfolio value for debugging
+                            _logger.LogInformation(
+                                $"User {user.Username} portfolio value at posting: {totalPortfolioValue:C}");
+                        }
+                        else
+                        {
+                            // Log warning if refresh fails but continue with post creation
+                            _logger.LogWarning(
+                                $"Failed to refresh holdings for user {user.Username} during post creation");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but don't prevent post creation
+                        _logger.LogError(ex, $"Error calculating portfolio value for user {user.Username}");
+                    }
+                }
+                else
+                {
+                    // Log that we're skipping portfolio calculation since Plaid isn't enabled
+                    _logger.LogInformation(
+                        $"User {user.Username} does not have Plaid enabled, skipping portfolio value calculation");
                 }
 
                 // Save the post to the database
