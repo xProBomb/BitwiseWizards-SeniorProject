@@ -44,14 +44,14 @@ public class UserRepositoryTests
     }
 
     [Test]
-    public void FindByIdentityId_WhenUserExists_ReturnsUser()
+    public async Task FindByIdentityIdAsync_WhenUserExists_ReturnsUser()
     {
         // Arrange
         var expectedId = 1;
         var expectedIdentityId = "test-identity-1";
 
         // Act
-        var result = _userRepository.FindByIdentityId(expectedIdentityId);
+        var result = await _userRepository.FindByIdentityIdAsync(expectedIdentityId);
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -60,13 +60,13 @@ public class UserRepositoryTests
     }
 
     [Test]
-    public void FindByIdentityId_WhenUserDoesNotExist_ReturnsNull()
+    public async Task FindByIdentityIdAsync_WhenUserDoesNotExist_ReturnsNull()
     {
         // Arrange
         var nonExistentIdentityId = "non-existent-identity-id";
 
         // Act
-        var result = _userRepository.FindByIdentityId(nonExistentIdentityId);
+        var result = await _userRepository.FindByIdentityIdAsync(nonExistentIdentityId);
 
         // Assert
         Assert.That(result, Is.Null);
