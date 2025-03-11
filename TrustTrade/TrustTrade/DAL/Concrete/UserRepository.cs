@@ -13,9 +13,9 @@ public class UserRepository : Repository<User>, IUserRepository
         _users = context.Users;
     }
 
-    public Task<User?> FindByIdentityIdAsync(string identityId)
+    public async Task<User?> FindByIdentityIdAsync(string identityId)
     {
-        return _users
+        return await _users
             .Include(u => u.Comments)
             .Include(u => u.FollowerFollowerUsers)
             .FirstOrDefaultAsync(u => u.IdentityId == identityId);
