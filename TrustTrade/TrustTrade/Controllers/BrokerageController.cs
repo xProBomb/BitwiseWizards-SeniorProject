@@ -114,4 +114,60 @@ public class BrokerageController : Controller
             throw;
         }
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> DeleteConnection()
+    {
+        try
+        {
+            var identityUser = await _userManager.GetUserAsync(User);
+            if (identityUser == null) return Unauthorized();
+
+            // Get our local user record
+            var trustTradeUser = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Email == identityUser.Email);
+        
+            if (trustTradeUser == null)
+            {
+                _logger.LogError("Failed to find TrustTrade user record for {Email}", identityUser.Email);
+                return StatusCode(500, new { error = "User account not properly synchronized" });
+            }
+
+            // Get all Plaid connections for this user
+            var plaidConnections = await _dbContext.PlaidConnections
+                .Where(pc => pc.UserId == trustTradeUser.Id)
+                .ToListAsync();
+
+            // Remove investment positions first to avoid foreign key constraints
+            var investments = await _dbContext.InvestmentPositions
+                .Where(ip => plaidConnections.Select(pc => pc.Id).Contains(ip.PlaidConnectionId))
+                .ToListAsync();
+        
+            _dbContext.InvestmentPositions.RemoveRange(investments);
+
+            // Remove Plaid connections
+            _dbContext.PlaidConnections.RemoveRange(plaidConnections);
+
+            // Update user's Plaid status
+            trustTradeUser.PlaidEnabled = false;
+            trustTradeUser.PlaidStatus = "Not Connected";
+            trustTradeUser.LastPlaidSync = null;
+
+            await _dbContext.SaveChangesAsync();
+
+            // For AJAX requests
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true });
+            }
+
+            // For regular form submissions
+            return RedirectToAction("Connect");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting Plaid connection");
+            return StatusCode(500, new { error = "Failed to delete Plaid connection", details = ex.Message });
+        }
+    }
 }
