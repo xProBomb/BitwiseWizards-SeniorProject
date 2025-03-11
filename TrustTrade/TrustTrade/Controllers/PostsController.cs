@@ -11,29 +11,25 @@ namespace TrustTrade.Controllers
     {
         private readonly ILogger<PostsController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IHoldingsRepository _holdingsRepository;
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
-
         private readonly IUserRepository _userRepository;
-
-        // Add holdings repository to refresh and fetch portfolio data
-        private readonly IHoldingsRepository _holdingsRepository;
 
         public PostsController(
             ILogger<PostsController> logger,
             UserManager<IdentityUser> userManager,
+            IHoldingsRepository holdingsRepository,
             IPostRepository postRepository,
             ITagRepository tagRepository,
-            IUserRepository userRepository,
-            // Inject holdings repository
-            IHoldingsRepository holdingsRepository)
+            IUserRepository userRepository)
         {
             _logger = logger;
             _userManager = userManager;
+            _holdingsRepository = holdingsRepository;
             _postRepository = postRepository;
             _tagRepository = tagRepository;
             _userRepository = userRepository;
-            _holdingsRepository = holdingsRepository;
         }
 
         [Authorize]
