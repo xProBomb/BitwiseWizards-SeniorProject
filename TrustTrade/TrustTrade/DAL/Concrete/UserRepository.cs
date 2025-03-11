@@ -13,11 +13,11 @@ public class UserRepository : Repository<User>, IUserRepository
         _users = context.Users;
     }
 
-    public User? FindByIdentityId(string identityId)
+    public Task<User?> FindByIdentityIdAsync(string identityId)
     {
         return _users
             .Include(u => u.Comments)
             .Include(u => u.FollowerFollowerUsers)
-            .FirstOrDefault(u => u.IdentityId == identityId);
+            .FirstOrDefaultAsync(u => u.IdentityId == identityId);
     }
 }

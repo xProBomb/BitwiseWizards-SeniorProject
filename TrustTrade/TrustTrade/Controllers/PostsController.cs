@@ -44,7 +44,7 @@ namespace TrustTrade.Controllers
 
         [Authorize]        
         [HttpPost]
-        public IActionResult Create(CreatePostVM createPostVM)
+        public async Task<IActionResult> Create(CreatePostVM createPostVM)
         {
             if (ModelState.IsValid)
             {
@@ -55,7 +55,7 @@ namespace TrustTrade.Controllers
                 }
 
                 // Retrieve the user from the database
-                User? user = _userRepository.FindByIdentityId(identityUserId);
+                User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
                 if (user == null)
                 {
                     return NotFound();
