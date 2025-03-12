@@ -41,7 +41,8 @@ namespace TestTrustTrade
                 _contextMock.Object,
                 _holdingsRepoMock.Object,
                 _loggerMock.Object,
-                _profileServiceMock.Object
+                _profileServiceMock.Object,
+                null
             );
         }
 
