@@ -108,7 +108,7 @@ namespace TrustTrade.Tests
 
             // Verify TempData was set.
             Assert.That(_controller.TempData["SuccessMessage"],
-                        Is.EqualTo("Your support request has been sent successfully."));
+                        Is.EqualTo("Your request has been submitted. We will get back to you shortly."));
         }
     }
 }
