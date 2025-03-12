@@ -4,7 +4,7 @@ public class ProfileViewModel
 {
     public string? UserTag { get; set; }
     public string IdentityId { get; set; }
-    public string ProfileName { get; set; }
+    public string Username { get; set; }
     public DateTime? CreatedAt { get; set; }
     public string? Bio { get; set; }
     public bool IsVerified { get; set; }
