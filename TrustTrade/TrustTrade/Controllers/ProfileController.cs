@@ -425,6 +425,39 @@ namespace TrustTrade.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Follow(string profileId)
+        {
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
+            {
+                return Unauthorized();
+            }
+
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var userToFollow = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToFollow == null)
+            {
+                return NotFound();
+            }
+
+            var follower = new Follower
+            {
+                FollowerUserId = userToFollow.Id,
+                FollowingUserId = currentUser.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Followers.Add(follower);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
 
 
 
