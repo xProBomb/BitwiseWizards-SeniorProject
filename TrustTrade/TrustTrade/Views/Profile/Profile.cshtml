@@ -238,6 +238,7 @@
                             <br>
                              <!-- Username Field -->
                                 <div class="mb-3">
+                                    <span asp-validation-for="Username" class="text-danger"></span>
                                     <label class="form-label">Username</label>
                                     <input type="text" name="Username" class="form-control" value="@Model.Username" required />
                                 </div>

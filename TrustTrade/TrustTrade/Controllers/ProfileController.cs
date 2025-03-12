@@ -357,7 +357,7 @@ namespace TrustTrade.Controllers
         /// <param name="userTag">The user's selected trading preference</param>
         /// <returns>Redirects to Profile page</returns>
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(string bio, string userTag)
+        public async Task<IActionResult> UpdateProfile(string username, string bio, string userTag)
         {
             try
             {
@@ -367,14 +367,36 @@ namespace TrustTrade.Controllers
                     return Unauthorized();
                 }
 
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.IdentityId == identityId);
-
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
                 if (user == null)
                 {
                     return NotFound();
                 }
 
+                // If the username has changed, check that the new username isn't already taken.
+                if (!string.Equals(user.Username, username, StringComparison.OrdinalIgnoreCase))
+                {
+                    bool usernameExists = await _context.Users.AnyAsync(u => u.Username == username && u.IdentityId != identityId);
+                    if (usernameExists)
+                    {
+                        ModelState.AddModelError("Username", "Username is already taken.");
+
+                        // Rebuild a view model for your profile page so that the modal can display errors.
+                        var model = new ProfileViewModel
+                        {
+                            IdentityId = user.IdentityId,
+                            Username = username,
+                            Bio = bio,
+                            UserTag = userTag,
+                            // Populate other properties as needed (e.g., Followers, PerformanceScore, etc.)
+                        };
+
+                        return View("MyProfile", model);
+                    }
+                }
+
+                // Update the user's properties.
+                user.Username = username;
                 user.Bio = bio;
                 user.UserTag = userTag;
 
@@ -388,6 +410,7 @@ namespace TrustTrade.Controllers
                 return StatusCode(500, new { error = "An unexpected error occurred" });
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Follow(string profileId)
