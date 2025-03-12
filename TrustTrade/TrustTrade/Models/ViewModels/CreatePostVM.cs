@@ -1,20 +1,31 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TrustTrade.ViewModels;
 
 public class CreatePostVM
 {
+    [Display(Name = "Title")]
     [Required(ErrorMessage = "Title is required.")]
-    [MinLength(5, ErrorMessage = "Title must be at least 5 characters long.")]
-    [MaxLength(128, ErrorMessage = "Title must be at most 128 characters long.")]
+    [StringLength(128, MinimumLength = 5, ErrorMessage = "Title must be between 5 and 128 characters long.")]
     public string? Title { get; set; }
 
+    [Display(Name = "Content")]
     [Required(ErrorMessage = "Content is required.")]
-    [MinLength(10, ErrorMessage = "Content must be at least 10 characters long.")]
-    [MaxLength(1024, ErrorMessage = "Content must be at most 1024 characters long.")]
+    [StringLength(1024, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 1024 characters long.")]
     public string? Content { get; set; }
 
+    // Tag properties
+    [Display(Name = "Tags")]
     public List<string> ExistingTags { get; set; } = new List<string>();
 
+    [MaxLength(5, ErrorMessage = "No more than 5 tags are allowed.")]
     public List<string> SelectedTags { get; set; } = new List<string>();
+
+    // Privacy properties
+    [Display(Name = "Privacy")]
+    public List<string> PrivacyOptions { get; set; } = new List<string>();
+    
+    [Required(ErrorMessage = "Privacy setting is required.")]
+    public string? SelectedPrivacy { get; set; }
 }
