@@ -12,20 +12,26 @@
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
-    <div class="form-group">
+    <div class="form-group mt-3">
         <label asp-for="Content"></label>
         <textarea asp-for="Content" class="form-control"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="SelectedTags">Select Existing Tags</label>
-        <select asp-for="SelectedTags" class="form-control" multiple="multiple">
+    <div class="form-group mt-3">
+        <label>Select Tags</label>
+        <div>
             @foreach (var tag in Model.ExistingTags)
             {
-                <option value="@tag">@tag</option>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="@tag" id="tag-@tag" name="SelectedTags" />
+                    <label class="form-check-label" for="tag-@tag">
+                        @tag
+                    </label>
+                </div>
             }
-        </select>
+        </div>
         <span asp-validation-for="SelectedTags" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create Post</button>
+    
+    <button type="submit" class="btn btn-primary mt-5">Create Post</button>
 </form>
