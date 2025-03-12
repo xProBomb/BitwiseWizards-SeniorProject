@@ -7,6 +7,11 @@
     bool isFollowing = Model.IsFollowing;
 }
 
+<!-- Show top-level validation summary -->
+<div class="text-danger">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+</div>
+
 <div class="container mt-4">
     <!-- Cover Photo and Profile Image -->
     <div class="position-relative mb-5">
@@ -226,6 +231,12 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
+                             @if (ViewBag.UsernameError != null)
+                                {
+                                    <div class="alert alert-danger">
+                                        @ViewBag.UsernameError
+                                    </div>
+                                }
                             <div class="theme-switch-wrapper ms-auto">
                                 <label class="theme-switch" for="checkbox">
                                     <input type="checkbox" id="checkbox" checked/>
@@ -423,6 +434,18 @@
         <a class="btn btn-primary" asp-controller="Brokerage" asp-action="Connect">Connect Brokerage</a>
     }
 </div>
+
+@if (ViewBag.UsernameError != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modalEl = document.getElementById('editProfileModal');
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        });
+    </script>
+}
+
 
 @section Scripts {
     <script src="~/js/profile.js"></script>
