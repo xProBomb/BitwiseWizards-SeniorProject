@@ -85,7 +85,7 @@ namespace TrustTrade.Controllers
             var model = new ProfileViewModel
             {
                 IdentityId = user.IdentityId,
-                ProfileName = user.ProfileName,
+                Username = user.Username,
                 CreatedAt = user.CreatedAt,
                 Bio = user.Bio,
                 IsVerified = user.IsVerified ?? false,
@@ -93,9 +93,9 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ??
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
                             new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ??
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
                             new List<string>(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
@@ -132,7 +132,7 @@ namespace TrustTrade.Controllers
             var user = await _context.Users
                 .Include(u => u.FollowerFollowerUsers)
                 .Include(u => u.FollowerFollowingUsers)
-                .FirstOrDefaultAsync(u => u.ProfileName == username);
+                .FirstOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
             {
@@ -173,7 +173,7 @@ namespace TrustTrade.Controllers
             var model = new ProfileViewModel
             {
                 IdentityId = user.IdentityId,
-                ProfileName = user.ProfileName,
+                Username = user.Username,
                 CreatedAt = user.CreatedAt,
                 Bio = user.Bio,
                 IsVerified = user.IsVerified ?? false,
@@ -181,9 +181,9 @@ namespace TrustTrade.Controllers
                 LastPlaidSync = user.LastPlaidSync,
                 FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
                 FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.ProfileName).ToList() ??
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
                             new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.ProfileName).ToList() ??
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
                             new List<string>(),
                 Holdings = filteredHoldings,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
@@ -357,27 +357,63 @@ namespace TrustTrade.Controllers
         /// <param name="userTag">The user's selected trading preference</param>
         /// <returns>Redirects to Profile page</returns>
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(string bio, string userTag)
+        public async Task<IActionResult> UpdateProfile(string username, string bio, string userTag)
         {
             try
             {
                 var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(identityId))
-                {
                     return Unauthorized();
-                }
 
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.IdentityId == identityId);
-
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
                 if (user == null)
-                {
                     return NotFound();
+
+                // Check uniqueness if the username has changed.
+                if (!string.Equals(user.Username, username, StringComparison.OrdinalIgnoreCase))
+                {
+                    bool usernameExists = await _context.Users
+                        .AnyAsync(u => u.Username == username && u.IdentityId != identityId);
+
+                    if (usernameExists)
+                    {
+                        // Set a custom error message in the ViewBag.
+                        ViewBag.UsernameError = $"The username {username} is already taken.";
+
+                        // Rebuild the complete ProfileViewModel using the current data from the database
+                        var updatedUser = await _context.Users
+                            .Include(u => u.FollowerFollowerUsers)
+                            .Include(u => u.FollowerFollowingUsers)
+                            .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+
+                        var model = new ProfileViewModel
+                        {
+                            IdentityId = updatedUser.IdentityId,
+                            Username = updatedUser.Username, // Keep the original username.
+                            Bio = updatedUser.Bio,           // Keep the original bio.
+                            UserTag = updatedUser.UserTag,   // Keep the original trading preference.
+                            CreatedAt = updatedUser.CreatedAt,
+                            FollowersCount = updatedUser.FollowerFollowerUsers?.Count ?? 0,
+                            FollowingCount = updatedUser.FollowerFollowingUsers?.Count ?? 0,
+                            Followers = updatedUser.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ?? new List<string>(),
+                            Following = updatedUser.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ?? new List<string>(),
+                            IsFollowing = false,
+                            HideDetailedInformation = false,
+                            HideAllPositions = false,
+                            PerformanceScore = 0,
+                            HasRatedScore = false,
+                            ScoreBreakdown = new Dictionary<string, decimal>()
+
+                        };
+
+                        return View("Profile", model);
+                    }
                 }
 
+                // Otherwise, update and save the new values.
+                user.Username = username;
                 user.Bio = bio;
                 user.UserTag = userTag;
-
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(MyProfile));
@@ -422,6 +458,8 @@ namespace TrustTrade.Controllers
 
             return Json(new { success = true });
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> Unfollow(string profileId)
