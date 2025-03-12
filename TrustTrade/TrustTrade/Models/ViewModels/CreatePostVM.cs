@@ -6,7 +6,7 @@ public class CreatePostVM
 {
     [Required(ErrorMessage = "Title is required.")]
     [MinLength(5, ErrorMessage = "Title must be at least 5 characters long.")]
-    [MaxLength(120, ErrorMessage = "Title must be at most 120 characters long.")]
+    [MaxLength(128, ErrorMessage = "Title must be at most 128 characters long.")]
     public string? Title { get; set; }
 
     [Required(ErrorMessage = "Content is required.")]
