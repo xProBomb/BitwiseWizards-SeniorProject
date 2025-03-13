@@ -15,7 +15,7 @@ public partial class Post
 
     public DateTime? CreatedAt { get; set; }
 
-    public string? PrivacySetting { get; set; }
+    public bool IsPublic { get; set; } = false;
 
     public decimal? PortfolioValueAtPosting { get; set; }
 
