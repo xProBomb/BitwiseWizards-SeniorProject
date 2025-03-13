@@ -72,4 +72,37 @@ public class TagRepositoryTests
         // Assert
         Assert.That(result, Is.Empty);
     }
+
+    [TestCase("Memes")]
+    [TestCase("memes")] // Case insensitivity test
+    [TestCase("MEMES")] // Case insensitivity test
+    public void FindByTagName_WhenTagExists_ReturnsTag(string tagName)
+    {
+        // Arrange
+        ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
+        var expected = _tags[0];
+
+        // Act
+        var result = tagRepository.FindByTagName(tagName);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.EqualTo(expected));
+        });
+    }
+
+    [Test]
+    public void FindByTagName_WhenTagDoesNotExist_ReturnsNull()
+    {
+        // Arrange
+        ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
+
+        // Act
+        var result = tagRepository.FindByTagName("NonExistentTag");
+
+        // Assert
+        Assert.That(result, Is.Null);
+    }
 }

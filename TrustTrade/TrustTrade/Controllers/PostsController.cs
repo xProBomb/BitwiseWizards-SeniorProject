@@ -11,29 +11,25 @@ namespace TrustTrade.Controllers
     {
         private readonly ILogger<PostsController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IHoldingsRepository _holdingsRepository;
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
-
         private readonly IUserRepository _userRepository;
-
-        // Add holdings repository to refresh and fetch portfolio data
-        private readonly IHoldingsRepository _holdingsRepository;
 
         public PostsController(
             ILogger<PostsController> logger,
             UserManager<IdentityUser> userManager,
+            IHoldingsRepository holdingsRepository,
             IPostRepository postRepository,
             ITagRepository tagRepository,
-            IUserRepository userRepository,
-            // Inject holdings repository
-            IHoldingsRepository holdingsRepository)
+            IUserRepository userRepository)
         {
             _logger = logger;
             _userManager = userManager;
+            _holdingsRepository = holdingsRepository;
             _postRepository = postRepository;
             _tagRepository = tagRepository;
             _userRepository = userRepository;
-            _holdingsRepository = holdingsRepository;
         }
 
         [Authorize]
@@ -41,7 +37,7 @@ namespace TrustTrade.Controllers
         public IActionResult Create()
         {
             // Retrieve all existing tags for the view model
-            CreatePostVM vm = new CreatePostVM
+            var vm = new CreatePostVM
             {
                 ExistingTags = _tagRepository.GetAllTagNames()
             };
@@ -62,25 +58,26 @@ namespace TrustTrade.Controllers
                 }
 
                 // Retrieve the user from the database
-                User? user = _userRepository.FindByIdentityId(identityUserId);
+                User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
                 if (user == null)
                 {
                     return NotFound();
                 }
 
                 // Map the CreatePostVM to the Post entity
-                Post post = new Post
+                var post = new Post
                 {
                     UserId = user.Id,
                     Title = createPostVM.Title,
                     Content = createPostVM.Content,
+                    IsPublic = createPostVM.IsPublic ?? false,
                     // PortfolioValueAtPosting will be set below if available
                 };
 
                 // Add the selected tags to the post
                 foreach (string tagName in createPostVM.SelectedTags)
                 {
-                    Tag? tag = _tagRepository.GetTagByName(tagName);
+                    Tag? tag = _tagRepository.FindByTagName(tagName);
                     if (tag != null)
                     {
                         // Add the tag to the post and the post to the tag

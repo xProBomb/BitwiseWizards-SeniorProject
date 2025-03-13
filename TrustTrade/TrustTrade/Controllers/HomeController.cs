@@ -58,7 +58,7 @@ namespace TrustTrade.Controllers
             List<string> tagNames = _tagRepository.GetAllTagNames();
 
             // Build the view model, including the current sort order
-            IndexVM vm = new()
+            var vm = new IndexVM
             {
                 Posts = postPreviews,
                 CurrentPage = page,
