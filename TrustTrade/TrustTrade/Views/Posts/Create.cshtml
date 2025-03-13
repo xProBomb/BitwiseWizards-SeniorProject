@@ -18,15 +18,13 @@
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
     <div class="form-group mt-3">
-        <label asp-for="PrivacyOptions"></label>
-        <select asp-for="SelectedPrivacy" class="form-control">
+        <label asp-for="IsPublic"></label>
+        <select asp-for="IsPublic" class="form-control">
             <option value="">-- Select Privacy --</option>
-            @foreach (var option in Model.PrivacyOptions)
-            {
-                <option value="@option">@option</option>
-            }
+            <option value="true">Public</option>
+            <option value="false">Private</option>
         </select>
-        <span asp-validation-for="SelectedPrivacy" class="text-danger"></span>
+        <span asp-validation-for="IsPublic" class="text-danger"></span>
     </div>
     <div class="form-group mt-3">
         <label asp-for="ExistingTags"></label>
