@@ -70,6 +70,7 @@ namespace TrustTrade.Controllers
                     UserId = user.Id,
                     Title = createPostVM.Title,
                     Content = createPostVM.Content,
+                    IsPublic = createPostVM.IsPublic ?? false,
                     // PortfolioValueAtPosting will be set below if available
                 };
 
