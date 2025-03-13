@@ -22,9 +22,7 @@ public class CreatePostVM
     public List<string> SelectedTags { get; set; } = new List<string>();
 
     // Privacy properties
-    [Display(Name = "Privacy")]
-    public List<string> PrivacyOptions { get; set; } = new List<string>();
-    
+    [Display(Name = "Privacy Setting")]
     [Required(ErrorMessage = "Privacy setting is required.")]
-    public string? SelectedPrivacy { get; set; }
+    public bool? IsPublic { get; set; }
 }
