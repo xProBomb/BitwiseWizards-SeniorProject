@@ -13,7 +13,7 @@ public partial class Post
 
     public string? Content { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public bool IsPublic { get; set; } = false;
 
