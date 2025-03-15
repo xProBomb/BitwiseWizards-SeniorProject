@@ -3,6 +3,8 @@
 @using TrustTrade.ViewModels
 @model IndexVM
 
+<link rel="stylesheet" href="~/css/index.css" />
+
 @{
     ViewData["Title"] = "Home Page";
 
@@ -101,7 +103,9 @@
     {
         foreach (var post in Model.Posts)
         {
-            <li class="list-group-item">
+            <!-- Display each post as a clickable list item -->
+            <li class="list-group-item clickable-post"
+                data-url="@Url.Action("Details", "Posts", new { id = post.Id })">
                 <p>
                     @post.UserName
                     @{
@@ -209,3 +213,6 @@
     </ul>
 }
 
+@section Scripts {
+    <script src="~/js/index.js"></script>
+}
