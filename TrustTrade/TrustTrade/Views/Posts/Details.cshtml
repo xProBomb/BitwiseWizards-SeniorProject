@@ -19,8 +19,7 @@
                     <img src="https://placehold.co/600x400/png"
                         alt="Profile Image" 
                         class="rounded-circle" 
-                        style="width: 40px; height: 40px;" />
-                    </img>
+                        style="width: 40px; height: 40px;">
                 </a>
                 <a asp-controller="Profile" 
                     asp-action="UserProfile" 
@@ -34,7 +33,7 @@
                     <span class="text-success ms-1">
                         @if (!string.IsNullOrEmpty(Model.PortfolioValueAtPosting))
                         {
-                            <span>@Model.PortfolioValueAtPosting</span>
+                            @Model.PortfolioValueAtPosting
                         }
                         <i class="bi bi-patch-check-fill"></i>
                         <!-- Consider whether or not to add this <small> Plaid Enabled</small> -->
