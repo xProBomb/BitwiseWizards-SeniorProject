@@ -41,9 +41,11 @@ body {
   margin-bottom: 60px;
 }
 
-/* Fixes error with lines not showing up */
 .list-group-item {
-  margin-bottom: 0 !important;
+  margin-bottom: 0 !important; /* Fixes error with lines not showing up */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-bs-theme="dark"] {
