@@ -4,6 +4,7 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using TrustTrade.Helpers;
 
 namespace TrustTrade.Controllers
 {
@@ -70,7 +71,7 @@ namespace TrustTrade.Controllers
                     UserId = user.Id,
                     Title = createPostVM.Title,
                     Content = createPostVM.Content,
-                    IsPublic = createPostVM.IsPublic ?? false,
+                    IsPublic = createPostVM.IsPublic ?? false, // Should never be null due to validation
                     // PortfolioValueAtPosting will be set below if available
                 };
 
@@ -141,6 +142,47 @@ namespace TrustTrade.Controllers
             // Repopulate the existing tags in case of validation errors
             createPostVM.ExistingTags = _tagRepository.GetAllTagNames();
             return View(createPostVM);
+        }
+
+        public IActionResult Details(int id)
+        {
+            // Retrieve the post from the repository
+            Post? post = _postRepository.FindById(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            var isPlaidEnabled = post.User.PlaidEnabled ?? false;
+            string? portfolioValue = null;
+
+            // Retreive and format the portfolio value if Plaid is enabled
+            if (isPlaidEnabled)
+            {
+                if (post.PortfolioValueAtPosting.HasValue)
+                {
+                    portfolioValue = FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
+                }
+                else
+                {
+                    portfolioValue = "$0";
+                }
+            }
+
+            // Map the post to the view model
+            var vm = new PostDetailsVM
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Username = post.User.Username,
+                TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
+                LikeCount = post.Likes.Count,
+                CommentCount = post.Comments.Count,
+                IsPlaidEnabled = isPlaidEnabled,
+                PortfolioValueAtPosting = portfolioValue
+            };
+
+            return View(vm);
         }
     }
 }
