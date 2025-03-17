@@ -362,4 +362,124 @@ public class PostsControllerTests
         Assert.That(model, Is.Not.Null);
         Assert.That(model.ExistingTags, Is.Empty);
     }
+
+    [Test]
+    public void Details_WhenPostExists_ReturnsViewResult()
+    {
+        // Arrange
+        var post = new Post
+        {
+            Id = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = new User { ProfileName = "johnDoe" },
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+
+        // Act
+        var result = _controller.Details(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<ViewResult>());
+    }
+
+    [Test]
+    public void Details_WhenPostExists_IncludesModelOfTypePostDetailsVM()
+    {
+        // Arrange
+        var post = new Post
+        {
+            Id = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = new User { ProfileName = "johnDoe" },
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+
+        // Act
+        var result = _controller.Details(1) as ViewResult;
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Model, Is.Not.Null.And.TypeOf<PostDetailsVM>());
+    }
+
+    [Test]
+    public void Details_WhenPostExists_ReturnsViewModelWithPostDetails()
+    {
+        // Arrange
+        var post = new Post
+        {
+            Id = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = new User { Username = "johnDoe" },
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+
+        // Act
+        var result = _controller.Details(1) as ViewResult;
+        var model = result?.Model as PostDetailsVM;
+
+        // Assert
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model.Title, Is.EqualTo("Test Post"));
+        Assert.That(model.Content, Is.EqualTo("Test Content"));
+        Assert.That(model.Username, Is.EqualTo("johnDoe"));
+        Assert.That(model.Tags, Is.Empty);
+        Assert.That(model.LikeCount, Is.Zero);
+        Assert.That(model.CommentCount, Is.Zero);
+        Assert.That(model.IsPlaidEnabled, Is.False);
+        Assert.That(model.PortfolioValueAtPosting, Is.Null);
+
+    }
+
+    [Test]
+    public void Details_WhenUserIsPlaidEnabled_ReturnsViewModelWithPortfolioValue()
+    {
+        // Arrange
+        var post = new Post
+        {
+            Id = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            PortfolioValueAtPosting = 1000,
+            User = new User { Username = "johnDoe", PlaidEnabled = true },
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+
+        // Act
+        var result = _controller.Details(1) as ViewResult;
+        var model = result?.Model as PostDetailsVM;
+
+        // Assert
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model.PortfolioValueAtPosting, Is.EqualTo("$1K"));
+        Assert.That(model.IsPlaidEnabled, Is.True);
+    }
+
+    [Test]
+    public void Details_WhenPostDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(() => null!);
+
+        // Act
+        var result = _controller.Details(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<NotFoundResult>());
+    }
 }
