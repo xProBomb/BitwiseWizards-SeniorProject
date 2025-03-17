@@ -1,0 +1,269 @@
+﻿@page
+@model EnableAuthenticatorModel
+@{
+    ViewData["Title"] = "Configure authenticator app";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<style>
+   
+    .security-container {
+        background-color: var(--bs-secondary-bg);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .security-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        padding-bottom: 1rem;
+    }
+    
+    .security-icon {
+        color: #0d6efd;
+        font-size: 2.2rem;
+        margin-right: 1rem;
+    }
+    
+    .step-container {
+        background-color: var(--bs-body-bg);
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    [data-bs-theme="dark"] .step-container {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+        border-radius: 50%;
+        margin-right: 0.75rem;
+    }
+    
+    .step-title {
+        display: inline;
+        font-weight: 600;
+        color: var(--bs-heading-color);
+    }
+    
+    .step-content {
+        margin-top: 0.75rem;
+        color: var(--bs-body-color);
+    }
+    
+    .app-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .app-badge {
+        display: flex;
+        align-items: center;
+        background-color: var(--bs-tertiary-bg);
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        color: var(--bs-body-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .app-badge:hover {
+        background-color: var(--bs-secondary-bg);
+        color: #0d6efd;
+    }
+    
+    .app-badge i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .shared-key {
+        background-color: var(--bs-tertiary-bg);
+        font-family: monospace;
+        padding: 0.75rem;
+        border-radius: 4px;
+        margin: 1rem 0;
+        user-select: all;
+        font-size: 1.1rem;
+        word-break: break-all;
+        border: 1px dashed var(--bs-border-color);
+    }
+    
+    .qr-container {
+        display: flex;
+        justify-content: center;
+        background-color: #ffffff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        max-width: 200px;
+        margin: 1rem auto;
+    }
+    
+    [data-bs-theme="dark"] .qr-container {
+        padding: 0.75rem;
+        background-color: #ffffff;
+    }
+    
+    .verify-button {
+        background-color: #0d6efd;
+        border: none;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+    
+    .verify-button:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .verification-code {
+        font-family: monospace;
+        letter-spacing: 0.25em;
+        text-align: center;
+        font-size: 1.2rem;
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+</style>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="security-container">
+    <div class="security-header">
+        <i class="bi bi-shield-lock-fill security-icon"></i>
+        <h3 class="mb-0">@ViewData["Title"]</h3>
+    </div>
+    
+    <p class="text-muted mb-4">
+        Two-factor authentication adds an extra layer of security to your account. 
+        After configuration, you'll need both your password and access to your authenticator app to sign in.
+    </p>
+
+    <div class="step-container">
+        <div class="step-number">1</div>
+        <h5 class="step-title">Download an authenticator app</h5>
+        <div class="step-content">
+            <p>Install a two-factor authenticator app on your mobile device:</p>
+            
+            <div class="app-badges">
+                <a href="https://go.microsoft.com/fwlink/?Linkid=825072" class="app-badge" target="_blank">
+                    <i class="bi bi-android"></i>
+                    Microsoft Authenticator (Android)
+                </a>
+                <a href="https://go.microsoft.com/fwlink/?Linkid=825073" class="app-badge" target="_blank">
+                    <i class="bi bi-apple"></i>
+                    Microsoft Authenticator (iOS)
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" class="app-badge" target="_blank">
+                    <i class="bi bi-android"></i>
+                    Google Authenticator (Android)
+                </a>
+                <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605" class="app-badge" target="_blank">
+                    <i class="bi bi-apple"></i>
+                    Google Authenticator (iOS)
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="step-container">
+        <div class="step-number">2</div>
+        <h5 class="step-title">Configure your authenticator app</h5>
+        <div class="step-content">
+            <p>Scan the QR code below with your authenticator app, or manually enter the provided key:</p>
+            
+            <div class="shared-key text-center">
+                <span>@Model.SharedKey</span>
+                <button class="btn btn-sm btn-outline-secondary ms-2" 
+                        onclick="navigator.clipboard.writeText('@Model.SharedKey'); this.innerHTML='Copied!'">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
+            </div>
+            
+            <div class="qr-container" id="qrCode"></div>
+            <div id="qrCodeData" data-url="@Model.AuthenticatorUri" class="d-none"></div>
+            
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>
+                    <small>If you can't scan the QR code, manually enter the key above into your authenticator app.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="step-container">
+        <div class="step-number">3</div>
+        <h5 class="step-title">Verify your authenticator app</h5>
+        <div class="step-content">
+            <p>Enter the verification code provided by your authenticator app below:</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="send-code" method="post">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Code" class="form-control verification-code" 
+                                   autocomplete="off" placeholder="000000" maxlength="6" inputmode="numeric"/>
+                            <label asp-for="Input.Code" class="form-label">Verification Code</label>
+                            <span asp-validation-for="Input.Code" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="w-100 btn verify-button">
+                            <i class="bi bi-check2-circle me-2"></i>Verify and Activate
+                        </button>
+                        <div asp-validation-summary="ModelOnly" class="text-danger mt-3" role="alert"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const iconLink = document.createElement('link');
+            iconLink.rel = 'stylesheet';
+            iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(iconLink);
+        }
+        
+        // Load QR Code library
+        window.addEventListener('load', function () {
+            new QRCode(document.getElementById('qrCode'), {
+                text: document.getElementById('qrCodeData').getAttribute('data-url'),
+                width: 200,
+                height: 200,
+                colorDark: '#212529',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" 
+            integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" 
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+    </script>
+}

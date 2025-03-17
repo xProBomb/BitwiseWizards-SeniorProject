@@ -1,0 +1,163 @@
+﻿@page
+@model ResetAuthenticatorModel
+@{
+    ViewData["Title"] = "Reset authenticator key";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<style>
+    
+    .reset-container {
+        background-color: var(--bs-secondary-bg);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    [data-bs-theme="dark"] .reset-container {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .reset-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        padding-bottom: 1rem;
+    }
+    
+    .reset-icon {
+        color: #dc3545;
+        font-size: 2.2rem;
+        margin-right: 1rem;
+    }
+    
+    .warning-card {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    [data-bs-theme="dark"] .warning-card {
+        background-color: rgba(255, 193, 7, 0.05);
+    }
+    
+    .warning-title {
+        display: flex;
+        align-items: center;
+        color: #856404;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    [data-bs-theme="dark"] .warning-title {
+        color: #e0c270;
+    }
+    
+    .warning-icon {
+        color: #ffc107;
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+    }
+    
+    .warning-content {
+        color: var(--bs-body-color);
+    }
+    
+    .action-container {
+        background-color: var(--bs-body-bg);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .reset-btn {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .reset-btn:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .reset-btn-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .confirmation-dialog {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+</style>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="reset-container">
+    <div class="reset-header">
+        <i class="bi bi-shield-exclamation reset-icon"></i>
+        <h3 class="mb-0">@ViewData["Title"]</h3>
+    </div>
+
+    <div class="warning-card">
+        <div class="warning-title">
+            <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+            Important Security Warning
+        </div>
+        <div class="warning-content">
+            <p class="mb-2">
+                <strong>If you reset your authenticator key, your authenticator app will not work until you reconfigure it.</strong>
+            </p>
+            <p class="mb-2">
+                This process disables 2FA until you verify your authenticator app again.
+            </p>
+            <p class="mb-0">
+                If you do not complete your authenticator app configuration, you may lose access to your account.
+                Make sure you have access to your recovery codes or another authentication method before proceeding.
+            </p>
+        </div>
+    </div>
+
+    <div class="action-container">
+        <p class="mb-3">Please confirm that you understand the risks and wish to proceed with resetting your authenticator key:</p>
+        
+        <form id="reset-authenticator-form" method="post" onsubmit="return confirmReset()">
+            <button id="reset-authenticator-button" class="btn reset-btn" type="submit">
+                <i class="bi bi-arrow-counterclockwise reset-btn-icon"></i>
+                Reset Authenticator Key
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const iconLink = document.createElement('link');
+            iconLink.rel = 'stylesheet';
+            iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(iconLink);
+        }
+        
+        // Confirmation dialog before reset
+        function confirmReset() {
+            return confirm("WARNING: You are about to reset your authenticator key. This will disable 2FA until you reconfigure your authenticator app. Are you sure you want to continue?");
+        }
+    </script>
+}

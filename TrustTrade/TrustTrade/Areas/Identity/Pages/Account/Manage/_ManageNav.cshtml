@@ -2,14 +2,167 @@
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
-    @if (hasExternalLogins)
-    {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
+
+<style>
+    
+    .manage-nav-container {
+        background-color: var(--bs-secondary-bg);
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem 0;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--bs-border-color);
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
-</ul>
+    
+    [data-bs-theme="dark"] .manage-nav-container {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+    
+    .manage-nav {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 0.375rem;
+    }
+    
+    .manage-nav-item {
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin: 0 0.75rem;
+    }
+    
+    .manage-nav-link {
+        color: var(--bs-body-color);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .manage-nav-link:hover {
+        background-color: var(--bs-tertiary-bg);
+        color: #0d6efd;
+    }
+    
+    .manage-nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .manage-nav-link.active:hover {
+        background-color: #0b5ed7;
+        color: white;
+    }
+    
+    .manage-nav-link .nav-icon {
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+        width: 1.5rem;
+        text-align: center;
+    }
+    
+    .security-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        background-color: #198754;
+        color: white;
+        border-radius: 1rem;
+        padding: 0.2rem 0.5rem;
+        margin-left: auto;
+    }
+    
+    [data-bs-theme="dark"] .security-badge {
+        background-color: #25c274;
+    }
+    
+    .manage-nav-header {
+        color: var(--bs-secondary-color);
+        padding: 0.75rem 1.75rem 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    @@media (max-width: 768px) {
+        .manage-nav {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .manage-nav-item {
+            margin: 0.25rem;
+        }
+        
+        .manage-nav-link {
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .manage-nav-link .nav-icon {
+            margin-right: 0.5rem;
+        }
+        
+        .manage-nav-header {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .security-badge {
+            display: none;
+        }
+    }
+</style>
+
+<div class="manage-nav-container">
+    <div class="manage-nav">
+        <div class="manage-nav-header">Account Settings</div>
+        
+        <div class="manage-nav-item">
+            <a class="manage-nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">
+                <i class="bi bi-envelope nav-icon"></i>
+                Email
+            </a>
+        </div>
+        
+        <div class="manage-nav-item">
+            <a class="manage-nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">
+                <i class="bi bi-key nav-icon"></i>
+                Password
+            </a>
+        </div>
+        
+        @if (hasExternalLogins)
+        {
+            <div class="manage-nav-item">
+                <a class="manage-nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" id="external-login" asp-page="./ExternalLogins">
+                    <i class="bi bi-box-arrow-in-right nav-icon"></i>
+                    External Logins
+                </a>
+            </div>
+        }
+        
+        <div class="manage-nav-header">Security & Privacy</div>
+        
+        <div class="manage-nav-item">
+            <a class="manage-nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">
+                <i class="bi bi-shield-lock nav-icon"></i>
+                Two-Factor Authentication
+                <span class="security-badge">Recommended</span>
+            </a>
+        </div>
+        
+        <div class="manage-nav-item">
+            <a class="manage-nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">
+                <i class="bi bi-file-earmark-lock nav-icon"></i>
+                Personal Data
+            </a>
+        </div>
+    </div>
+</div>
