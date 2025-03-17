@@ -30,7 +30,7 @@ namespace TrustTrade.Controllers
             // Retrieve paged posts from your repository.
             List<Post> posts = _postRepository.GetPagedPosts(categoryFilter, page, PAGE_SIZE, sortOrder);
 
-            // Map to your view model for the post preview
+            // Map to the view model for the post preview
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
             {
                 Id = p.Id,
@@ -40,6 +40,8 @@ namespace TrustTrade.Controllers
                     ? $"{p.Content.Substring(0, 100)}..." 
                     : p.Content ?? string.Empty,
                 TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt),
+                LikeCount = p.Likes.Count,
+                CommentCount = p.Comments.Count,
                 IsPlaidEnabled = p.User.PlaidEnabled ?? false,
                 PortfolioValueAtPosting = p.PortfolioValueAtPosting
             }).ToList();

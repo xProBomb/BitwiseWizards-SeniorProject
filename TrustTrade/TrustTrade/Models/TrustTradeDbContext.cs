@@ -159,7 +159,7 @@ public partial class TrustTradeDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.IsPublic).HasDefaultValue(false);
-            entity.Property(e => e.Title).HasMaxLength(100);
+            entity.Property(e => e.Title).HasMaxLength(128);
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.PortfolioValueAtPosting)
                 .HasColumnType("decimal(18, 2)")
