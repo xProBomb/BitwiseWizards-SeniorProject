@@ -106,11 +106,21 @@
             <!-- Display each post as a clickable list item -->
             <li class="list-group-item clickable-post"
                 data-url="@Url.Action("Details", "Posts", new { id = post.Id })">
-                <p>
+                <div class="d-flex align-items-center">
+                    <!-- Profile Links -->
                     <a asp-controller="Profile" 
                         asp-action="UserProfile" 
                         asp-route-username="@post.UserName"
-                        class="username-profile-link">
+                        class="image-profile-link">
+                        <img src="https://placehold.co/600x400/png"
+                            alt="Profile Image" 
+                            class="rounded-circle" 
+                            style="width: 40px; height: 40px;">
+                    </a>
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="username-profile-link ms-2">
                         @post.UserName
                     </a>
                     @{
@@ -122,22 +132,31 @@
                                 {
                                     string value = @FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
                                     
-                                    <span class="text-success">@value </span>
+                                    <span class="text-success ms-2">@value </span>
                                 }
                                 catch (Exception)
                                 {
                                     // Fallback in case of formatting issues
-                                    <span class="text-success">$0 </span>
+                                    <span class="text-success ms-2">$0 </span>
                                 }
                             }
                             // Always show checkmark for Plaid-enabled users
                             <i class="bi bi-patch-check-fill text-success"></i>
                         }
                     }
-                    | @post.TimeAgo
-                </p>
+                    <span class="ms-2">@post.TimeAgo</span>
+                </div>
                 <h3>@post.Title</h3>
                 <p>@post.Excerpt</p>
+                <!-- Like and Comment Buttons -->
+                <div class="d-flex align-items-center mt-4">
+                <button class="btn btn-primary position-relative" aria-label="Like">
+                    <i class="bi bi-hand-thumbs-up"></i> @post.LikeCount
+                </button>
+                <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
+                    <i class="bi bi-chat"></i> @post.CommentCount
+                </button>
+            </div>
             </li>
         }
     }
