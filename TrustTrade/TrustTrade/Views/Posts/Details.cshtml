@@ -10,27 +10,27 @@
 <div class="container mt-5">
     <div class="card">
         <div class="card-body">
-            <p>
+            <div class="d-flex align-items-center">
                 <!-- Profile Links -->
                 <a asp-controller="Profile" 
                     asp-action="UserProfile" 
                     asp-route-username="@Model.Username"
                     class="image-profile-link">
                     <img src="https://placehold.co/600x400/png"
-                        alt="Profile Image" 
+                        alt="@Model.Username's profile image" 
                         class="rounded-circle" 
                         style="width: 40px; height: 40px;">
                 </a>
                 <a asp-controller="Profile" 
                     asp-action="UserProfile" 
                     asp-route-username="@Model.Username"
-                    class="username-profile-link ms-1">
+                    class="username-profile-link ms-2">
                     @Model.Username
                 </a>
                 <!-- Display Plaid Info If Enabled-->
                 @if (Model.IsPlaidEnabled)
                 {
-                    <span class="text-success ms-1">
+                    <span class="text-success ms-2">
                         @if (!string.IsNullOrEmpty(Model.PortfolioValueAtPosting))
                         {
                             @Model.PortfolioValueAtPosting
@@ -41,19 +41,26 @@
                 }
                 <!-- Display Time Ago -->
                 <span class="text-muted ms-2">@Model.TimeAgo</span>
-            </p>
+            </div>
             <!-- Consider whether or not to add this tag here <hr /> -->
             <!-- Display Main Post Content -->
             <h2 class="card-title mt-3">@Model.Title</h2>
             <p class="card-text mt-4">@Model.Content</p>
             <!-- Like and Comment Buttons -->
             <div class="d-flex align-items-center mt-4">
-                <button class="btn btn-primary position-relative">
+                <button class="btn btn-primary position-relative" aria-label="Like">
                     <i class="bi bi-hand-thumbs-up"></i> @Model.LikeCount
                 </button>
-                <button class="btn btn-primary position-relative ms-4">
+                <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
                     <i class="bi bi-chat"></i> @Model.CommentCount
                 </button>
+            </div>
+            <!-- Tags -->
+            <div class="mt-4">
+                @foreach (var tag in Model.Tags)
+                {
+                    <span class="badge bg-secondary me-2">@tag</span>
+                }
             </div>
         </div>
     </div>
