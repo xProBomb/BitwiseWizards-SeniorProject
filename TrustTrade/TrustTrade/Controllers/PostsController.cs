@@ -5,6 +5,7 @@ using TrustTrade.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using TrustTrade.Helpers;
+using TrustTrade.DAL.Concrete;
 
 namespace TrustTrade.Controllers
 {
@@ -181,6 +182,36 @@ namespace TrustTrade.Controllers
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
                 PortfolioValueAtPosting = portfolioValue
+            };
+
+            return View(vm);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            Post? post = _postRepository.FindById(id);
+            if (post == null) return NotFound();
+
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user corresponding to the identity ID
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
+            // Ensure the user is the author of the post
+            if (post.UserId != user.Id) return Unauthorized();
+
+            var vm = new PostEditVM
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                IsPublic = post.IsPublic,
+                AvailableTags = _tagRepository.GetAllTagNames(),
+                SelectedTags = post.Tags.Select(t => t.TagName).ToList()
             };
 
             return View(vm);
