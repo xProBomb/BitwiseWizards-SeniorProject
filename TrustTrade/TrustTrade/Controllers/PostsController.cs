@@ -176,6 +176,7 @@ namespace TrustTrade.Controllers
                 Content = post.Content,
                 Username = post.User.Username,
                 TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
+                Tags = post.Tags.Select(t => t.TagName).ToList(),
                 LikeCount = post.Likes.Count,
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
