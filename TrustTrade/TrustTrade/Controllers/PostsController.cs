@@ -187,8 +187,8 @@ namespace TrustTrade.Controllers
             return View(vm);
         }
 
-        [Authorize]
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Edit(int id)
         {
             Post? post = _postRepository.FindById(id);
@@ -197,7 +197,7 @@ namespace TrustTrade.Controllers
             string? identityUserId = _userManager.GetUserId(User);
             if (identityUserId == null) return Unauthorized();
 
-            // Retrieve the user corresponding to the identity ID
+            // Retrieve the user from the main database
             User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
             if (user == null) return NotFound();
 
@@ -215,6 +215,52 @@ namespace TrustTrade.Controllers
             };
 
             return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, PostEditVM postEditVM)
+        {
+            if (!ModelState.IsValid)
+            {
+                postEditVM.AvailableTags = _tagRepository.GetAllTagNames();
+                return View(postEditVM);
+            }
+
+            if (id != postEditVM.Id) return BadRequest("Post ID mismatch");
+
+            Post? post = _postRepository.FindById(id);
+            if (post == null) return NotFound();
+
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user from the main database
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
+            // Ensure the user is the author of the post
+            if (post.UserId != user.Id) return Unauthorized();
+
+            // Update the post with the new values
+            post.Title = postEditVM.Title;
+            post.Content = postEditVM.Content;
+            post.IsPublic = postEditVM.IsPublic;
+
+            // Clear existing post tags and add the new ones
+            post.Tags.Clear();
+            foreach (string tagName in postEditVM.SelectedTags)
+            {
+                Tag? tag = _tagRepository.FindByTagName(tagName);
+                if (tag != null)
+                {
+                    post.Tags.Add(tag);
+                }
+            }
+
+            // Save the updated post
+            _postRepository.AddOrUpdate(post);
+            return RedirectToAction("Details", new { id = post.Id });
         }
     }
 }
