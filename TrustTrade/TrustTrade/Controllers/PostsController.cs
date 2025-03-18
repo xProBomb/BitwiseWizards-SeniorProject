@@ -34,8 +34,8 @@ namespace TrustTrade.Controllers
             _userRepository = userRepository;
         }
 
-        [Authorize]
         [HttpGet]
+        [Authorize]
         public IActionResult Create()
         {
             // Retrieve all existing tags for the view model
@@ -47,8 +47,8 @@ namespace TrustTrade.Controllers
             return View(vm);
         }
 
-        [Authorize]
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create(CreatePostVM createPostVM)
         {
             if (ModelState.IsValid)
@@ -145,14 +145,11 @@ namespace TrustTrade.Controllers
             return View(createPostVM);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             // Retrieve the post from the repository
             Post? post = _postRepository.FindById(id);
-            if (post == null)
-            {
-                return NotFound();
-            }
+            if (post == null) return NotFound();
 
             var isPlaidEnabled = post.User.PlaidEnabled ?? false;
             string? portfolioValue = null;
@@ -170,9 +167,17 @@ namespace TrustTrade.Controllers
                 }
             }
 
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user from the main database
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
             // Map the post to the view model
             var vm = new PostDetailsVM
             {
+                Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
                 Username = post.User.Username,
@@ -181,7 +186,8 @@ namespace TrustTrade.Controllers
                 LikeCount = post.Likes.Count,
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
-                PortfolioValueAtPosting = portfolioValue
+                PortfolioValueAtPosting = portfolioValue,
+                IsOwnedByCurrentUser = post.UserId == user.Id
             };
 
             return View(vm);
@@ -261,6 +267,28 @@ namespace TrustTrade.Controllers
             // Save the updated post
             _postRepository.AddOrUpdate(post);
             return RedirectToAction("Details", new { id = post.Id });
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            Post? post = _postRepository.FindById(id);
+            if (post == null) return NotFound();
+
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user from the main database
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
+            // Ensure the user is the author of the post
+            if (post.UserId != user.Id) return Unauthorized();
+
+            _postRepository.Delete(post);
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }
