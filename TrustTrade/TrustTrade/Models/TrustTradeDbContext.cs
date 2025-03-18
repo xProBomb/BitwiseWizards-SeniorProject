@@ -36,6 +36,8 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
+    
+    public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -301,6 +303,27 @@ public partial class TrustTradeDbContext : DbContext
                 .WithOne()
                 .HasForeignKey<PortfolioVisibilitySettings>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        modelBuilder.Entity<VerificationHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__VerificationHistory__3214EC27");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Timestamp)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Reason)
+                .HasMaxLength(255);
+            entity.Property(e => e.Source)
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_VerificationHistory_User");
         });
 
         OnModelCreatingPartial(modelBuilder);
