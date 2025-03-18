@@ -73,6 +73,12 @@
             <!-- Consider whether or not to add this tag here <hr /> -->
             <!-- Display Main Post Content -->
             <h2 class="card-title mt-3">@Model.Title</h2>
+            <div class="mt-2">
+                @foreach (var tag in Model.Tags)
+                {
+                    <span class="badge bg-secondary me-2">@tag</span>
+                }
+            </div>
             <p class="card-text mt-4">@Model.Content</p>
             <!-- Like and Comment Buttons -->
             <div class="d-flex align-items-center mt-4">
@@ -82,13 +88,6 @@
                 <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
                     <i class="bi bi-chat"></i> @Model.CommentCount
                 </button>
-            </div>
-            <!-- Tags -->
-            <div class="mt-4">
-                @foreach (var tag in Model.Tags)
-                {
-                    <span class="badge bg-secondary me-2">@tag</span>
-                }
             </div>
         </div>
     </div>
