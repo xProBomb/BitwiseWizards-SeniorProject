@@ -364,7 +364,7 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void Details_WhenPostExists_ReturnsViewResult()
+    public async Task Details_WhenPostExists_ReturnsViewResult()
     {
         // Arrange
         var post = new Post
@@ -380,14 +380,14 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
 
         // Act
-        var result = _controller.Details(1);
+        var result = await _controller.Details(1);
 
         // Assert
         Assert.That(result, Is.Not.Null.And.TypeOf<ViewResult>());
     }
 
     [Test]
-    public void Details_WhenPostExists_IncludesModelOfTypePostDetailsVM()
+    public async Task Details_WhenPostExists_IncludesModelOfTypePostDetailsVM()
     {
         // Arrange
         var post = new Post
@@ -403,7 +403,7 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
 
         // Act
-        var result = _controller.Details(1) as ViewResult;
+        var result = await _controller.Details(1) as ViewResult;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -411,7 +411,7 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void Details_WhenPostExists_ReturnsViewModelWithPostDetails()
+    public async Task Details_WhenPostExists_ReturnsViewModelWithPostDetails()
     {
         // Arrange
         var post = new Post
@@ -427,7 +427,7 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
 
         // Act
-        var result = _controller.Details(1) as ViewResult;
+        var result = await _controller.Details(1) as ViewResult;
         var model = result?.Model as PostDetailsVM;
 
         // Assert
@@ -444,7 +444,7 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void Details_WhenUserIsPlaidEnabled_ReturnsViewModelWithPortfolioValue()
+    public async Task Details_WhenUserIsPlaidEnabled_ReturnsViewModelWithPortfolioValue()
     {
         // Arrange
         var post = new Post
@@ -461,7 +461,7 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
 
         // Act
-        var result = _controller.Details(1) as ViewResult;
+        var result = await _controller.Details(1) as ViewResult;
         var model = result?.Model as PostDetailsVM;
 
         // Assert
@@ -471,13 +471,13 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void Details_WhenPostDoesNotExist_ReturnsNotFound()
+    public async Task Details_WhenPostDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(() => null!);
 
         // Act
-        var result = _controller.Details(1);
+        var result = await _controller.Details(1);
 
         // Assert
         Assert.That(result, Is.Not.Null.And.TypeOf<NotFoundResult>());
