@@ -5,7 +5,6 @@ using TrustTrade.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using TrustTrade.Helpers;
-using TrustTrade.DAL.Concrete;
 
 namespace TrustTrade.Controllers
 {
@@ -167,12 +166,19 @@ namespace TrustTrade.Controllers
                 }
             }
 
-            string? identityUserId = _userManager.GetUserId(User);
-            if (identityUserId == null) return Unauthorized();
+            bool isOwnedByCurrentUser = false;
 
-            // Retrieve the user from the main database
-            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
-            if (user == null) return NotFound();
+            // Check if the current user is the author of the post
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId != null)
+            {
+                // Retrieve the user from the main database
+                User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+                if (user != null && user.Id == post.UserId)
+                {
+                    isOwnedByCurrentUser = true;
+                }
+            }
 
             // Map the post to the view model
             var vm = new PostDetailsVM
@@ -187,7 +193,7 @@ namespace TrustTrade.Controllers
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
                 PortfolioValueAtPosting = portfolioValue,
-                IsOwnedByCurrentUser = post.UserId == user.Id
+                IsOwnedByCurrentUser = isOwnedByCurrentUser
             };
 
             return View(vm);
