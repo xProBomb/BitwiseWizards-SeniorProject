@@ -2,6 +2,8 @@ namespace TrustTrade.ViewModels;
 
 public class PostDetailsVM
 {
+    public int Id { get; set; }
+
     public string Title { get; set; } = string.Empty;
 
     public string Content { get; set; } = string.Empty;
@@ -19,4 +21,6 @@ public class PostDetailsVM
     public bool IsPlaidEnabled { get; set; }
 
     public string? PortfolioValueAtPosting { get; set; }
+
+    public bool IsOwnedByCurrentUser { get; set; }
 }
