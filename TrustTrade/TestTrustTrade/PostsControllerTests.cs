@@ -520,4 +520,226 @@ public class PostsControllerTests
         // Assert
         Assert.That(result, Is.Not.Null.And.TypeOf<NotFoundResult>());
     }
+
+    [Test]
+    public async Task EditGET_WhenUserIsOwner_ReturnsViewResult()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+
+        // Act
+        var result = await _controller.Edit(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<ViewResult>());
+    }
+
+    [Test]
+    public async Task EditGET_WhenUserIsOwner_IncludesModelOfTypePostEditVM()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+
+        // Act
+        var result = await _controller.Edit(1) as ViewResult;
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Model, Is.Not.Null.And.TypeOf<PostEditVM>());
+    }
+
+    [Test]
+    public async Task EditGET_WhenUserIsOwner_ReturnsViewModelWithPostDetails()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var tags = new List<Tag>
+        {
+            new Tag { Id = 1, TagName = "Memes" },
+            new Tag { Id = 2, TagName = "Gain" }
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+            Tags = tags
+        };
+
+        var availableTags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(availableTags);
+
+        // Act
+        var result = await _controller.Edit(1) as ViewResult;
+        var model = result?.Model as PostEditVM;
+
+        // Assert
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model.Id, Is.EqualTo(1));
+        Assert.That(model.Title, Is.EqualTo("Test Post"));
+        Assert.That(model.Content, Is.EqualTo("Test Content"));
+        Assert.That(model.IsPublic, Is.True);
+        Assert.That(model.AvailableTags, Is.EquivalentTo(availableTags));
+        Assert.That(model.SelectedTags, Is.EquivalentTo(new List<string> { "Memes", "Gain" }));
+    }
+
+    [Test]
+    public async Task EditGET_WhenUserIsNotOwner_ReturnsUnauthorized()
+    {
+        // Arrange
+        var user1 = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var user2 = new User
+        {
+            Id = 2,
+            IdentityId = "test-identity-2",
+            ProfileName = "janeDoe",
+            Username = "janeDoe",
+            Email = "janedoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user1,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user2);
+
+        // Act
+        var result = await _controller.Edit(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<UnauthorizedResult>());
+    }
+
+    [Test]
+    public async Task EditGET_WhenNotLoggedIn_ReturnsUnauthorized()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
+
+        // Act
+        var result = await _controller.Edit(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<UnauthorizedResult>());
+    }
+
+    [Test]
+    public async Task EditGET_WhenPostDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(() => null!);
+
+        // Act
+        var result = await _controller.Edit(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<NotFoundResult>());
+    }
 }
