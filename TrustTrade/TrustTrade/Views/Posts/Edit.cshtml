@@ -52,6 +52,20 @@
         </div>
         <span asp-validation-for="SelectedTags" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary mt-5">Save Changes</button>
+    <div class="d-flex justify-content-start mt-5">
+        <button type="submit" class="btn btn-primary me-2" aria-label="Save Changes">
+            <i class="bi bi-save"></i> Save Changes
+        </button>
+        <a asp-controller="Posts" 
+            asp-action="Details" 
+            asp-route-id="@Model.Id" 
+            class="btn btn-secondary cancel-edit"
+            aria-label="Cancel and return to post details">
+                <i class="bi bi-x-circle"></i> Cancel
+        </a>
+    </div>
 </form>
 
+@section Scripts {
+    <script src="~/js/postActions.js"></script>
+}

@@ -7,4 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // Confirmation for canceling an edit
+    document.querySelectorAll(".cancel-edit").forEach(form => {
+        form.addEventListener("click", (event) => {
+            if (!confirm("Are you sure you want to cancel? Unsaved changes will be lost.")) {
+                event.preventDefault(); // Stop navigation if user cancels
+            }
+        });
+    });
 });
