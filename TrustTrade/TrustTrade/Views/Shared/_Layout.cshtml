@@ -11,6 +11,86 @@
     <link rel="stylesheet" href="~/css/search.css" asp-append-version="true" />
     <script src="~/js/ThemeSwitcher.js" asp-append-version="true"></script>
     <script src="~/js/site.js"></script>
+    <style>
+        /* Floating Action Button (FAB) styles */
+        .fab-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+        }
+        
+        .fab {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .fab:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: #0b5ed7;
+            color: white;
+        }
+        
+        .fab i {
+            font-size: 1.75rem;
+        }
+        
+        .fab-tooltip {
+            position: absolute;
+            top: 50%;
+            right: calc(100% + 10px);
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        
+        [data-bs-theme="light"] .fab-tooltip {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        [data-bs-theme="dark"] .fab-tooltip {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        
+        .fab:hover .fab-tooltip {
+            opacity: 1;
+        }
+        
+        /* Make FAB responsive */
+        @@media (max-width: 768px) {
+            .fab-container {
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+            
+            .fab {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .fab i {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -64,6 +144,14 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+    </div>
+
+    <!-- Floating Action Button for Create Post -->
+    <div class="fab-container">
+        <a asp-controller="Posts" asp-action="Create" class="fab">
+            <i class="bi bi-plus-lg"></i>
+            <span class="fab-tooltip">Create Post</span>
+        </a>
     </div>
 
     <footer class="border-top footer text-muted">
