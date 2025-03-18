@@ -4,50 +4,30 @@ using System.Collections.Generic;
 namespace TrustTrade.Models.ViewModels
 {
     /// <summary>
-    /// View model for the brokerage connection page
+    /// View model for verification status information
     /// </summary>
-    public class BrokerageConnectionViewModel
+    public class VerificationStatusViewModel
     {
-        /// <summary>
-        /// The user's email address from Identity
-        /// </summary>
-        public string UserEmail { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Whether the user has already connected a brokerage
-        /// </summary>
-        public bool HasExistingConnection { get; set; }
-
-        /// <summary>
-        /// Details about the connected brokerage, if any
-        /// </summary>
-        public PlaidConnection? ExistingConnection { get; set; }
-        
         /// <summary>
         /// Current verification status
         /// </summary>
         public bool IsVerified { get; set; }
-        
+
         /// <summary>
         /// When the user was first verified, if ever
         /// </summary>
         public DateTime? FirstVerifiedDate { get; set; }
-        
+
         /// <summary>
         /// When the user was most recently verified, if ever
         /// </summary>
         public DateTime? MostRecentVerifiedDate { get; set; }
-        
+
         /// <summary>
         /// Total time the user has been verified
         /// </summary>
         public TimeSpan TotalVerifiedDuration { get; set; }
-        
-        /// <summary>
-        /// History of verification status changes
-        /// </summary>
-        public List<VerificationHistoryItem> VerificationHistory { get; set; } = new List<VerificationHistoryItem>();
-        
+
         /// <summary>
         /// Formatted string representation of the verified duration
         /// </summary>
@@ -83,5 +63,10 @@ namespace TrustTrade.Models.ViewModels
                 }
             }
         }
+
+        /// <summary>
+        /// Verification history records
+        /// </summary>
+        public List<VerificationHistoryItem> History { get; set; } = new List<VerificationHistoryItem>();
     }
 }

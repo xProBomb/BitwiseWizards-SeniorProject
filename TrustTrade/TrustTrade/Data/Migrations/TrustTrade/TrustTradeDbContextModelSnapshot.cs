@@ -521,6 +521,43 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.VerificationHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserID");
+
+                    b.HasKey("Id")
+                        .HasName("PK__VerificationHistory__3214EC27");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("VerificationHistory");
+                });
+
             modelBuilder.Entity("PostTags", b =>
                 {
                     b.HasOne("TrustTrade.Models.Post", null)
@@ -662,6 +699,18 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasConstraintName("FK_Trade_User");
 
                     b.Navigation("TickerSymbolNavigation");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.VerificationHistory", b =>
+                {
+                    b.HasOne("TrustTrade.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_VerificationHistory_User");
 
                     b.Navigation("User");
                 });
