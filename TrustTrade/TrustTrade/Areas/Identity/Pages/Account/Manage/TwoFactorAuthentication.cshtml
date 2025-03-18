@@ -1,0 +1,485 @@
+﻿@page
+@using Microsoft.AspNetCore.Http.Features
+@model TwoFactorAuthenticationModel
+@{
+    ViewData["Title"] = "Two-factor authentication (2FA)";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<style>
+    
+    .tfa-container {
+        background-color: var(--bs-secondary-bg);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    [data-bs-theme="dark"] .tfa-container {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .tfa-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        padding-bottom: 1rem;
+    }
+    
+    .tfa-icon {
+        color: #0d6efd;
+        font-size: 2.2rem;
+        margin-right: 1rem;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-left: 1rem;
+    }
+    
+    .status-enabled {
+        background-color: rgba(25, 135, 84, 0.15);
+        color: #198754;
+    }
+    
+    [data-bs-theme="dark"] .status-enabled {
+        background-color: rgba(25, 135, 84, 0.25);
+        color: #25c274;
+    }
+    
+    .status-disabled {
+        background-color: rgba(108, 117, 125, 0.15);
+        color: #6c757d;
+    }
+    
+    [data-bs-theme="dark"] .status-disabled {
+        background-color: rgba(108, 117, 125, 0.25);
+        color: #adb5bd;
+    }
+    
+    .status-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .tfa-content {
+        background-color: var(--bs-body-bg);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .tfa-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .tfa-section-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+    
+    .section-icon {
+        margin-right: 0.75rem;
+        color: #0d6efd;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .btn-tfa {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-tfa-primary {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+    }
+    
+    .btn-tfa-primary:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+    
+    .btn-tfa-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+    }
+    
+    .btn-tfa-danger:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+    
+    .btn-tfa-warning {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+    }
+    
+    .btn-tfa-warning:hover {
+        background-color: #e0a800;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: #212529;
+    }
+    
+    .btn-tfa-secondary {
+        background-color: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .btn-tfa-secondary:hover {
+        background-color: var(--bs-secondary-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        border-color: var(--bs-body-color);
+    }
+    
+    .btn-icon {
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .recovery-alert {
+        display: flex;
+        align-items: flex-start;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    
+    .recovery-alert-icon {
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-left: 4px solid #dc3545;
+    }
+    
+    [data-bs-theme="dark"] .alert-danger {
+        background-color: rgba(220, 53, 69, 0.15);
+    }
+    
+    .alert-danger .recovery-alert-icon {
+        color: #dc3545;
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+    }
+    
+    [data-bs-theme="dark"] .alert-warning {
+        background-color: rgba(255, 193, 7, 0.15);
+    }
+    
+    .alert-warning .recovery-alert-icon {
+        color: #ffc107;
+    }
+    
+    .info-card {
+        background-color: rgba(13, 110, 253, 0.05);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+        border-left: 4px solid #0d6efd;
+    }
+    
+    [data-bs-theme="dark"] .info-card {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .feature-item {
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .feature-icon {
+        color: #0d6efd;
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="tfa-container">
+    <div class="tfa-header">
+        <i class="bi bi-shield-lock-fill tfa-icon"></i>
+        <h3 class="mb-0">@ViewData["Title"]</h3>
+        @if (Model.Is2faEnabled)
+        {
+            <div class="status-badge status-enabled">
+                <i class="bi bi-check-circle-fill status-icon"></i>
+                Enabled
+            </div>
+        }
+        else
+        {
+            <div class="status-badge status-disabled">
+                <i class="bi bi-x-circle-fill status-icon"></i>
+                Disabled
+            </div>
+        }
+    </div>
+    
+    <p class="text-muted mb-4">
+        Two-factor authentication adds an extra layer of security to your account by requiring a verification code
+        in addition to your password when you sign in.
+    </p>
+    
+    @{
+        var consentFeature = HttpContext.Features.Get<ITrackingConsentFeature>();
+        @if (consentFeature?.CanTrack ?? true)
+        {
+            @if (Model.Is2faEnabled)
+            {
+                <div class="tfa-content">
+                    <div class="tfa-section">
+                        <div class="tfa-section-title">
+                            <i class="bi bi-shield-check section-icon"></i>
+                            2FA Status
+                        </div>
+                        <p>
+                            Two-factor authentication is currently <strong class="text-success">enabled</strong> for your account.
+                            You will be required to enter a verification code when you sign in.
+                        </p>
+                        <div class="action-buttons">
+                            <form method="post" style="display: inline-block">
+                                @if (Model.IsMachineRemembered)
+                                {
+                                    <button type="submit" class="btn btn-tfa btn-tfa-secondary">
+                                        <i class="bi bi-x-circle btn-icon"></i>
+                                        Forget this browser
+                                    </button>
+                                }
+                            </form>
+                            <a asp-page="./Disable2fa" class="btn btn-tfa btn-tfa-danger">
+                                <i class="bi bi-shield-x btn-icon"></i>
+                                Disable 2FA
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Recovery Codes Section -->
+                    <div class="tfa-section">
+                        <div class="tfa-section-title">
+                            <i class="bi bi-key section-icon"></i>
+                            Recovery Codes
+                        </div>
+                        
+                        @if (Model.RecoveryCodesLeft == 0)
+                        {
+                            <div class="recovery-alert alert-danger">
+                                <i class="bi bi-exclamation-triangle-fill recovery-alert-icon"></i>
+                                <div>
+                                    <strong>You have no recovery codes left.</strong>
+                                    <p class="mb-0">You must generate a new set of recovery codes before you can log in with a recovery code.</p>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.RecoveryCodesLeft == 1)
+                        {
+                            <div class="recovery-alert alert-danger">
+                                <i class="bi bi-exclamation-triangle-fill recovery-alert-icon"></i>
+                                <div>
+                                    <strong>You have only 1 recovery code left.</strong>
+                                    <p class="mb-0">You should generate a new set of recovery codes immediately.</p>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.RecoveryCodesLeft <= 3)
+                        {
+                            <div class="recovery-alert alert-warning">
+                                <i class="bi bi-exclamation-circle-fill recovery-alert-icon"></i>
+                                <div>
+                                    <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
+                                    <p class="mb-0">You should generate a new set of recovery codes soon.</p>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <p>
+                                You have <strong>@Model.RecoveryCodesLeft recovery codes</strong> remaining. Keep these in a secure location
+                                as they can be used to access your account if you lose your authenticator device.
+                            </p>
+                        }
+                        
+                        <div class="action-buttons">
+                            <a asp-page="./GenerateRecoveryCodes" class="btn btn-tfa btn-tfa-primary">
+                                <i class="bi bi-key-fill btn-icon"></i>
+                                @(Model.RecoveryCodesLeft == 0 ? "Generate Recovery Codes" : "Reset Recovery Codes")
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Authenticator App Section -->
+                    <div class="tfa-section">
+                        <div class="tfa-section-title">
+                            <i class="bi bi-phone section-icon"></i>
+                            Authenticator App
+                        </div>
+                        
+                        <p>
+                            @if (Model.HasAuthenticator)
+                            {
+                                <span>Your authenticator app is configured. You can reset your authenticator keys if you need to set up a new device.</span>
+                            }
+                            else
+                            {
+                                <span>You haven't set up an authenticator app yet. Setting up an app is a recommended second step.</span>
+                            }
+                        </p>
+                        
+                        <div class="action-buttons">
+                            @if (Model.HasAuthenticator)
+                            {
+                                <a asp-page="./EnableAuthenticator" class="btn btn-tfa btn-tfa-primary">
+                                    <i class="bi bi-pencil-square btn-icon"></i>
+                                    Configure App
+                                </a>
+                                <a asp-page="./ResetAuthenticator" class="btn btn-tfa btn-tfa-warning">
+                                    <i class="bi bi-arrow-repeat btn-icon"></i>
+                                    Reset App
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-page="./EnableAuthenticator" class="btn btn-tfa btn-tfa-primary">
+                                    <i class="bi bi-plus-circle btn-icon"></i>
+                                    Set Up Authenticator App
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="tfa-content">
+                    <div class="tfa-section">
+                        <div class="tfa-section-title">
+                            <i class="bi bi-shield-lock section-icon"></i>
+                            Enable Two-Factor Authentication
+                        </div>
+                        
+                        <p>
+                            Two-factor authentication is currently <strong class="text-muted">disabled</strong>. 
+                            Enabling 2FA significantly improves the security of your account.
+                        </p>
+                        
+                        <div class="info-card">
+                            <h5><i class="bi bi-shield-check me-2"></i>Benefits of Two-Factor Authentication</h5>
+                            <div class="features-grid">
+                                <div class="feature-item">
+                                    <i class="bi bi-lock-fill feature-icon"></i>
+                                    <div>
+                                        <strong>Enhanced Security</strong>
+                                        <div class="text-muted">Protection against password theft</div>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="bi bi-shield feature-icon"></i>
+                                    <div>
+                                        <strong>Account Protection</strong>
+                                        <div class="text-muted">Prevents unauthorized access</div>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="bi bi-phone-fill feature-icon"></i>
+                                    <div>
+                                        <strong>Mobile Verification</strong>
+                                        <div class="text-muted">Uses your personal device</div>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="bi bi-key-fill feature-icon"></i>
+                                    <div>
+                                        <strong>Recovery Options</strong>
+                                        <div class="text-muted">Backup access codes provided</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons mt-4">
+                            <a asp-page="./EnableAuthenticator" class="btn btn-tfa btn-tfa-primary">
+                                <i class="bi bi-shield-plus btn-icon"></i>
+                                Enable 2FA
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="tfa-content">
+                <div class="recovery-alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill recovery-alert-icon"></i>
+                    <div>
+                        <strong>Privacy and cookie policy have not been accepted.</strong>
+                        <p class="mb-0">You must accept the policy before you can enable two-factor authentication.</p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const iconLink = document.createElement('link');
+            iconLink.rel = 'stylesheet';
+            iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(iconLink);
+        }
+    </script>
+}

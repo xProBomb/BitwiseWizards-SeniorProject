@@ -41,9 +41,11 @@ body {
   margin-bottom: 60px;
 }
 
-/* Fixes error with lines not showing up */
 .list-group-item {
-  margin-bottom: 0 !important;
+  margin-bottom: 0 !important; /* Fixes error with lines not showing up */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-bs-theme="dark"] {
@@ -259,3 +261,18 @@ body {
 .score-purple { background-color: #6f42c1; color: white; }
 
 .not-rated-badge { color: #6c757d; margin-left: 0.5rem; }
+
+.username-profile-link {
+  font-weight: bold;
+  color: inherit;
+  text-decoration: none;
+}
+
+.username-profile-link:hover {
+  text-decoration: underline;
+}
+
+.image-profile-link {
+  color: inherit;
+  text-decoration: none;
+}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrustTrade.Models;
 
@@ -11,9 +12,11 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    partial class TrustTradeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250314022044_AlterCreatedAtToNonNullable")]
+    partial class AlterCreatedAtToNonNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -287,7 +290,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -304,9 +306,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int")

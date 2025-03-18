@@ -20,7 +20,7 @@ public class TagRepository : Repository<Tag>, ITagRepository
             .ToList();
     }
 
-    public Tag? GetTagByName(string tagName)
+    public Tag? FindByTagName(string tagName)
     {
         return _tags
             .FirstOrDefault(t => t.TagName.ToLower() == tagName.ToLower());

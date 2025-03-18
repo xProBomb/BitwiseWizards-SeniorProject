@@ -1,0 +1,227 @@
+﻿@page
+@model DeletePersonalDataModel
+@{
+    ViewData["Title"] = "Delete Personal Data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<style>
+    
+    .delete-container {
+        background-color: var(--bs-secondary-bg);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    [data-bs-theme="dark"] .delete-container {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .delete-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        padding-bottom: 1rem;
+    }
+    
+    .delete-icon {
+        color: #dc3545;
+        font-size: 2.2rem;
+        margin-right: 1rem;
+    }
+    
+    .danger-alert {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-left: 4px solid #dc3545;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    [data-bs-theme="dark"] .danger-alert {
+        background-color: rgba(220, 53, 69, 0.15);
+    }
+    
+    .danger-title {
+        display: flex;
+        align-items: center;
+        color: #dc3545;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .danger-icon {
+        margin-right: 0.75rem;
+        font-size: 1.5rem;
+    }
+    
+    .delete-content {
+        background-color: var(--bs-body-bg);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .impact-list {
+        margin-bottom: 1.5rem;
+    }
+    
+    .impact-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+    
+    .impact-icon {
+        color: #6c757d;
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+        margin-top: 0.15rem;
+    }
+    
+    .verification-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--bs-border-color);
+    }
+    
+    .delete-btn {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+    
+    .delete-btn:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .delete-btn-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .cancel-link {
+        display: block;
+        text-align: center;
+        margin-top: 1rem;
+        color: var(--bs-body-color);
+        text-decoration: none;
+    }
+    
+    .cancel-link:hover {
+        text-decoration: underline;
+        color: var(--bs-link-hover-color);
+    }
+</style>
+
+<div class="delete-container">
+    <div class="delete-header">
+        <i class="bi bi-exclamation-octagon-fill delete-icon"></i>
+        <h3 class="mb-0">@ViewData["Title"]</h3>
+    </div>
+
+    <p class="text-muted mb-4">
+        This process allows you to permanently delete your personal data and close your account.
+    </p>
+
+    <div class="danger-alert">
+        <div class="danger-title">
+            <i class="bi bi-exclamation-triangle-fill danger-icon"></i>
+            Critical Warning
+        </div>
+        <p class="mb-2">
+            <strong>This action is permanent and cannot be undone.</strong> Once you delete your account:
+        </p>
+        <ul class="impact-list">
+            <li class="impact-item">
+                <i class="bi bi-x-circle-fill impact-icon"></i>
+                <span>All your personal information will be permanently removed</span>
+            </li>
+            <li class="impact-item">
+                <i class="bi bi-x-circle-fill impact-icon"></i>
+                <span>Your account access will be immediately terminated</span>
+            </li>
+            <li class="impact-item">
+                <i class="bi bi-x-circle-fill impact-icon"></i>
+                <span>Any active transactions or pending activities may be affected</span>
+            </li>
+            <li class="impact-item">
+                <i class="bi bi-x-circle-fill impact-icon"></i>
+                <span>You will not be able to recover your account</span>
+            </li>
+        </ul>
+        <p class="mb-0">
+            Please consider downloading your data before proceeding with this irreversible action.
+        </p>
+    </div>
+
+    <div class="delete-content">
+        <form id="delete-user" method="post" onsubmit="return confirmDeletion()">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            
+            <div class="verification-section">
+                <h5>Security Verification</h5>
+                <p>To confirm your identity, please provide the requested information below:</p>
+                
+                @if (Model.RequirePassword)
+                {
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" 
+                               aria-required="true" placeholder="Please enter your password." />
+                        <label asp-for="Input.Password" class="form-label">Your current password</label>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+                }
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDeleteCheck" required>
+                    <label class="form-check-label" for="confirmDeleteCheck">
+                        I understand this action cannot be undone and confirm I want to delete my data
+                    </label>
+                </div>
+                
+                <button class="w-100 btn delete-btn" type="submit">
+                    <i class="bi bi-trash-fill delete-btn-icon"></i>
+                    Delete Data and Close My Account
+                </button>
+                
+                <a href="./PersonalData" class="cancel-link">
+                    <i class="bi bi-arrow-left"></i> Cancel and return to Personal Data
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const iconLink = document.createElement('link');
+            iconLink.rel = 'stylesheet';
+            iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(iconLink);
+        }
+        
+       
+        function confirmDeletion() {
+            return confirm("WARNING: You are about to permanently delete your account and all associated data. This action cannot be undone. Are you absolutely sure you want to proceed?");
+        }
+    </script>
+}

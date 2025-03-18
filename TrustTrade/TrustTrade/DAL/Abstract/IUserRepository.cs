@@ -4,5 +4,5 @@ namespace TrustTrade.DAL.Abstract;
 
 public interface IUserRepository : IRepository<User>
 {
-    User? FindByIdentityId(string identityId);
+    Task<User?> FindByIdentityIdAsync(string identityId);
 }

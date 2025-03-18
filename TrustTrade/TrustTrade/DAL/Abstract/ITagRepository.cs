@@ -6,5 +6,5 @@ public interface ITagRepository : IRepository<Tag>
 {
     List<string> GetAllTagNames();
 
-    Tag? GetTagByName(string tagName);
+    Tag? FindByTagName(string tagName);
 }
