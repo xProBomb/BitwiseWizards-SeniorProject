@@ -471,6 +471,44 @@ public class PostsControllerTests
     }
 
     [Test]
+    public async Task Details_WhenCurrentUserIsOwner_ReturnsViewModelShowingOwnership()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+
+        // Act
+        var result = await _controller.Details(1) as ViewResult;
+        var model = result?.Model as PostDetailsVM;
+
+        // Assert
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model.IsOwnedByCurrentUser, Is.True);
+    }
+
+    [Test]
     public async Task Details_WhenPostDoesNotExist_ReturnsNotFound()
     {
         // Arrange
