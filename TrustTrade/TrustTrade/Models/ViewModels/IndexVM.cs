@@ -9,4 +9,6 @@ public class IndexVM
     public string? SortOrder { get; set; }
     public required List<string> Categories { get; set; }
     public string? SelectedCategory { get; set; }
+    public int? CurrentUserId { get; set; }
+    public string? CurrentUserName { get; set; }
 }

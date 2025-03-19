@@ -5,50 +5,359 @@
     ViewData["Title"] = "Register";
 }
 
-<section class="py-3 py-md-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-                <div class="card border border-light-subtle rounded-3 shadow-sm">
-                    <div class="card-body p-3 p-md-4 p-xl-5">
-                        <div class="text-center mb-3">
-                            <h1 class="fs-4 fw-normal text-primary">TrustTrade</h1>
-                        </div>
-                        <h2 class="fs-6 fw-normal text-center text-secondary mb-4">Create a new account</h2>
-                        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                                <label asp-for="Input.Email" class="form-label">Email</label>
-                                <span asp-validation-for="Input.Email" class="text-danger"></span>
-                            </div>
-                        <!--    <div class="form-floating mb-3">
-                                <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="username" />
-                                <label asp-for="Input.Username" class="form-label">Username</label>
-                                <span asp-validation-for="Input.Username" class="text-danger"></span>
-                            </div>
-                        -->
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                                <label asp-for="Input.Password" class="form-label">Password</label>
-                                <span asp-validation-for="Input.Password" class="text-danger"></span>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                                <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
-                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-                            </div>
-                            <div class="d-grid my-3">
-                                <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg">Register</button>
-                            </div>
-                        </form>
-                    </div>
+<style>
+    
+    body {
+        overflow: hidden; 
+    }
+    
+    .register-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    [data-bs-theme="dark"] .register-backdrop {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .register-section {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+    
+    .register-card {
+        background-color: var(--bs-body-bg);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        border: 1px solid var(--bs-border-color);
+        transition: all 0.3s ease;
+        max-width: 500px;
+        width: 100%;
+        z-index: 1010;
+    }
+    
+    [data-bs-theme="dark"] .register-card {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .register-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-bs-theme="dark"] .register-card:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .brand-logo {
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .logo-icon {
+        margin-right: 0.5rem;
+        font-size: 2.6rem;
+    }
+    
+    .register-subtitle {
+        color: var(--bs-secondary-color);
+        font-weight: 500;
+    }
+    
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: var(--bs-secondary-bg);
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+        font-size: 0.8rem;
+        color: var(--bs-body-color);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .security-icon {
+        color: #198754;
+        margin-right: 0.5rem;
+    }
+    
+    [data-bs-theme="dark"] .security-icon {
+        color: #25c274;
+    }
+    
+    .form-floating > .form-control::placeholder {
+        color: transparent;
+    }
+    
+    .form-floating > .form-control:focus,
+    .form-floating > .form-control:not(:placeholder-shown) {
+        padding-top: 1.25rem;
+    }
+    
+    .password-input-group {
+        position: relative;
+    }
+    
+    .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--bs-secondary-color);
+        cursor: pointer;
+        z-index: 10;
+        transition: color 0.2s ease;
+        display: flex;
+    }
+    
+    .password-toggle:hover {
+        color: var(--bs-body-color);
+    }
+    
+    .register-btn {
+        padding: 0.8rem;
+        font-size: 1rem;
+        font-weight: 500;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .register-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .register-btn-icon {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .footer-link {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+    
+    .footer-link:hover {
+        text-decoration: underline;
+    }
+    
+    .password-strength {
+        height: 5px;
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        background-color: #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .password-strength-weak {
+        width: 33%;
+        background-color: #dc3545;
+    }
+    
+    .password-strength-medium {
+        width: 66%;
+        background-color: #ffc107;
+    }
+    
+    .password-strength-strong {
+        width: 100%;
+        background-color: #198754;
+    }
+    
+    .password-strength-label {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        text-align: right;
+    }
+</style>
+
+<div class="register-backdrop">
+    <div class="register-section">
+        <div class="register-card p-4 p-md-5">
+            <div class="register-header">
+                <div class="brand-logo">
+                    <i class="bi bi-shield-check logo-icon"></i>
+                    TrustTrade
                 </div>
+                <div class="security-badge">
+                    <i class="bi bi-shield-lock-fill security-icon"></i>
+                    Secure Registration
+                </div>
+                <h2 class="register-subtitle mb-0">Create your account</h2>
             </div>
+            
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                           aria-required="true" placeholder="name@example.com" />
+                    <label asp-for="Input.Email" class="form-label">Email Address</label>
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                
+                <div class="form-floating mb-3 password-input-group">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" 
+                           aria-required="true" placeholder="password" id="password-field" />
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <button type="button" class="password-toggle" id="password-toggle">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+                
+                <div class="password-strength" id="passwordStrength"></div>
+                <div class="password-strength-label" id="passwordStrengthText">Password strength</div>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                
+                <div class="form-floating mb-4 password-input-group">
+                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" 
+                           aria-required="true" placeholder="password" id="confirm-password-field" />
+                    <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
+                    <button type="button" class="password-toggle" id="confirm-password-toggle">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+                
+                <div class="form-text text-muted mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Password must be at least 6 characters long and include uppercase, lowercase, numbers, and special characters.
+                </div>
+                
+                <div class="d-grid mb-3">
+                    <button id="registerSubmit" type="submit" class="register-btn">
+                        <i class="bi bi-person-plus-fill register-btn-icon"></i>
+                        Create Account
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="mb-0">
+                        Already have an account? 
+                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="footer-link">
+                            Sign in instead
+                        </a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
-</section>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const iconLink = document.createElement('link');
+            iconLink.rel = 'stylesheet';
+            iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(iconLink);
+        }
+        
+        // Toggle password visibility
+        function setupPasswordToggle(inputId, toggleId) {
+            const passwordField = document.getElementById(inputId);
+            const passwordToggle = document.getElementById(toggleId);
+            
+            if (passwordField && passwordToggle) {
+                passwordToggle.addEventListener('click', function() {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    
+                    const icon = passwordToggle.querySelector('i');
+                    icon.classList.toggle('bi-eye');
+                    icon.classList.toggle('bi-eye-slash');
+                });
+            }
+        }
+        
+        // Password strength meter
+        function checkPasswordStrength(password) {
+            const strengthMeter = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            // Remove any existing classes
+            strengthMeter.className = 'password-strength';
+            
+            if (!password) {
+                strengthText.textContent = 'Password strength';
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Complexity checks
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[a-z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Set appropriate class and text
+            if (strength <= 2) {
+                strengthMeter.classList.add('password-strength-weak');
+                strengthText.textContent = 'Weak';
+                strengthText.style.color = '#dc3545';
+            } else if (strength <= 4) {
+                strengthMeter.classList.add('password-strength-medium');
+                strengthText.textContent = 'Medium';
+                strengthText.style.color = '#ffc107';
+            } else {
+                strengthMeter.classList.add('password-strength-strong');
+                strengthText.textContent = 'Strong';
+                strengthText.style.color = '#198754';
+            }
+        }
+        
+        // Initialize password functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPasswordToggle('password-field', 'password-toggle');
+            setupPasswordToggle('confirm-password-field', 'confirm-password-toggle');
+            
+            const passwordField = document.getElementById('password-field');
+            if (passwordField) {
+                passwordField.addEventListener('input', function() {
+                    checkPasswordStrength(this.value);
+                });
+            }
+        });
+    </script>
 }

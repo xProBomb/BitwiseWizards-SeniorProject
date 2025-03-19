@@ -77,6 +77,9 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
 
+// Add services for verification history
+builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
