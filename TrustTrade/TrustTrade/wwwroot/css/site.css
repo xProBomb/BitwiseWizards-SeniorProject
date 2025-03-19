@@ -278,6 +278,11 @@ body.sidebar-expanded {
   text-decoration: none;
 }
 
+.scrollable-checkbox-tags {
+  max-height: 155px;
+  overflow-y: auto;
+}
+
 /* Top Navigation Bar Styles */
 .top-navbar {
   height: 56px;
