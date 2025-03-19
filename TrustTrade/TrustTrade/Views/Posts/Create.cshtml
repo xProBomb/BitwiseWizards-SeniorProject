@@ -13,12 +13,12 @@
 <form asp-action="Create" method="post" class="mt-4">
     <div class="form-group">
         <label asp-for="Title"></label>
-        <input asp-for="Title" class="form-control" />
+        <input asp-for="Title" class="form-control" maxlength="130" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="form-group mt-4">
         <label asp-for="Content"></label>
-        <textarea asp-for="Content" class="form-control"></textarea>
+        <textarea asp-for="Content" class="form-control" maxlength=1026></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
     <div class="form-group mt-4">
