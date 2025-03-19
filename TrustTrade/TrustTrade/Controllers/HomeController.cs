@@ -16,9 +16,6 @@ namespace TrustTrade.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
-        private ILogger<HomeController> object1;
-        private IPostRepository object2;
-        private ITagRepository object3;
 
         public HomeController(
             TrustTradeDbContext context,
@@ -30,13 +27,6 @@ namespace TrustTrade.Controllers
             _logger = logger;
             _postRepository = postRepository;
             _tagRepository = tagRepository;
-        }
-
-        public HomeController(ILogger<HomeController> object1, IPostRepository object2, ITagRepository object3)
-        {
-            this.object1 = object1;
-            this.object2 = object2;
-            this.object3 = object3;
         }
 
         public IActionResult Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
