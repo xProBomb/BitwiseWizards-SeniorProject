@@ -23,7 +23,7 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
-    public string? ProfilePicture { get; set; }
+    public byte[]? ProfilePicture { get; set; }
 
     public string? Bio { get; set; }
 

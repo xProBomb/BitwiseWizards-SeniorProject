@@ -35,7 +35,7 @@ namespace TrustTrade.Tests.Repositories
                     ProfileName = "johnDoe", 
                     Email = "john@example.com", 
                     PasswordHash = "dummyHash", 
-                    ProfilePicture = "/images/john.jpg", 
+                    ProfilePicture = null,
                     CreatedAt = DateTime.Now.AddDays(-10) 
                 },
                 new User 
@@ -45,7 +45,7 @@ namespace TrustTrade.Tests.Repositories
                     ProfileName = "janeSmith", 
                     Email = "jane@example.com", 
                     PasswordHash = "dummyHash", 
-                    ProfilePicture = "/images/jane.jpg", 
+                    ProfilePicture = null, 
                     CreatedAt = DateTime.Now.AddDays(-20) 
                 },
                 new User 
@@ -55,7 +55,7 @@ namespace TrustTrade.Tests.Repositories
                     ProfileName = "johnSmith", 
                     Email = "johnsmith@example.com", 
                     PasswordHash = "dummyHash", 
-                    ProfilePicture = "/images/john2.jpg", 
+                    ProfilePicture = null, 
                     CreatedAt = DateTime.Now.AddDays(-5) 
                 }
             });

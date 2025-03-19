@@ -36,6 +36,8 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
+    
+    public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -158,10 +160,8 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.PrivacySetting)
-                .HasMaxLength(20)
-                .HasDefaultValue("Public");
-            entity.Property(e => e.Title).HasMaxLength(100);
+            entity.Property(e => e.IsPublic).HasDefaultValue(false);
+            entity.Property(e => e.Title).HasMaxLength(128);
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.PortfolioValueAtPosting)
                 .HasColumnType("decimal(18, 2)")
@@ -287,7 +287,7 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.ProfileName)
                 .HasMaxLength(50)
                 .HasColumnName("Profile_Name");
-            entity.Property(e => e.ProfilePicture).HasMaxLength(255);
+            entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
         });
 
@@ -303,6 +303,27 @@ public partial class TrustTradeDbContext : DbContext
                 .WithOne()
                 .HasForeignKey<PortfolioVisibilitySettings>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        modelBuilder.Entity<VerificationHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__VerificationHistory__3214EC27");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Timestamp)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Reason)
+                .HasMaxLength(255);
+            entity.Property(e => e.Source)
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_VerificationHistory_User");
         });
 
         OnModelCreatingPartial(modelBuilder);

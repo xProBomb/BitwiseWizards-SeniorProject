@@ -19,4 +19,10 @@ public class TagRepository : Repository<Tag>, ITagRepository
             .Select(t => t.TagName)
             .ToList();
     }
+
+    public Tag? FindByTagName(string tagName)
+    {
+        return _tags
+            .FirstOrDefault(t => t.TagName.ToLower() == tagName.ToLower());
+    }
 }

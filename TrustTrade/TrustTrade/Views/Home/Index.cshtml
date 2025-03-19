@@ -3,6 +3,8 @@
 @using TrustTrade.ViewModels
 @model IndexVM
 
+<link rel="stylesheet" href="~/css/index.css" />
+
 @{
     ViewData["Title"] = "Home Page";
 
@@ -16,21 +18,6 @@
         ("DateAsc", "Oldest First")
     };
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome to TrustTrade</h1>
-    <p>This is the WOU Sr Project for the 2025 Graduates Rowan, Justin, Paul, and Jesus.</p>
-    <p>
-        TrustTrade is a social platform that revolutionizes how traders interact by requiring
-        portfolio verification through Plaid integration (optional but highlighted). Users who connect
-        their brokerage accounts get a "Verified Portfolio" badge, displaying their real-time portfolio
-        value, current stock positions, option contracts, and quantity of holdings. This verification
-        system creates a hierarchy of trust, where verified users' posts and analyses carry more weight
-        than unverified accounts. The platform would feature a "Performance Score" that tracks verified
-        users' trading history, win rates, and risk-adjusted returns, making it impossible to fake success.
-        Users can create detailed trade journals with entry/exit points, reasoning, and outcome analysis,
-        all backed by verified transaction data.
-    </p>
-</div>
 
 <!-- Sort Order Drop-down -->
 <form id="sortForm" method="get" asp-controller="Home" asp-action="Index">
@@ -81,7 +68,6 @@
     <input type="hidden" name="page" value="1" />
     <input type="hidden" name="sortOrder" value="@selectedSortOrder" />
 
-
     @if (Model.SelectedCategory != null)
     {
     <!-- Clear the category filter -->
@@ -101,34 +87,63 @@
     {
         foreach (var post in Model.Posts)
         {
-            <li class="list-group-item">
-                <p>
-                    @post.UserName
-                    @{
-                        if (post.IsPlaidEnabled)
+            <!-- Display each post as a clickable list item -->
+            <li class="list-group-item clickable-post"
+                data-url="@Url.Action("Details", "Posts", new { id = post.Id })">
+                <div class="d-flex align-items-center">
+                    <!-- Profile Links -->
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="image-profile-link">
+                        @if (post.ProfilePicture != null)
                         {
-                            if (post.PortfolioValueAtPosting.HasValue)
-                            {
-                                try
-                                {
-                                    string value = @FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
-                                    
-                                    <span class="text-success">@value </span>
-                                }
-                                catch (Exception)
-                                {
-                                    // Fallback in case of formatting issues
-                                    <span class="text-success">$0 </span>
-                                }
-                            }
-                            // Always show checkmark for Plaid-enabled users
-                            <i class="bi bi-patch-check-fill text-success"></i>
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(post.ProfilePicture)" alt="Profile Picture"
+                                 class="rounded-circle" style="width: 50px; height: 50px;">
                         }
+                        else
+                        {
+                            <img src="/icons/defpfp.png" alt="Profile Picture"
+                                 class="rounded-circle" style="width: 50px; height: 50px;">
+                        }
+                    </a>
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="username-profile-link ms-2">
+                        @post.UserName
+                    </a>
+                    @if (post.IsPlaidEnabled)
+                    {
+                        if (post.PortfolioValueAtPosting.HasValue)
+                        {
+                            try
+                            {
+                                string value = @FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
+                                <span class="text-success ms-2">@value </span>
+                            }
+                            catch (Exception)
+                            {
+                                // Fallback in case of formatting issues
+                                <span class="text-success ms-2">$0 </span>
+                            }
+                        }
+                        // Always show checkmark for Plaid-enabled users
+                        <i class="bi bi-patch-check-fill text-success"></i>
                     }
-                    | @post.TimeAgo
-                </p>
-                <h3>@post.Title</h3>
+                    <span class="ms-2">@post.TimeAgo</span>
+                </div>
+                <h3 style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;">@post.Title</h3>
                 <p>@post.Excerpt</p>
+                <!-- Like and Comment Buttons -->
+                <div class="d-flex align-items-center mt-4">
+                    <button class="btn btn-primary position-relative" aria-label="Like">
+                        <i class="bi bi-hand-thumbs-up"></i> @post.LikeCount
+                    </button>
+                    <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
+                        <i class="bi bi-chat"></i> @post.CommentCount
+                    </button>
+                </div>
             </li>
         }
     }
@@ -209,3 +224,6 @@
     </ul>
 }
 
+@section Scripts {
+    <script src="~/js/index.js"></script>
+}

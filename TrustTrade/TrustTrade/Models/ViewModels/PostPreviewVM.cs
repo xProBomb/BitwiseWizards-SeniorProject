@@ -14,7 +14,13 @@ public class PostPreviewVM
     
     public string? TimeAgo { get; set; }
     
-    
+    public int LikeCount { get; set; }
+
+    public int CommentCount { get; set; }
+
     public bool IsPlaidEnabled { get; set; }
+
     public decimal? PortfolioValueAtPosting { get; set; }
+
+    public byte[]? ProfilePicture { get; set; }
 }

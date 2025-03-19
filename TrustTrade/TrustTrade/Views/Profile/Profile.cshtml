@@ -7,25 +7,141 @@
     bool isFollowing = Model.IsFollowing;
 }
 
-<div class="container mt-4">
+<!-- Show top-level validation summary -->
+<div class="text-danger">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+</div>
+
     <!-- Cover Photo and Profile Image -->
-    <div class="position-relative mb-5">
+    <!--<div class="position-relative mb-5">
         <div class="bg-light" style="height: 125px;"></div>
         <div class="position-absolute" style="top: 130px; left: 30px;">
             <img src="https://via.placeholder.com/150" alt="Profile Picture"
                  class="rounded-circle img-thumbnail border border-white" style="width: 150px; height: 100px;">
         </div>
-    </div>
+    </div>-->
 
+<div class="container mt-4">
     <!-- Profile Name, Joined Date and Follow Button -->
     <div class="mb-4" style="padding-left: 200px;">
         <h2>
-            @Model.ProfileName
+            @if (Model.ProfilePicture != null)
+            {
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ProfilePicture)" alt="Profile Picture"
+                     class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
+            }
+            else
+            {
+                <img src="/icons/defpfp.png" alt="Profile Picture"
+                     class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
+            }
+            @Model.Username
             @if (Model.PlaidEnabled)
             {
                 <i class="bi bi-patch-check"></i>
             }
+            @if (Model.HasRatedScore)
+            {
+                <span class="performance-score @GetScoreColorClass(Model.PerformanceScore)"
+                      data-bs-toggle="tooltip"
+                      data-bs-html="true"
+                      title="Performance Score: @Model.PerformanceScore.ToString("N0")">
+                    @Model.PerformanceScore.ToString("N0")
+                </span>
+            }
+            else
+            {
+                <span class="not-rated-badge"
+                      data-bs-toggle="tooltip"
+                      data-bs-html="true"
+                      title="Not Yet Rated - Requires Plaid connection, posts, and holdings">
+                    <i class="bi bi-dash-circle"></i>
+                </span>
+            }
         </h2>
+        <div>
+        @if (TempData["ProfilePictureError"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ProfilePictureError"]
+            </div>
+        }
+        @if (isOwner)
+        {
+            <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#updateProfilePictureModal">
+                <i class="bi bi-pencil"></i> Change
+            </button>
+        }
+        </div>
+        @functions {
+            string GetScoreColorClass(decimal score)
+            {
+                if (score < 50) return "score-red";
+                if (score >= 50 && score <= 79) return "score-yellow";
+                if (score > 79 && score < 89) return "score-green";
+                return "score-purple";
+            }
+        }
+        <!-- Modal for updating profile picture -->
+        <div class="modal fade" id="updateProfilePictureModal" tabindex="-1" aria-labelledby="updateProfilePictureModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateProfilePictureModalLabel">Update Profile Picture</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form asp-action="UpdateProfilePicture" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="profilePicture" class="form-label">Choose a new profile picture</label>
+                                <input type="file" class="form-control" id="profilePicture" name="ProfilePicture" accept="image/*" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Upload</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- For the self-view breakdown modal -->
+        @if (isOwner && Model.HasRatedScore)
+        {
+            <div class="mt-3">
+                <button type="button" class="btn btn-sm btn-secondary"
+                        data-bs-toggle="modal" data-bs-target="#scoreBreakdownModal">
+                    View Score Details
+                </button>
+            </div>
+
+            <div class="modal fade" id="scoreBreakdownModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Your Performance Score: @Model.PerformanceScore.ToString("N0")</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Your performance score is calculated based on several factors:</p>
+                            <ul class="list-group">
+                                @foreach (var item in Model.ScoreBreakdown)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        @item.Key
+                                        <span class="badge bg-primary rounded-pill">@item.Value.ToString("N0")</span>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="mt-3">
+                                <p class="text-muted">Scores are updated when you create posts, refresh holdings, and receive engagement from other users.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        
         @if (!isOwner)
         {
             <!-- Follow/Unfollow button appears only for non-owners -->
@@ -81,9 +197,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="followersModalLabel">Followers</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <ul>
@@ -107,9 +221,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="followingModalLabel">Following</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <ul>
@@ -160,6 +272,12 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
+                             @if (ViewBag.UsernameError != null)
+                                {
+                                    <div class="alert alert-danger">
+                                        @ViewBag.UsernameError
+                                    </div>
+                                }
                             <div class="theme-switch-wrapper ms-auto">
                                 <label class="theme-switch" for="checkbox">
                                     <input type="checkbox" id="checkbox" checked/>
@@ -170,6 +288,13 @@
                                 </label>
                             </div>
                             <br>
+                             <!-- Username Field -->
+                                <div class="mb-3">
+                                    <span asp-validation-for="Username" class="text-danger"></span>
+                                    <label class="form-label">Username</label>
+                                    <input type="text" name="Username" class="form-control" value="@Model.Username" required />
+                                </div>
+                            <!-- Bio Field -->
                             <div class="mb-3">
                                 <label class="form-label">About</label>
                                 <textarea name="Bio" class="form-control" rows="4">@Model.Bio</textarea>
@@ -281,14 +406,26 @@
                                 <td class="text-end">$@holding.CurrentValue.ToString("N2")</td>
                                 @if (!Model.HideDetailedInformation)
                                 {
-                                    <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
-                                        $@Math.Abs(holding.ReturnAmount).ToString("N2")
-                                        @(holding.ReturnAmount >= 0 ? "+" : "-")
-                                    </td>
-                                    <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
-                                        @Math.Abs(holding.ReturnPercentage).ToString("N2")%
-                                        @(holding.ReturnPercentage >= 0 ? "+" : "-")
-                                    </td>
+                                    @if (holding.ReturnAmount == 0 && holding.ReturnPercentage == 0)
+                                    {
+                                        <td class="text-end">
+                                            N/A
+                                        </td>
+                                        <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
+                                            N/A
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-end @(holding.ReturnAmount >= 0 ? "text-success" : "text-danger")">
+                                            $@Math.Abs(holding.ReturnAmount).ToString("N2")
+                                            @(holding.ReturnAmount >= 0 ? "+" : "-")
+                                        </td>
+                                        <td class="text-end @(holding.ReturnPercentage >= 0 ? "text-success" : "text-danger")">
+                                            @Math.Abs(holding.ReturnPercentage).ToString("N2")%
+                                            @(holding.ReturnPercentage >= 0 ? "+" : "-")
+                                        </td>
+                                    }
                                 }
                             </tr>
                         }
@@ -334,10 +471,22 @@
     @if (isOwner)
     {
         <!-- Manage Account and Brokerage Connection Links -->
-        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">Manage Account</a>
+        <a asp-area="Identity" asp-page="/Account/Manage/Email" class="btn btn-primary">Manage Account</a>
         <a class="btn btn-primary" asp-controller="Brokerage" asp-action="Connect">Connect Brokerage</a>
     }
 </div>
+
+@if (ViewBag.UsernameError != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modalEl = document.getElementById('editProfileModal');
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        });
+    </script>
+}
+
 
 @section Scripts {
     <script src="~/js/profile.js"></script>

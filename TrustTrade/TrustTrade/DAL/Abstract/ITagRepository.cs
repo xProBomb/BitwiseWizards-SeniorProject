@@ -5,4 +5,6 @@ namespace TrustTrade.DAL.Abstract;
 public interface ITagRepository : IRepository<Tag>
 {
     List<string> GetAllTagNames();
+
+    Tag? FindByTagName(string tagName);
 }

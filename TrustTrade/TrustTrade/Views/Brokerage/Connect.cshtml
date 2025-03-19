@@ -6,7 +6,7 @@
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Connect Your Brokerage Account</h2>
@@ -20,14 +20,20 @@
                             <p>Last synced: @(Model.ExistingConnection.LastSyncTimestamp?.ToString("g") ?? "Never")</p>
                         </div>
 
-                        <button id="connect-plaid" class="btn btn-primary">
-                            Update Connection
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button id="update-plaid" class="btn btn-primary">
+                                Update Connection
+                            </button>
+                            <button id="delete-plaid" class="btn btn-danger">
+                                Delete Connection
+                            </button>
+                        </div>
                     }
                     else
                     {
                         <p class="lead mb-4">
-                            Connect your brokerage account to start tracking your investments and participating in the TrustTrade community.
+                            Connect your brokerage account to start tracking your investments and participating in the
+                            TrustTrade community.
                         </p>
 
                         <div class="d-grid gap-2">
@@ -39,20 +45,257 @@
                         <div class="mt-4">
                             <h5>Why connect your brokerage?</h5>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-check-circle text-success"></i> Track your investments in real-time</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Share verified trades with the community</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Get insights into your portfolio performance</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Participate in investment discussions</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Track your investments in real-time
+                                </li>
+                                <li><i class="bi bi-check-circle text-success"></i> Share verified trades with the
+                                    community
+                                </li>
+                                <li><i class="bi bi-check-circle text-success"></i> Get insights into your portfolio
+                                    performance
+                                </li>
+                                <li><i class="bi bi-check-circle text-success"></i> Participate in investment
+                                    discussions
+                                </li>
                             </ul>
                         </div>
                     }
+                </div>
+            </div>
+
+            <!-- New Verification Status Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Verification Status</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="verification-status-container">
+                                <div class="d-flex align-items-center mb-4">
+                                    @if (Model.IsVerified)
+                                    {
+                                        <div class="verification-badge verified me-3">
+                                            <i class="bi bi-patch-check-fill fs-1"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-0 text-success">Verified</h3>
+                                            <p class="text-muted mb-0">Your account is fully verified</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="verification-badge unverified me-3">
+                                            <i class="bi bi-exclamation-circle fs-1"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-0 text-warning">Not Verified</h3>
+                                            <p class="text-muted mb-0">Connect your brokerage account to get
+                                                verified</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- TrustTrade/Views/Brokerage/Connect.cshtml - Updated HTML structure -->
+                            <div class="verification-summary">
+                                <h5 class="mb-3">Verification Summary</h5>
+                                <div class="card">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <span class="label">First Verified</span>
+                                            <div class="badge-container">
+                    <span class="badge bg-primary rounded-pill">
+                        @(Model.FirstVerifiedDate?.ToString("M/d/yyyy h:mm tt") ?? "Never")
+                    </span>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="label">Most Recent</span>
+                                            <div class="badge-container">
+                    <span class="badge bg-primary rounded-pill">
+                        @(Model.MostRecentVerifiedDate?.ToString("M/d/yyyy h:mm tt") ?? "Never")
+                    </span>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="label">Total Time</span>
+                                            <div class="badge-container">
+                    <span class="badge bg-success rounded-pill"
+                          title="Duration since first verification">
+                        @Model.FormattedVerifiedDuration
+                    </span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add verification history if there is any -->
+            @if (Model.VerificationHistory.Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Verification History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Source</th>
+                                    <th>Reason</th>
+                                    <th>Time</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var item in Model.VerificationHistory)
+                                {
+                                    <tr>
+                                        <td>@item.Timestamp.ToString("g")</td>
+                                        <td>
+                                            @if (item.IsVerified)
+                                            {
+                                                <span class="badge bg-success">Verified</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Unverified</span>
+                                            }
+                                        </td>
+                                        <td>@(item.Source ?? "Unknown")</td>
+                                        <td>@(item.Reason ?? "-")</td>
+                                        <td>@item.TimeSince</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Verification Benefits Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Verification Benefits</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="verification-benefit">
+                                <i class="bi bi-shield-check fs-2 mb-2"></i>
+                                <h5>Enhanced Credibility</h5>
+                                <p>Your posts and analyses carry more weight with verified status</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="verification-benefit">
+                                <i class="bi bi-graph-up-arrow fs-2 mb-2"></i>
+                                <h5>Performance Tracking</h5>
+                                <p>Get detailed analytics on your investment performance</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="verification-benefit">
+                                <i class="bi bi-people fs-2 mb-2"></i>
+                                <h5>Community Recognition</h5>
+                                <p>Stand out in the community with your verified badge</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .verification-badge {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .verification-badge.verified {
+        color: #198754;
+    }
+
+    .verification-badge.unverified {
+        color: #ffc107;
+    }
+
+    .verification-benefit {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 8px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: rgba(13, 110, 253, 0.05);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .verification-benefit:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .verification-benefit i {
+        color: #0d6efd;
+        margin-bottom: 1rem;
+    }
+
+    .verification-summary .badge.rounded-pill {
+        display: inline-block;
+        padding: 0.35rem 0.5rem;  /* Reduced padding */
+        font-size: 0.8rem;        /* Smaller font size */
+        font-weight: normal;
+        line-height: 1.2;
+        white-space: normal;      /* Allow wrapping on very small screens */
+        text-align: center;
+        vertical-align: middle;
+        border-radius: 10rem;
+        max-width: 100%;
+    }
+
+    /* Improved list items for better responsive behavior */
+    .verification-summary .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;         /* Reduced padding */
+        flex-wrap: wrap;          /* Allow wrapping on very small screens */
+    }
+
+    /* Left side label with responsive adjustments */
+    .verification-summary .list-group-item .label {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding-right: 0.5rem;
+        font-weight: 500;
+    }
+
+    /* Right side container for badges with responsive behavior */
+    .verification-summary .badge-container {
+        flex: 0 0 auto;
+        max-width: 50%;
+        text-align: right;
+    }
+    
+</style>
+
 @section Scripts {
     <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-    <script src="~/js/plaid.js?v=2.0"></script>
+    <script src="~/js/plaid.js?v=2.1"></script>
 }

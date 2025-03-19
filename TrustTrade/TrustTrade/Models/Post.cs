@@ -9,13 +9,13 @@ public partial class Post
 
     public int UserId { get; set; }
 
-    public string? Title { get; set; }
+    public string Title { get; set; } = null!;
 
-    public string? Content { get; set; }
+    public string Content { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public string? PrivacySetting { get; set; }
+    public bool IsPublic { get; set; } = false;
 
     public decimal? PortfolioValueAtPosting { get; set; }
 
