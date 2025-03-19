@@ -33,8 +33,8 @@ namespace TrustTrade.Controllers
             _userRepository = userRepository;
         }
 
-        [Authorize]
         [HttpGet]
+        [Authorize]
         public IActionResult Create()
         {
             // Retrieve all existing tags for the view model
@@ -46,8 +46,8 @@ namespace TrustTrade.Controllers
             return View(vm);
         }
 
-        [Authorize]
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create(CreatePostVM createPostVM)
         {
             if (ModelState.IsValid)
@@ -144,14 +144,11 @@ namespace TrustTrade.Controllers
             return View(createPostVM);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             // Retrieve the post from the repository
             Post? post = _postRepository.FindById(id);
-            if (post == null)
-            {
-                return NotFound();
-            }
+            if (post == null) return NotFound();
 
             var isPlaidEnabled = post.User.PlaidEnabled ?? false;
             string? portfolioValue = null;
@@ -169,9 +166,24 @@ namespace TrustTrade.Controllers
                 }
             }
 
+            bool isOwnedByCurrentUser = false;
+
+            // Check if the current user is the author of the post
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId != null)
+            {
+                // Retrieve the user from the main database
+                User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+                if (user != null && user.Id == post.UserId)
+                {
+                    isOwnedByCurrentUser = true;
+                }
+            }
+
             // Map the post to the view model
             var vm = new PostDetailsVM
             {
+                Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
                 Username = post.User.Username,
@@ -180,10 +192,109 @@ namespace TrustTrade.Controllers
                 LikeCount = post.Likes.Count,
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
-                PortfolioValueAtPosting = portfolioValue
+                PortfolioValueAtPosting = portfolioValue,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser
             };
 
             return View(vm);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id)
+        {
+            Post? post = _postRepository.FindById(id);
+            if (post == null) return NotFound();
+
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user from the main database
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
+            // Ensure the user is the author of the post
+            if (post.UserId != user.Id) return Unauthorized();
+
+            var vm = new PostEditVM
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                IsPublic = post.IsPublic,
+                AvailableTags = _tagRepository.GetAllTagNames(),
+                SelectedTags = post.Tags.Select(t => t.TagName).ToList()
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, PostEditVM postEditVM)
+        {
+            if (!ModelState.IsValid)
+            {
+                postEditVM.AvailableTags = _tagRepository.GetAllTagNames();
+                return View(postEditVM);
+            }
+
+            if (id != postEditVM.Id) return BadRequest("Post ID mismatch");
+
+            Post? post = _postRepository.FindById(id);
+            if (post == null) return NotFound();
+
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user from the main database
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
+            // Ensure the user is the author of the post
+            if (post.UserId != user.Id) return Unauthorized();
+
+            // Update the post with the new values
+            post.Title = postEditVM.Title;
+            post.Content = postEditVM.Content;
+            post.IsPublic = postEditVM.IsPublic;
+
+            // Clear existing post tags and add the new ones
+            post.Tags.Clear();
+            foreach (string tagName in postEditVM.SelectedTags)
+            {
+                Tag? tag = _tagRepository.FindByTagName(tagName);
+                if (tag != null)
+                {
+                    post.Tags.Add(tag);
+                }
+            }
+
+            // Save the updated post
+            _postRepository.AddOrUpdate(post);
+            return RedirectToAction("Details", new { id = post.Id });
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            Post? post = _postRepository.FindById(id);
+            if (post == null) return NotFound();
+
+            string? identityUserId = _userManager.GetUserId(User);
+            if (identityUserId == null) return Unauthorized();
+
+            // Retrieve the user from the main database
+            User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
+            if (user == null) return NotFound();
+
+            // Ensure the user is the author of the post
+            if (post.UserId != user.Id) return Unauthorized();
+
+            _postRepository.Delete(post);
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

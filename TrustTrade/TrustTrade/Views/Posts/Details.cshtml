@@ -6,8 +6,36 @@
     ViewData["Title"] = "Post Details";
 }
 
+<!-- Post Actions Dropdown For The Owner -->
+@if (Model.IsOwnedByCurrentUser)
+{
+    <div class="d-flex justify-content-end">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="postActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Actions
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postActionsDropdown">
+                <li>
+                    <a class="dropdown-item" asp-controller="Posts" 
+                    asp-action="Edit" 
+                    asp-route-id="@Model.Id">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                </li>
+                <li>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="delete-post-form">
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
 <!-- Post Details -->
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="card">
         <div class="card-body">
             <div class="d-flex align-items-center">
@@ -45,6 +73,12 @@
             <!-- Consider whether or not to add this tag here <hr /> -->
             <!-- Display Main Post Content -->
             <h2 class="card-title mt-3">@Model.Title</h2>
+            <div class="mt-2">
+                @foreach (var tag in Model.Tags)
+                {
+                    <span class="badge bg-secondary me-2">@tag</span>
+                }
+            </div>
             <p class="card-text mt-4">@Model.Content</p>
             <!-- Like and Comment Buttons -->
             <div class="d-flex align-items-center mt-4">
@@ -54,13 +88,6 @@
                 <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
                     <i class="bi bi-chat"></i> @Model.CommentCount
                 </button>
-            </div>
-            <!-- Tags -->
-            <div class="mt-4">
-                @foreach (var tag in Model.Tags)
-                {
-                    <span class="badge bg-secondary me-2">@tag</span>
-                }
             </div>
         </div>
     </div>
@@ -75,3 +102,7 @@
         </li>
     </ul>
 </div>
+
+@section Scripts {
+    <script src="~/js/postActions.js"></script>
+}
