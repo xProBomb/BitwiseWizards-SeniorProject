@@ -105,10 +105,39 @@ namespace TrustTrade.Controllers
                 HideAllPositions = hideAll,
                 PerformanceScore = score,
                 HasRatedScore = isRated,
-                ScoreBreakdown = breakdown
+                ScoreBreakdown = breakdown,
+                ProfilePicture = user.ProfilePicture
             };
 
             return View("Profile", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfilePicture(IFormFile ProfilePicture)
+        {
+            if (ProfilePicture != null && ProfilePicture.Length > 0)
+            {
+                var validImageTypes = new[] { "image/jpeg", "image/png" };
+                if (!validImageTypes.Contains(ProfilePicture.ContentType))
+                {
+                    TempData["ProfilePictureError"] = "Invalid image type. Only JPEG and PNG are allowed.";
+                    return RedirectToAction("MyProfile");
+                }
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await ProfilePicture.CopyToAsync(memoryStream);
+                    var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+                    if (user != null)
+                    {
+                        user.ProfilePicture = memoryStream.ToArray();
+                        _context.Update(user);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            return RedirectToAction("MyProfile");
         }
 
         // In order to access the profile of a user, use the route below
@@ -191,7 +220,8 @@ namespace TrustTrade.Controllers
                 IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
                 PerformanceScore = score,
                 HasRatedScore = isRated,
-                ScoreBreakdown = breakdown
+                ScoreBreakdown = breakdown,
+                ProfilePicture = user.ProfilePicture
             };
 
             return View("Profile", model);
@@ -402,8 +432,8 @@ namespace TrustTrade.Controllers
                             HideAllPositions = false,
                             PerformanceScore = 0,
                             HasRatedScore = false,
-                            ScoreBreakdown = new Dictionary<string, decimal>()
-
+                            ScoreBreakdown = new Dictionary<string, decimal>(),
+                            ProfilePicture = updatedUser.ProfilePicture
                         };
 
                         return View("Profile", model);
@@ -414,6 +444,7 @@ namespace TrustTrade.Controllers
                 user.Username = username;
                 user.Bio = bio;
                 user.UserTag = userTag;
+                _context.Update(user);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(MyProfile));

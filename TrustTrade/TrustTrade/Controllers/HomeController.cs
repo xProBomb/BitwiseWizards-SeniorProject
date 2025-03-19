@@ -49,7 +49,8 @@ namespace TrustTrade.Controllers
                 LikeCount = p.Likes.Count,
                 CommentCount = p.Comments.Count,
                 IsPlaidEnabled = p.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = p.PortfolioValueAtPosting
+                PortfolioValueAtPosting = p.PortfolioValueAtPosting,
+                ProfilePicture = p.User.ProfilePicture
             }).ToList();
             
             //            // For debugging 
@@ -118,7 +119,8 @@ namespace TrustTrade.Controllers
                 LikeCount = p.Likes.Count,
                 CommentCount = p.Comments.Count,
                 IsPlaidEnabled = p.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = p.PortfolioValueAtPosting
+                PortfolioValueAtPosting = p.PortfolioValueAtPosting,
+                ProfilePicture = p.User.ProfilePicture
             }).ToList();
 
             // Determine total pages
