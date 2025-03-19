@@ -7,7 +7,7 @@ CREATE TABLE Users (
     Email NVARCHAR(100) NOT NULL UNIQUE,
     PasswordHash NVARCHAR(255) NOT NULL,
     CreatedAt DATETIME DEFAULT GETDATE(),
-    ProfilePicture NVARCHAR(255),
+    ProfilePicture VARBINARY(MAX),
     Bio NVARCHAR(500),
     Is_Admin BIT DEFAULT 0,
     Is_Verified BIT DEFAULT 0,
