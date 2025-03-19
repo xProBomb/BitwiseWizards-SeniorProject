@@ -960,4 +960,125 @@ public class PostsControllerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Model, Is.Not.Null.And.TypeOf<PostEditVM>());
     }
+
+    [Test]
+    public async Task DeletePOST_WhenUserIsOwner_DeletesPostAndRedirectsToIndex()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _postRepositoryMock.Setup(r => r.Delete(It.IsAny<Post>())).Verifiable();
+
+        // Act
+        var result = await _controller.Delete(1) as RedirectToActionResult;
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.ActionName, Is.EqualTo("Index"), "Expected to redirect to 'Index'");
+
+        _postRepositoryMock.Verify(r => r.Delete(It.IsAny<Post>()), Times.Once);
+    }
+
+    [Test]
+    public async Task DeletePOST_WhenUserIsNotOwner_ReturnsUnauthorized()
+    {
+        // Arrange
+        var user1 = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var user2 = new User
+        {
+            Id = 2,
+            IdentityId = "test-identity-2",
+            ProfileName = "janeDoe",
+            Username = "janeDoe",
+            Email = "janedoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user1,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user2);
+
+        // Act
+        var result = await _controller.Delete(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<UnauthorizedResult>());
+    }
+
+    [Test]
+    public async Task DeletePOST_WhenNotLoggedIn_ReturnsUnauthorized()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            IdentityId = "test-identity-1",
+            ProfileName = "johnDoe",
+            Username = "johnDoe",
+            Email = "johndoe@example.com",
+            PasswordHash = "dummyHash"
+        };
+
+        var post = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = user,
+        };
+
+        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
+
+        // Act
+        var result = await _controller.Delete(1);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.TypeOf<UnauthorizedResult>());
+    }
 }
