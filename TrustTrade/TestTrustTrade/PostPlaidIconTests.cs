@@ -170,7 +170,8 @@ namespace TestTrustTrade
             var loggerMock = new Mock<ILogger<HomeController>>();
             var postRepoMock = new Mock<IPostRepository>();
             var tagRepoMock = new Mock<ITagRepository>();
-            var controller = new HomeController(loggerMock.Object, postRepoMock.Object, tagRepoMock.Object);
+            var dbContextMock = new Mock<TrustTradeDbContext>();
+            var controller = new HomeController(dbContextMock.Object, loggerMock.Object, postRepoMock.Object, tagRepoMock.Object);
 
             var plaidUser = new User
             {
