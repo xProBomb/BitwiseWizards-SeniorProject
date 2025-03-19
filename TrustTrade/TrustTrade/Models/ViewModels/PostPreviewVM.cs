@@ -21,4 +21,6 @@ public class PostPreviewVM
     public bool IsPlaidEnabled { get; set; }
 
     public decimal? PortfolioValueAtPosting { get; set; }
+
+    public byte[]? ProfilePicture { get; set; }
 }
