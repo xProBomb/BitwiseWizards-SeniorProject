@@ -3,6 +3,7 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.DAL.Concrete;
 using TrustTrade.Models;
 using Microsoft.EntityFrameworkCore;
+using Moq.EntityFrameworkCore;
 
 namespace TestTrustTrade;
 
@@ -10,20 +11,7 @@ namespace TestTrustTrade;
 public class TagRepositoryTests
 {
     private Mock<TrustTradeDbContext> _mockDbContext;
-    private Mock<DbSet<Tag>> _mockTagDbSet;
     private List<Tag> _tags;
-
-    // A helper to make dbset queryable
-    private Mock<DbSet<T>> GetMockDbSet<T>(IQueryable<T> entities) where T : class
-    {
-        var mockSet = new Mock<DbSet<T>>();
-        mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(entities.Provider);
-        mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(entities.Expression);
-        mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(entities.ElementType);
-        mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(entities.GetEnumerator());
-        return mockSet;
-    }
-
 
     [SetUp]
     public void Setup()
@@ -40,34 +28,33 @@ public class TagRepositoryTests
         };
 
         _mockDbContext = new Mock<TrustTradeDbContext>();
-        _mockTagDbSet = GetMockDbSet(_tags.AsQueryable());
-        _mockDbContext.Setup(c => c.Tags).Returns(_mockTagDbSet.Object);
-        _mockDbContext.Setup(c => c.Set<Tag>()).Returns(_mockTagDbSet.Object); 
+        _mockDbContext.Setup(c => c.Tags).ReturnsDbSet(_tags);
+        _mockDbContext.Setup(c => c.Set<Tag>()).ReturnsDbSet(_tags);
     }
 
     [Test]
-    public void GetAllTagNames_WhenTagsExist_ReturnsAllTagNames()
+    public async Task GetAllTagNamesAsync_WhenTagsExist_ReturnsAllTagNames()
     {
         // Arrange
         ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
         var expected = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
 
         // Act
-        var result = tagRepository.GetAllTagNames();
+        var result = await tagRepository.GetAllTagNamesAsync();
 
         // Assert
         Assert.That(result, Is.EquivalentTo(expected));
     }
 
     [Test]
-    public void GetAllTagNames_WhenNoTags_ReturnsEmptyList()
+    public async Task GetAllTagNamesAsync_WhenNoTags_ReturnsEmptyList()
     {
         // Arrange
         _tags.Clear();
         ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
 
         // Act
-        var result = tagRepository.GetAllTagNames();
+        var result = await tagRepository.GetAllTagNamesAsync();
 
         // Assert
         Assert.That(result, Is.Empty);
@@ -76,14 +63,14 @@ public class TagRepositoryTests
     [TestCase("Memes")]
     [TestCase("memes")] // Case insensitivity test
     [TestCase("MEMES")] // Case insensitivity test
-    public void FindByTagName_WhenTagExists_ReturnsTag(string tagName)
+    public async Task FindByTagNameAsync_WhenTagExists_ReturnsTag(string tagName)
     {
         // Arrange
         ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
         var expected = _tags[0];
 
         // Act
-        var result = tagRepository.FindByTagName(tagName);
+        var result = await tagRepository.FindByTagNameAsync(tagName);
 
         // Assert
         Assert.Multiple(() =>
@@ -94,13 +81,13 @@ public class TagRepositoryTests
     }
 
     [Test]
-    public void FindByTagName_WhenTagDoesNotExist_ReturnsNull()
+    public async Task FindByTagNameAsync_WhenTagDoesNotExist_ReturnsNull()
     {
         // Arrange
         ITagRepository tagRepository = new TagRepository(_mockDbContext.Object);
 
         // Act
-        var result = tagRepository.FindByTagName("NonExistentTag");
+        var result = await tagRepository.FindByTagNameAsync("NonExistentTag");
 
         // Assert
         Assert.That(result, Is.Null);

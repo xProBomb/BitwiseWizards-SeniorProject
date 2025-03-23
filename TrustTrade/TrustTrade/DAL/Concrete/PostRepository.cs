@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
@@ -14,7 +15,7 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
-    public List<Post> GetPagedPosts(string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public async Task<List<Post>> GetPagedPostsAsync(string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
     {
         // Start with a query that includes the related User and Tags.
         IQueryable<Post> query = _posts
@@ -46,14 +47,14 @@ public class PostRepository : Repository<Post>, IPostRepository
         }
 
         // Apply pagination
-        return query
+        return await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync();
     }
 
     // Method to get the posts that a specific user is following
-    public List<Post> GetPagedPostsByUserFollows(int currentUser, string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public async Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUser, string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
     {
         // Start with a query that includes the related User and Tags.
         IQueryable<Post> query = _posts
@@ -86,13 +87,13 @@ public class PostRepository : Repository<Post>, IPostRepository
         }
 
         // Apply pagination
-        return query
+        return await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync();
     }
 
-    public int GetTotalPosts(string? category = null)
+    public async Task<int> GetTotalPostsAsync(string? category = null)
     {
         // Start with a query that includes the related Tags.
         IQueryable<Post> query = _posts
@@ -104,10 +105,10 @@ public class PostRepository : Repository<Post>, IPostRepository
             query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
         }
 
-        return query.Count();
+        return await query.CountAsync();
     }
 
-    public int GetTotalPostsByUserFollows(int currentUserId, string? category = null)
+    public async Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? category = null)
     {
         // Start with a query that includes the related Tags.
         IQueryable<Post> query = _posts
@@ -120,7 +121,7 @@ public class PostRepository : Repository<Post>, IPostRepository
             query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
         }
 
-        return query.Count();
+        return await query.CountAsync();
     }
 }
 

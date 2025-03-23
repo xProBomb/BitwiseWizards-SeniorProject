@@ -35,12 +35,12 @@ namespace TrustTrade.Controllers
 
         [HttpGet]
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             // Retrieve all existing tags for the view model
             var vm = new CreatePostVM
             {
-                ExistingTags = _tagRepository.GetAllTagNames()
+                ExistingTags = await _tagRepository.GetAllTagNamesAsync()
             };
 
             return View(vm);
@@ -78,7 +78,7 @@ namespace TrustTrade.Controllers
                 // Add the selected tags to the post
                 foreach (string tagName in createPostVM.SelectedTags)
                 {
-                    Tag? tag = _tagRepository.FindByTagName(tagName);
+                    Tag? tag = await _tagRepository.FindByTagNameAsync(tagName);
                     if (tag != null)
                     {
                         // Add the tag to the post and the post to the tag
@@ -140,7 +140,7 @@ namespace TrustTrade.Controllers
             }
 
             // Repopulate the existing tags in case of validation errors
-            createPostVM.ExistingTags = _tagRepository.GetAllTagNames();
+            createPostVM.ExistingTags = await _tagRepository.GetAllTagNamesAsync();
             return View(createPostVM);
         }
 
@@ -222,7 +222,7 @@ namespace TrustTrade.Controllers
                 Title = post.Title,
                 Content = post.Content,
                 IsPublic = post.IsPublic,
-                AvailableTags = _tagRepository.GetAllTagNames(),
+                AvailableTags = await _tagRepository.GetAllTagNamesAsync(),
                 SelectedTags = post.Tags.Select(t => t.TagName).ToList()
             };
 
@@ -235,7 +235,7 @@ namespace TrustTrade.Controllers
         {
             if (!ModelState.IsValid)
             {
-                postEditVM.AvailableTags = _tagRepository.GetAllTagNames();
+                postEditVM.AvailableTags = await _tagRepository.GetAllTagNamesAsync();
                 return View(postEditVM);
             }
 
@@ -263,7 +263,7 @@ namespace TrustTrade.Controllers
             post.Tags.Clear();
             foreach (string tagName in postEditVM.SelectedTags)
             {
-                Tag? tag = _tagRepository.FindByTagName(tagName);
+                Tag? tag = await _tagRepository.FindByTagNameAsync(tagName);
                 if (tag != null)
                 {
                     post.Tags.Add(tag);

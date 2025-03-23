@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using TrustTrade.ViewModels;
+using System.Threading.Tasks;
 
 namespace TestTrustTrade;
 
@@ -124,26 +125,26 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void CreateGET_ReturnsViewResult()
+    public async Task CreateGET_ReturnsViewResult()
     {
         // Arrange
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
-        var result = _controller.Create();
+        var result = await _controller.Create();
 
         // Assert
         Assert.That(result, Is.Not.Null.And.TypeOf<ViewResult>());
     }
 
     [Test]
-    public void CreateGET_IncludesModelOfTypeCreatePostVM()
+    public async Task CreateGET_IncludesModelOfTypeCreatePostVM()
     {
         // Arrange
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
-        var result = _controller.Create() as ViewResult;
+        var result = await _controller.Create() as ViewResult;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -151,14 +152,14 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void CreateGET_WhenTagsExist_PopulatesExistingTags()
+    public async Task CreateGET_WhenTagsExist_PopulatesExistingTags()
     {
         // Arrange
         var tags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(tags);
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(tags);
 
         // Act
-        var result = _controller.Create() as ViewResult;
+        var result = await _controller.Create() as ViewResult;
         var model = result?.Model as CreatePostVM;
 
         // Assert
@@ -167,13 +168,13 @@ public class PostsControllerTests
     }
 
     [Test]
-    public void CreateGET_WhenNoTagsExist_SetsEmptyTagList()
+    public async Task CreateGET_WhenNoTagsExist_SetsEmptyTagList()
     {
         // Arrange
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
-        var result = _controller.Create() as ViewResult;
+        var result = await _controller.Create() as ViewResult;
         var model = result?.Model as CreatePostVM;
 
         // Assert
@@ -212,7 +213,7 @@ public class PostsControllerTests
 
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
-        _tagRepositoryMock.Setup(r => r.FindByTagName(It.IsAny<string>())).Returns(new Tag());
+        _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdate(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -222,8 +223,8 @@ public class PostsControllerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result.ActionName, Is.EqualTo("Index"), "Expected to redirect to 'Index'");
 
-        _tagRepositoryMock.Verify(r => r.FindByTagName("Memes"), Times.Once);
-        _tagRepositoryMock.Verify(r => r.FindByTagName("Gain"), Times.Once);
+        _tagRepositoryMock.Verify(r => r.FindByTagNameAsync("Memes"), Times.Once);
+        _tagRepositoryMock.Verify(r => r.FindByTagNameAsync("Gain"), Times.Once);
         _postRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<Post>()), Times.Once);
     }
 
@@ -299,7 +300,7 @@ public class PostsControllerTests
     {
         // Arrange
         _controller.ModelState.AddModelError("Title", "Title is required");
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
         var result = await _controller.Create(_invalidCreatePostVM);
@@ -313,7 +314,7 @@ public class PostsControllerTests
     {
         // Arrange
         _controller.ModelState.AddModelError("Title", "Title is required");
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
         var result = await _controller.Create(_invalidCreatePostVM) as ViewResult;
@@ -329,7 +330,7 @@ public class PostsControllerTests
         // Arrange
         var tags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
 
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(tags);
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(tags);
         _controller.ModelState.AddModelError("Title", "Title is required");
 
         // Act
@@ -345,7 +346,7 @@ public class PostsControllerTests
     public async Task CreatePOST_WhenInvalidAndNoTagsExist_SetsEmptyTagList()
     {
         // Arrange
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
         _controller.ModelState.AddModelError("Title", "Title is required");
 
         // Act
@@ -471,7 +472,7 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
         var result = await _controller.Edit(1) as ViewResult;
@@ -509,7 +510,7 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(availableTags);
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(availableTags);
 
         // Act
         var result = await _controller.Edit(1) as ViewResult;
@@ -574,7 +575,7 @@ public class PostsControllerTests
         _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
-        _tagRepositoryMock.Setup(r => r.FindByTagName(It.IsAny<string>())).Returns(new Tag());
+        _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdate(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -634,7 +635,7 @@ public class PostsControllerTests
     {
         // Arrange
         _controller.ModelState.AddModelError("Title", "Title is required");
-        _tagRepositoryMock.Setup(r => r.GetAllTagNames()).Returns(new List<string>());
+        _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
         var result = await _controller.Edit(1, _invalidPostEditVM) as ViewResult;

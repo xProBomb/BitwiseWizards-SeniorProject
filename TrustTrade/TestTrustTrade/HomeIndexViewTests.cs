@@ -109,18 +109,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Index_ReturnsAViewResult()
+        public async Task Index_ReturnsAViewResult()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index();
+            var result = await _controller.Index();
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -128,18 +128,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Index_ReturnsCorrectModelType()
+        public async Task Index_ReturnsCorrectModelType()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
 
             // Assert
             Assert.That(result?.Model, Is.Not.Null);
@@ -147,18 +147,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Index_PlaidEnabledUser_ShowsCheckmarkInViewModel()
+        public async Task Index_PlaidEnabledUser_ShowsCheckmarkInViewModel()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
             var model = result?.Model as IndexVM;
             
             // Find posts by users with different Plaid statuses
@@ -181,18 +181,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Index_PlaidEnabledUserWithPortfolioValue_IncludesValueInViewModel()
+        public async Task Index_PlaidEnabledUserWithPortfolioValue_IncludesValueInViewModel()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
             var model = result?.Model as IndexVM;
             
             // Find posts with different portfolio values
@@ -213,19 +213,19 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Index_PagingAndSorting_PreservesPlaidStatusInViewModel()
+        public async Task Index_PagingAndSorting_PreservesPlaidStatusInViewModel()
         {
             // Arrange
             var sortedPosts = _mockPosts.OrderBy(p => p.CreatedAt).ToList(); // Sort by date ascending
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "DateAsc"))
-                .Returns(sortedPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "DateAsc"))
+                .ReturnsAsync(sortedPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index(sortOrder: "DateAsc") as ViewResult;
+            var result = await _controller.Index(sortOrder: "DateAsc") as ViewResult;
             var model = result?.Model as IndexVM;
 
             // Assert
@@ -241,18 +241,18 @@ namespace TestTrustTrade
             Assert.That(nonPlaidPosts.Count, Is.EqualTo(2), "Should have 2 posts without Plaid enabled");
         }
         [Test]
-        public void Follower_ReturnsAViewResult()
+        public async Task Follower_ReturnsAViewResult()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index();
+            var result = await _controller.Index();
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -260,18 +260,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Follower_ReturnsCorrectModelType()
+        public async Task Follower_ReturnsCorrectModelType()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
 
             // Assert
             Assert.That(result?.Model, Is.Not.Null);
@@ -279,18 +279,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Follower_PlaidEnabledUser_ShowsCheckmarkInViewModel()
+        public async Task Follower_PlaidEnabledUser_ShowsCheckmarkInViewModel()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
             var model = result?.Model as IndexVM;
 
             // Find posts by users with different Plaid statuses
@@ -313,18 +313,18 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Follower_PlaidEnabledUserWithPortfolioValue_IncludesValueInViewModel()
+        public async Task Follower_PlaidEnabledUserWithPortfolioValue_IncludesValueInViewModel()
         {
             // Arrange
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(_mockPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
             var model = result?.Model as IndexVM;
 
             // Find posts with different portfolio values
@@ -345,19 +345,19 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void Follower_PagingAndSorting_PreservesPlaidStatusInViewModel()
+        public async Task Follower_PagingAndSorting_PreservesPlaidStatusInViewModel()
         {
             // Arrange
             var sortedPosts = _mockPosts.OrderBy(p => p.CreatedAt).ToList(); // Sort by date ascending
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "DateAsc"))
-                .Returns(sortedPosts);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(_mockPosts.Count);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "DateAsc"))
+                .ReturnsAsync(sortedPosts);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(_mockPosts.Count);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index(sortOrder: "DateAsc") as ViewResult;
+            var result = await _controller.Index(sortOrder: "DateAsc") as ViewResult;
             var model = result?.Model as IndexVM;
 
             // Assert
@@ -373,7 +373,7 @@ namespace TestTrustTrade
             Assert.That(nonPlaidPosts.Count, Is.EqualTo(2), "Should have 2 posts without Plaid enabled");
         }
         [Test]
-        public void ConvertToViewModel_CorrectlyMapsPlaidStatus()
+        public async Task ConvertToViewModel_CorrectlyMapsPlaidStatus()
         {
             // This test validates the mapping logic in the controller
             // We'll create mock data similar to what the repository would return
@@ -393,15 +393,15 @@ namespace TestTrustTrade
                 }
             };
 
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(mockPostsWithUsers);
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(1);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(mockPostsWithUsers);
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(1);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
             var model = result?.Model as IndexVM;
             var postPreview = model?.Posts?.FirstOrDefault();
 

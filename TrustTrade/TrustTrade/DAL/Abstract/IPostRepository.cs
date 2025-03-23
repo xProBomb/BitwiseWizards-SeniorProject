@@ -4,8 +4,8 @@ namespace TrustTrade.DAL.Abstract;
 
 public interface IPostRepository : IRepository<Post>
 {
-    List<Post> GetPagedPosts(string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc");
-    List<Post> GetPagedPostsByUserFollows(int currentUserId, string? categoryFilter, int page, int pAGE_SIZE, string sortOrder);
-    int GetTotalPosts(string? category = null);
-    int GetTotalPostsByUserFollows(int currentUserId, string? categoryFilter);
+    Task<List<Post>> GetPagedPostsAsync(string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc");
+    Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUserId, string? categoryFilter, int page, int pAGE_SIZE, string sortOrder);
+    Task<int> GetTotalPostsAsync(string? category = null);
+    Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? categoryFilter);
 }
