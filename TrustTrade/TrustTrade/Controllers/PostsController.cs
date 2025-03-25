@@ -53,17 +53,11 @@ namespace TrustTrade.Controllers
             if (ModelState.IsValid)
             {
                 string? identityUserId = _userManager.GetUserId(User);
-                if (identityUserId == null)
-                {
-                    return Unauthorized();
-                }
+                if (identityUserId == null) return Unauthorized();
 
-                // Retrieve the user from the database
+                // Retrieve the user from the main database
                 User? user = await _userRepository.FindByIdentityIdAsync(identityUserId);
-                if (user == null)
-                {
-                    return NotFound();
-                }
+                if (user == null) return NotFound();
 
                 // Map the CreatePostVM to the Post entity
                 var post = new Post
