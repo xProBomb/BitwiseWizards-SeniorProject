@@ -69,18 +69,6 @@ namespace TrustTrade.Controllers
                     // PortfolioValueAtPosting will be set below if available
                 };
 
-                // Add the selected tags to the post
-                foreach (string tagName in createPostVM.SelectedTags)
-                {
-                    Tag? tag = await _tagRepository.FindByTagNameAsync(tagName);
-                    if (tag != null)
-                    {
-                        // Add the tag to the post and the post to the tag
-                        post.Tags.Add(tag);
-                        tag.Posts.Add(post);
-                    }
-                }
-
                 // Only attempt to refresh and calculate portfolio value if Plaid is enabled
                 if (user.PlaidEnabled == true)
                 {
@@ -123,9 +111,20 @@ namespace TrustTrade.Controllers
                 }
                 else
                 {
-                    // Log that we're skipping portfolio calculation since Plaid isn't enabled
                     _logger.LogInformation(
                         $"User {user.Username} does not have Plaid enabled, skipping portfolio value calculation");
+                }
+
+                // Add the selected tags to the post
+                foreach (string tagName in createPostVM.SelectedTags)
+                {
+                    Tag? tag = await _tagRepository.FindByTagNameAsync(tagName);
+                    if (tag != null)
+                    {
+                        // Add the tag to the post and the post to the tag
+                        post.Tags.Add(tag);
+                        tag.Posts.Add(post);
+                    }
                 }
 
                 // Save the post to the database
