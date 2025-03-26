@@ -128,7 +128,7 @@ namespace TrustTrade.Controllers
                 }
 
                 // Save the post to the database
-                _postRepository.AddOrUpdate(post);
+                await _postRepository.AddOrUpdateAsync(post);
                 return RedirectToAction("Index", "Home");
             }
 
@@ -140,7 +140,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> Details(int id)
         {
             // Retrieve the post from the repository
-            Post? post = _postRepository.FindById(id);
+            Post? post = await _postRepository.FindByIdAsync(id);
             if (post == null) return NotFound();
 
             var isPlaidEnabled = post.User.PlaidEnabled ?? false;
@@ -196,7 +196,7 @@ namespace TrustTrade.Controllers
         [Authorize]
         public async Task<IActionResult> Edit(int id)
         {
-            Post? post = _postRepository.FindById(id);
+            Post? post = await _postRepository.FindByIdAsync(id);
             if (post == null) return NotFound();
 
             string? identityUserId = _userManager.GetUserId(User);
@@ -234,7 +234,7 @@ namespace TrustTrade.Controllers
 
             if (id != postEditVM.Id) return BadRequest("Post ID mismatch");
 
-            Post? post = _postRepository.FindById(id);
+            Post? post = await _postRepository.FindByIdAsync(id);
             if (post == null) return NotFound();
 
             string? identityUserId = _userManager.GetUserId(User);
@@ -264,7 +264,7 @@ namespace TrustTrade.Controllers
             }
 
             // Save the updated post
-            _postRepository.AddOrUpdate(post);
+            await _postRepository.AddOrUpdateAsync(post);
             return RedirectToAction("Details", new { id = post.Id });
         }
 
@@ -272,7 +272,7 @@ namespace TrustTrade.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            Post? post = _postRepository.FindById(id);
+            Post? post = await _postRepository.FindByIdAsync(id);
             if (post == null) return NotFound();
 
             string? identityUserId = _userManager.GetUserId(User);
@@ -285,7 +285,7 @@ namespace TrustTrade.Controllers
             // Ensure the user is the author of the post
             if (post.UserId != user.Id) return Unauthorized();
 
-            _postRepository.Delete(post);
+            await _postRepository.DeleteAsync(post);
 
             return RedirectToAction("Index", "Home");
         }

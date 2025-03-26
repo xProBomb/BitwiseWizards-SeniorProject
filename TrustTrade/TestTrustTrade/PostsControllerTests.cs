@@ -188,7 +188,7 @@ public class PostsControllerTests
         // Arrange
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
-        _postRepositoryMock.Setup(r => r.AddOrUpdate(It.IsAny<Post>())).Verifiable();
+        _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
         var result = await _controller.Create(_validCreatePostVM) as RedirectToActionResult;
@@ -197,7 +197,7 @@ public class PostsControllerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result.ActionName, Is.EqualTo("Index"), "Expected to redirect to 'Index'");
 
-         _postRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<Post>()), Times.Once);
+         _postRepositoryMock.Verify(r => r.AddOrUpdateAsync(It.IsAny<Post>()), Times.Once);
     }
 
     [Test]
@@ -214,7 +214,7 @@ public class PostsControllerTests
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
-        _postRepositoryMock.Setup(r => r.AddOrUpdate(It.IsAny<Post>())).Verifiable();
+        _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
         var result = await _controller.Create(vm) as RedirectToActionResult;
@@ -225,7 +225,7 @@ public class PostsControllerTests
 
         _tagRepositoryMock.Verify(r => r.FindByTagNameAsync("Memes"), Times.Once);
         _tagRepositoryMock.Verify(r => r.FindByTagNameAsync("Gain"), Times.Once);
-        _postRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<Post>()), Times.Once);
+        _postRepositoryMock.Verify(r => r.AddOrUpdateAsync(It.IsAny<Post>()), Times.Once);
     }
 
 
@@ -255,7 +255,7 @@ public class PostsControllerTests
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
         _holdingsRepositoryMock.Setup(r => r.RefreshHoldingsAsync(It.IsAny<int>())).ReturnsAsync(true);
         _holdingsRepositoryMock.Setup(r => r.GetHoldingsForUserAsync(It.IsAny<int>())).ReturnsAsync(investmentPositions).Verifiable();
-        _postRepositoryMock.Setup(r => r.AddOrUpdate(It.IsAny<Post>())).Verifiable();
+        _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
         var result = await _controller.Create(_validCreatePostVM) as RedirectToActionResult;
@@ -265,7 +265,7 @@ public class PostsControllerTests
         Assert.That(result.ActionName, Is.EqualTo("Index"), "Expected to redirect to 'Index'");
 
         _holdingsRepositoryMock.Verify(r => r.GetHoldingsForUserAsync(It.IsAny<int>()), Times.Once);
-        _postRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<Post>()), Times.Once);
+        _postRepositoryMock.Verify(r => r.AddOrUpdateAsync(It.IsAny<Post>()), Times.Once);
     }
 
     [Test]
@@ -362,7 +362,7 @@ public class PostsControllerTests
     public async Task Details_WhenPostExists_ReturnsViewResult()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
 
         // Act
         var result = await _controller.Details(1);
@@ -375,7 +375,7 @@ public class PostsControllerTests
     public async Task Details_WhenPostExists_IncludesModelOfTypePostDetailsVM()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -389,7 +389,7 @@ public class PostsControllerTests
     public async Task Details_WhenPostExists_ReturnsViewModelWithPostDetails()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -423,7 +423,7 @@ public class PostsControllerTests
             User = new User { Username = "johnDoe", PlaidEnabled = true },
         };
 
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(post);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -439,7 +439,7 @@ public class PostsControllerTests
     public async Task Details_WhenCurrentUserIsOwner_ReturnsViewModelShowingOwnership()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
 
@@ -456,7 +456,7 @@ public class PostsControllerTests
     public async Task Details_WhenPostDoesNotExist_ReturnsNotFound()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(() => null!);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(() => null!);
 
         // Act
         var result = await _controller.Details(1);
@@ -469,7 +469,7 @@ public class PostsControllerTests
     public async Task EditGET_WhenUserIsOwner_ReturnsViewResultWithPostEditVM()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
@@ -507,7 +507,7 @@ public class PostsControllerTests
 
         var availableTags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
 
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(post);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(post);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(availableTags);
@@ -530,7 +530,7 @@ public class PostsControllerTests
     public async Task EditGET_WhenUserIsNotOwner_ReturnsUnauthorized()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user2);
 
@@ -545,7 +545,7 @@ public class PostsControllerTests
     public async Task EditGET_WhenNotLoggedIn_ReturnsUnauthorized()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
 
         // Act
@@ -559,7 +559,7 @@ public class PostsControllerTests
     public async Task EditGET_WhenPostDoesNotExist_ReturnsNotFound()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(() => null!);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(() => null!);
 
         // Act
         var result = await _controller.Edit(1);
@@ -572,11 +572,11 @@ public class PostsControllerTests
     public async Task EditPOST_WhenUserIsOwner_UpdatesPostAndRedirectsToDetails()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
-        _postRepositoryMock.Setup(r => r.AddOrUpdate(It.IsAny<Post>())).Verifiable();
+        _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
         var result = await _controller.Edit(1, _validPostEditVM) as RedirectToActionResult;
@@ -585,14 +585,14 @@ public class PostsControllerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result.ActionName, Is.EqualTo("Details"), "Expected to redirect to 'Details'");
 
-        _postRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<Post>()), Times.Once);
+        _postRepositoryMock.Verify(r => r.AddOrUpdateAsync(It.IsAny<Post>()), Times.Once);
     }
 
     [Test]
     public async Task EditPOST_WhenUserIsNotOwner_ReturnsUnauthorized()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user2);
 
@@ -607,7 +607,7 @@ public class PostsControllerTests
     public async Task EditPOST_WhenNotLoggedIn_ReturnsUnauthorized()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
 
         // Act
@@ -621,7 +621,7 @@ public class PostsControllerTests
     public async Task EditPOST_WhenPostDoesNotExist_ReturnsNotFound()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(() => null!);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(() => null!);
 
         // Act
         var result = await _controller.Edit(1, _validPostEditVM);
@@ -650,10 +650,10 @@ public class PostsControllerTests
     public async Task DeletePOST_WhenUserIsOwner_DeletesPostAndRedirectsToIndex()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
-        _postRepositoryMock.Setup(r => r.Delete(It.IsAny<Post>())).Verifiable();
+        _postRepositoryMock.Setup(r => r.DeleteAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
         var result = await _controller.Delete(1) as RedirectToActionResult;
@@ -662,14 +662,14 @@ public class PostsControllerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result.ActionName, Is.EqualTo("Index"), "Expected to redirect to 'Index'");
 
-        _postRepositoryMock.Verify(r => r.Delete(It.IsAny<Post>()), Times.Once);
+        _postRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Post>()), Times.Once);
     }
 
     [Test]
     public async Task DeletePOST_WhenUserIsNotOwner_ReturnsUnauthorized()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
         _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user2);
 
@@ -684,7 +684,7 @@ public class PostsControllerTests
     public async Task DeletePOST_WhenNotLoggedIn_ReturnsUnauthorized()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(_postByUser1);
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
 
         // Act
