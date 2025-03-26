@@ -140,13 +140,21 @@ namespace TrustTrade.DAL.Concrete
 
         public virtual void DeleteById(int id)
         {
-            Delete(FindById(id));
+            Delete(FindById(id)!); // ! is safe because FindById will throw if not found 
             return;
         }
 
         public virtual async Task DeleteByIdAsync(int id)
         {
-            await DeleteAsync(await FindByIdAsync(id));
+            TEntity? entity = await FindByIdAsync(id);
+            if (entity == null)
+            {
+                throw new Exception("Entity to delete was not found or was null");
+            }
+            else
+            {
+                await DeleteAsync(entity);
+            }
             return;
         }
     }
