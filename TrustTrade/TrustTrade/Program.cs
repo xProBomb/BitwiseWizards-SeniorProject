@@ -7,6 +7,8 @@ using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Services;
+using TrustTrade.Services.Web.Interfaces;
+using TrustTrade.Services.Web.Implementations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +75,7 @@ builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
