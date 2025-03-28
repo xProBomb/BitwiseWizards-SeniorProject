@@ -5,9 +5,8 @@ using TrustTrade.Controllers;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
 using TrustTrade.ViewModels;
-using System.Threading.Tasks;
+using TrustTrade.Services.Web.Interfaces;
 
 namespace TestTrustTrade;
 
@@ -15,11 +14,10 @@ namespace TestTrustTrade;
 public class PostsControllerTests
 {
     private Mock<ILogger<PostsController>> _loggerMock;
-    private Mock<UserManager<IdentityUser>> _userManagerMock;
+    private Mock<IUserService> _userServiceMock;
     private Mock<IHoldingsRepository> _holdingsRepositoryMock;
     private Mock<IPostRepository> _postRepositoryMock;
     private Mock<ITagRepository> _tagRepositoryMock;
-    private Mock<IUserRepository> _userRepositoryMock;
     private PostsController _controller;
 
     private User _user1;
@@ -34,22 +32,17 @@ public class PostsControllerTests
     public void Setup()
     {
         _loggerMock = new Mock<ILogger<PostsController>>();
-        _userManagerMock = new Mock<UserManager<IdentityUser>>(
-            new Mock<IUserStore<IdentityUser>>().Object,
-            null!, null!, null!, null!, null!, null!, null!, null!
-        );
+        _userServiceMock = new Mock<IUserService>();
         _holdingsRepositoryMock = new Mock<IHoldingsRepository>();
         _postRepositoryMock = new Mock<IPostRepository>();
         _tagRepositoryMock = new Mock<ITagRepository>();
-        _userRepositoryMock = new Mock<IUserRepository>();
 
         _controller = new PostsController(
             _loggerMock.Object,
-            _userManagerMock.Object,
+            _userServiceMock.Object,
             _holdingsRepositoryMock.Object,
             _postRepositoryMock.Object,
-            _tagRepositoryMock.Object,
-            _userRepositoryMock.Object
+            _tagRepositoryMock.Object
         );
 
         
@@ -186,8 +179,7 @@ public class PostsControllerTests
     public async Task CreatePOST_WhenValid_SavesPostAndRedirectsToIndex()
     {
         // Arrange
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -211,8 +203,7 @@ public class PostsControllerTests
             SelectedTags = new List<string> { "Memes", "Gain" }
         };
 
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
@@ -251,8 +242,7 @@ public class PostsControllerTests
             new InvestmentPosition { Id = 2, PlaidConnectionId = 1, SecurityId= "test-security-id-2", Symbol = "TSLA", Quantity = 5, CostBasis = 200, CurrentPrice = 220, TypeOfSecurity = "Stock" }
         };
 
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(user);
         _holdingsRepositoryMock.Setup(r => r.RefreshHoldingsAsync(It.IsAny<int>())).ReturnsAsync(true);
         _holdingsRepositoryMock.Setup(r => r.GetHoldingsForUserAsync(It.IsAny<int>())).ReturnsAsync(investmentPositions).Verifiable();
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
@@ -269,30 +259,16 @@ public class PostsControllerTests
     }
 
     [Test]
-    public async Task CreatePOST_WhenIdentityUserNotFound_ReturnsUnauthorized()
+    public async Task CreatePOST_WhenUserNotFound_ReturnsUnauthorized()
     {
         // Arrange
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Create(_validCreatePostVM);
 
         // Assert
         Assert.That(result, Is.Not.Null.And.TypeOf<UnauthorizedResult>());
-    }
-
-    [Test]
-    public async Task CreatePOST_WhenUserNotFound_ReturnsNotFound()
-    {
-        // Arrange
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(() => null);
-
-        // Act
-        var result = await _controller.Create(_validCreatePostVM);
-
-        // Assert
-        Assert.That(result, Is.Not.Null.And.TypeOf<NotFoundResult>());
     }
 
     [Test]
@@ -440,8 +416,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -470,8 +445,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
@@ -508,8 +482,7 @@ public class PostsControllerTests
         var availableTags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
 
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(post);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(availableTags);
 
         // Act
@@ -531,8 +504,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user2);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user2);
 
         // Act
         var result = await _controller.Edit(1);
@@ -546,7 +518,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
+        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Edit(1);
@@ -573,8 +545,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
@@ -593,8 +564,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user2);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user2);
 
         // Act
         var result = await _controller.Edit(1, _validPostEditVM);
@@ -608,7 +578,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
+        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Edit(1, _validPostEditVM);
@@ -651,8 +621,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
         _postRepositoryMock.Setup(r => r.DeleteAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -670,8 +639,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns("test-identity-2");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync(It.IsAny<string>())).ReturnsAsync(_user2);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user2);
 
         // Act
         var result = await _controller.Delete(1);
@@ -685,7 +653,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>())).Returns(() => null);
+        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Delete(1);
