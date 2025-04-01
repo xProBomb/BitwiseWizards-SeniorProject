@@ -4,6 +4,9 @@ using TrustTrade.Models;
 
 namespace TrustTrade.DAL.Concrete;
 
+/// <summary>
+/// Repository for Tag entities.
+/// </summary>
 public class TagRepository : Repository<Tag>, ITagRepository
 {
     private DbSet<Tag> _tags;
