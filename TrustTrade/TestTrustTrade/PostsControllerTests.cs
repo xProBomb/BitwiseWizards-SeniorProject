@@ -179,7 +179,7 @@ public class PostsControllerTests
     public async Task CreatePOST_WhenValid_SavesPostAndRedirectsToIndex()
     {
         // Arrange
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -203,7 +203,7 @@ public class PostsControllerTests
             SelectedTags = new List<string> { "Memes", "Gain" }
         };
 
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
@@ -242,7 +242,7 @@ public class PostsControllerTests
             new InvestmentPosition { Id = 2, PlaidConnectionId = 1, SecurityId= "test-security-id-2", Symbol = "TSLA", Quantity = 5, CostBasis = 200, CurrentPrice = 220, TypeOfSecurity = "Stock" }
         };
 
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(user);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(user);
         _holdingsRepositoryMock.Setup(r => r.RefreshHoldingsAsync(It.IsAny<int>())).ReturnsAsync(true);
         _holdingsRepositoryMock.Setup(r => r.GetHoldingsForUserAsync(It.IsAny<int>())).ReturnsAsync(investmentPositions).Verifiable();
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
@@ -262,7 +262,7 @@ public class PostsControllerTests
     public async Task CreatePOST_WhenUserNotFound_ReturnsUnauthorized()
     {
         // Arrange
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Create(_validCreatePostVM);
@@ -416,7 +416,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -445,7 +445,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
 
         // Act
@@ -482,7 +482,7 @@ public class PostsControllerTests
         var availableTags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
 
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(post);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(availableTags);
 
         // Act
@@ -504,7 +504,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user2);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user2);
 
         // Act
         var result = await _controller.Edit(1);
@@ -518,7 +518,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
+        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Edit(1);
@@ -545,7 +545,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
@@ -564,7 +564,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user2);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user2);
 
         // Act
         var result = await _controller.Edit(1, _validPostEditVM);
@@ -578,7 +578,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
+        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Edit(1, _validPostEditVM);
@@ -621,7 +621,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user1);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
         _postRepositoryMock.Setup(r => r.DeleteAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -639,7 +639,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(_user2);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user2);
 
         // Act
         var result = await _controller.Delete(1);
@@ -653,7 +653,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
-        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(() => null);
+        _userServiceMock.Setup(u => u.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(() => null);
 
         // Act
         var result = await _controller.Delete(1);

@@ -52,7 +52,7 @@ public class UserServiceTests
         // Arrange
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>()))
             .Returns(() => "test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync("test-identity-1"))
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()))
             .ReturnsAsync(_user1);
         
         // Act
@@ -63,7 +63,7 @@ public class UserServiceTests
         Assert.That(result.Id, Is.EqualTo(_user1.Id));
         Assert.That(result.IdentityId, Is.EqualTo(_user1.IdentityId));
         _userManagerMock.Verify(u => u.GetUserId(It.IsAny<ClaimsPrincipal>()), Times.Once);
-        _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1"), Times.Once);
+        _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()), Times.Once);
     }
 
     [Test]
@@ -87,7 +87,7 @@ public class UserServiceTests
         // Arrange
         _userManagerMock.Setup(u => u.GetUserId(It.IsAny<ClaimsPrincipal>()))
             .Returns(() => "test-identity-1");
-        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync("test-identity-1"))
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()))
             .ReturnsAsync(() => null);
 
         // Act
@@ -96,6 +96,6 @@ public class UserServiceTests
         // Assert
         Assert.That(result, Is.Null);
         _userManagerMock.Verify(u => u.GetUserId(It.IsAny<ClaimsPrincipal>()), Times.Once);
-        _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1"), Times.Once);
+        _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()), Times.Once);
     }
 }
