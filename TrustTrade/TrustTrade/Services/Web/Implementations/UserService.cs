@@ -6,6 +6,9 @@ using TrustTrade.Services.Web.Interfaces;
 
 namespace TrustTrade.Services.Web.Implementations;
 
+/// <summary>
+/// Service for user-related operations.
+/// </summary>
 public class UserService : IUserService
 {
     private readonly ILogger<UserService> _logger;
@@ -19,7 +22,7 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<User?> GetCurrentUserAsync(ClaimsPrincipal user)
+    public async Task<User?> GetCurrentUserAsync(ClaimsPrincipal user, bool includeRelated = false)
     {
         // Get the identity user ID from the UserManager
         string? identityUserId = _userManager.GetUserId(user);
@@ -30,16 +33,14 @@ public class UserService : IUserService
         }
 
         // Retrieve the user from the main database
-        User? currentUser = await _userRepository.FindByIdentityIdAsync(identityUserId);
+        User? currentUser = await _userRepository.FindByIdentityIdAsync(identityUserId, includeRelated);
         if (currentUser == null)
         {
             _logger.LogWarning($"User with IdentityId '{identityUserId}' not found in the database.");
+            return null;
         }
-        else
-        {
-            _logger.LogInformation($"Successfully retrieved user '{currentUser.Username}' with IdentityId '{identityUserId}'.");
-        }
-
+        
+        _logger.LogInformation($"Successfully retrieved user '{currentUser.Username}' with IdentityId '{identityUserId}'.");
         return currentUser;
     }
 }

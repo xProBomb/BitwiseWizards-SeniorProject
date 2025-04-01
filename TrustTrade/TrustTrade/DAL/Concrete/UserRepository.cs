@@ -4,6 +4,9 @@ using TrustTrade.Models;
 
 namespace TrustTrade.DAL.Concrete;
 
+/// <summary>
+/// Repository for User entities.
+/// </summary>
 public class UserRepository : Repository<User>, IUserRepository
 {
     private DbSet<User> _users;
@@ -13,11 +16,17 @@ public class UserRepository : Repository<User>, IUserRepository
         _users = context.Users;
     }
 
-    public async Task<User?> FindByIdentityIdAsync(string identityId)
+    public async Task<User?> FindByIdentityIdAsync(string identityId, bool includeRelated = false)
     {
-        return await _users
-            .Include(u => u.Comments)
-            .Include(u => u.FollowerFollowerUsers)
-            .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+        IQueryable<User> users = _users;
+
+        if (includeRelated)
+        {
+            users = users
+                .Include(u => u.Comments)
+                .Include(u => u.FollowerFollowerUsers);
+        }
+        
+        return await users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
     }
 }
