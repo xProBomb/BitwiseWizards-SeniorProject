@@ -29,12 +29,12 @@ namespace TrustTrade.Controllers
             _tagRepository = tagRepository;
         }
 
-        public IActionResult Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
         {
             const int PAGE_SIZE = 10;
 
             // Retrieve paged posts from your repository.
-            List<Post> posts = _postRepository.GetPagedPosts(categoryFilter, page, PAGE_SIZE, sortOrder);
+            List<Post> posts = await _postRepository.GetPagedPostsAsync(categoryFilter, page, PAGE_SIZE, sortOrder);
 
             // Map to the view model for the post preview
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
@@ -60,11 +60,11 @@ namespace TrustTrade.Controllers
 //            }
 
             // Determine total pages
-            int totalPosts = _postRepository.GetTotalPosts(categoryFilter);
+            int totalPosts = await _postRepository.GetTotalPostsAsync(categoryFilter);
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
             // Retrieve all tag names for the category filter
-            List<string> tagNames = _tagRepository.GetAllTagNames();
+            List<string> tagNames = await _tagRepository.GetAllTagNamesAsync();
 
             // Build the view model, including the current sort order
             var vm = new IndexVM
@@ -104,7 +104,7 @@ namespace TrustTrade.Controllers
             int currentUserId = user.Id;
 
             // Retrieve paged posts from your repository.
-            List<Post> posts = _postRepository.GetPagedPostsByUserFollows(currentUserId, categoryFilter, page, PAGE_SIZE, sortOrder);
+            List<Post> posts = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUserId, categoryFilter, page, PAGE_SIZE, sortOrder);
 
             // Map to the view model for the post preview
             List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
@@ -124,11 +124,11 @@ namespace TrustTrade.Controllers
             }).ToList();
 
             // Determine total pages
-            int totalPosts = _postRepository.GetTotalPostsByUserFollows(currentUserId, categoryFilter);
+            int totalPosts = await _postRepository.GetTotalPostsByUserFollowsAsync(currentUserId, categoryFilter);
             int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
             // Retrieve all tag names for the category filter
-            List<string> tagNames = _tagRepository.GetAllTagNames();
+            List<string> tagNames = await _tagRepository.GetAllTagNamesAsync();
 
             // Build the view model, including the current sort order
             var vm = new IndexVM
