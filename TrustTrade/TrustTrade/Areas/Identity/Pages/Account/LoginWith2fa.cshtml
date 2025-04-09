@@ -1,0 +1,421 @@
+﻿@page
+@model LoginWith2faModel
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+}
+
+<style>
+   
+    body {
+        overflow: hidden; 
+    }
+    
+    .security-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    [data-bs-theme="light"] .security-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    [data-bs-theme="dark"] .security-backdrop {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    
+    .security-section {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+    
+    .security-card {
+        background-color: var(--bs-body-bg);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        max-width: 450px;
+        width: 100%;
+        z-index: 1010;
+        border: 1px solid var(--bs-border-color);
+        transition: all 0.3s ease;
+    }
+    
+    [data-bs-theme="dark"] .security-card {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    
+    .security-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    
+    .security-header {
+        text-align: center;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+    
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: var(--bs-secondary-bg);
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+        font-size: 0.8rem;
+        color: var(--bs-body-color);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .security-icon {
+        color: #198754;
+        margin-right: 0.5rem;
+    }
+    
+    [data-bs-theme="dark"] .security-icon {
+        color: #25c274;
+    }
+    
+    .shield-icon {
+        color: #0d6efd;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .code-input {
+        font-family: monospace;
+        letter-spacing: 0.5em;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        height: auto;
+        padding: 1rem 0.75rem;
+        background-color: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+        border: 1px solid var(--bs-border-color);
+    }
+    
+    .code-input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        background-color: var(--bs-body-bg);
+    }
+    
+    .security-btn {
+        padding: 0.8rem;
+        font-size: 1rem;
+        font-weight: 500;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .security-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .security-btn-icon {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .code-hint {
+        text-align: center;
+        color: var(--bs-secondary-color);
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background-color: var(--bs-secondary-bg);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hint-icon {
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+        color: #0d6efd;
+    }
+    
+    .spinner-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+    
+    [data-bs-theme="light"] .spinner-overlay {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    [data-bs-theme="dark"] .spinner-overlay {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .pulse-container {
+        width: 120px;
+        height: 120px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .pulse {
+        width: 80px;
+        height: 80px;
+        background-color: #0d6efd;
+        border-radius: 50%;
+        position: relative;
+        animation: pulse 1.5s infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .pulse i {
+        color: white;
+        font-size: 2rem;
+    }
+    
+    @@keyframes pulse {
+        0% {
+            transform: scale(0.8);
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 15px rgba(13, 110, 253, 0);
+        }
+        100% {
+            transform: scale(0.8);
+        }
+    }
+    
+    .digits-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .digit-box {
+        width: 40px;
+        height: 50px;
+        margin: 0 5px;
+        background-color: var(--bs-tertiary-bg);
+        border: 2px solid var(--bs-border-color);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: monospace;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .active-digit {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .recovery-link {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .recovery-btn {
+        color: #0d6efd;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .recovery-btn:hover {
+        text-decoration: underline;
+    }
+    
+    .recovery-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .security-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+</style>
+
+<div class="security-backdrop">
+    <div class="security-section">
+        <div class="security-card p-4 p-md-5">
+            <div class="security-header">
+                <i class="bi bi-shield-lock-fill shield-icon"></i>
+                <h2>@ViewData["Title"]</h2>
+                <div class="security-badge">
+                    <i class="bi bi-lock-fill security-icon"></i>
+                    Enhanced Security
+                </div>
+                <p class="text-muted mb-0">
+                    Please enter the verification code from your authenticator app
+                </p>
+            </div>
+            
+            <form id="twoFactorForm" method="post" asp-route-returnUrl="@Model.ReturnUrl">
+                <input asp-for="RememberMe" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                
+                <!-- Visual code entry display -->
+                <div class="digits-container">
+                    <div class="digit-box" id="digit1"></div>
+                    <div class="digit-box" id="digit2"></div>
+                    <div class="digit-box" id="digit3"></div>
+                    <div class="digit-box" id="digit4"></div>
+                    <div class="digit-box" id="digit5"></div>
+                    <div class="digit-box" id="digit6"></div>
+                </div>
+                
+                <div class="mb-4">
+                    <input asp-for="Input.TwoFactorCode" class="form-control code-input" 
+                           autocomplete="off" placeholder="______" maxlength="6" 
+                           id="twoFactorInput" />
+                    <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
+                </div>
+                
+                <div class="code-hint">
+                    <i class="bi bi-phone-fill hint-icon"></i>
+                    <span>Open your authenticator app to view your code</span>
+                </div>
+                
+                <div class="form-check mb-4">
+                    <input asp-for="Input.RememberMachine" class="form-check-input" />
+                    <label asp-for="Input.RememberMachine" class="form-check-label">
+                        Trust this browser for limited time
+                    </label>
+                </div>
+                
+                <div class="d-grid">
+                    <button type="submit" class="btn security-btn">
+                        <i class="bi bi-unlock-fill security-btn-icon"></i>
+                        Verify and Sign In
+                    </button>
+                </div>
+                
+                
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="spinner-overlay" id="loadingSpinner">
+    <div class="pulse-container">
+        <div class="pulse">
+            <i class="bi bi-shield-check"></i>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const iconLink = document.createElement('link');
+            iconLink.rel = 'stylesheet';
+            iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(iconLink);
+        }
+        
+        // Show loading spinner on form submit
+        document.getElementById('twoFactorForm').addEventListener('submit', function() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+        });
+        
+        // Handle code input and visual display
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.getElementById('twoFactorInput');
+            const digitBoxes = [
+                document.getElementById('digit1'),
+                document.getElementById('digit2'),
+                document.getElementById('digit3'),
+                document.getElementById('digit4'),
+                document.getElementById('digit5'),
+                document.getElementById('digit6')
+            ];
+            
+            // Set focus on the code input field
+            codeInput.focus();
+            
+            // Update digit boxes when code is entered
+            codeInput.addEventListener('input', function() {
+                const code = this.value;
+                
+                // Clear all digit boxes
+                digitBoxes.forEach(box => {
+                    box.textContent = '';
+                    box.classList.remove('active-digit');
+                });
+                
+                // Fill digit boxes with entered code
+                for (let i = 0; i < code.length; i++) {
+                    if (i < digitBoxes.length) {
+                        digitBoxes[i].textContent = code[i];
+                        digitBoxes[i].classList.add('active-digit');
+                    }
+                }
+                
+                // Add active class to the current input position
+                if (code.length < digitBoxes.length) {
+                    digitBoxes[code.length].classList.add('active-digit');
+                }
+            });
+            
+            // Handle click on digit boxes to focus input
+            digitBoxes.forEach(box => {
+                box.addEventListener('click', function() {
+                    codeInput.focus();
+                });
+            });
+            
+            // Handle initial state for returning users or if there's validation errors
+            if (codeInput.value) {
+                const event = new Event('input', { bubbles: true });
+                codeInput.dispatchEvent(event);
+            } else {
+                // Set the first digit box as active
+                digitBoxes[0].classList.add('active-digit');
+            }
+        });
+    </script>
+}

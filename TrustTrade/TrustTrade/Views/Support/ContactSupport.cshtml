@@ -1,0 +1,45 @@
+@model TrustTrade.ViewModels.ContactSupportViewModel
+
+@{
+    ViewBag.Title = "Contact Support";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4">Contact Support</h2>
+
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success">
+                    @ViewBag.SuccessMessage
+                </div>
+            }
+
+            <form asp-action="ContactSupport" method="post">
+                <div class="form-group">
+                    <label asp-for="Tag"></label>
+                    <select asp-for="Tag" class="form-control">
+                        <option value="Bug">Bug</option>
+                        <option value="Appeal">Appeal</option>
+                        <option value="Question">Question</option>
+                        <option value="Comment">Comment</option>
+                    </select>
+                    <span asp-validation-for="Tag" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Name"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Message"></label>
+                    <textarea asp-for="Message" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Send Request</button>
+            </form>
+        </div>
+    </div>
+</div>
+

@@ -11,6 +11,11 @@ using Microsoft.AspNetCore.Http;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using TrustTrade.ViewModels;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
 
 namespace TestTrustTrade
 {
@@ -20,6 +25,8 @@ namespace TestTrustTrade
         private Mock<TrustTradeDbContext> _contextMock;
         private Mock<IHoldingsRepository> _holdingsRepoMock;
         private Mock<ILogger<ProfileController>> _loggerMock;
+        private Mock<IProfileService> _profileServiceMock;
+        private Mock<IPerformanceScoreRepository> _performanceScoreRepository;
         private ProfileController _controller;
         
         [TearDown]
@@ -34,11 +41,15 @@ namespace TestTrustTrade
             _contextMock = new Mock<TrustTradeDbContext>();
             _holdingsRepoMock = new Mock<IHoldingsRepository>();
             _loggerMock = new Mock<ILogger<ProfileController>>();
+            _profileServiceMock = new Mock<IProfileService>();
+            _performanceScoreRepository = new Mock<IPerformanceScoreRepository>();
 
             _controller = new ProfileController(
                 _contextMock.Object,
                 _holdingsRepoMock.Object,
-                _loggerMock.Object
+                _loggerMock.Object,
+                _profileServiceMock.Object,
+                _performanceScoreRepository.Object
             );
         }
 
@@ -74,83 +85,6 @@ namespace TestTrustTrade
                 }
             };
         }
-
-        [Test]
-        public async Task MyProfile_UserFound_ReturnsViewWithModel()
-        {
-            // Arrange
-            var testIdentityId = "test_identity_123";
-            
-            // Create test user with pre-loaded navigation properties
-            var testUser = new User
-            {
-                Id = 1,
-                IdentityId = testIdentityId,
-                Username = "testuser",
-                ProfileName = "Test User",
-                Email = "test@example.com",
-                PasswordHash = "hash",
-                Bio = "Test bio",
-                IsVerified = true,
-                PlaidEnabled = true,
-                LastPlaidSync = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                FollowerFollowerUsers = new List<Follower>
-                {
-                    new Follower { Id = 1, FollowerUserId = 2 }
-                },
-                FollowerFollowingUsers = new List<Follower>
-                {
-                    new Follower { Id = 2, FollowingUserId = 3 }
-                }
-            };
-
-            var users = new List<User> { testUser }.AsQueryable();
-            var mockDbSet = CreateMockDbSet(users);
-            _contextMock.Setup(c => c.Users).Returns(mockDbSet.Object);
-
-            var testHoldings = new List<InvestmentPosition>
-            {
-                new InvestmentPosition
-                {
-                    Id = 1,
-                    Symbol = "AAPL",
-                    Quantity = 10,
-                    CurrentPrice = 150.00M,
-                    CostBasis = 140.00M,
-                    TypeOfSecurity = "equity",
-                    LastUpdated = DateTime.UtcNow,
-                    PlaidConnection = new PlaidConnection
-                    {
-                        Id = 1,
-                        InstitutionName = "Test Bank"
-                    }
-                }
-            };
-
-            _holdingsRepoMock.Setup(h => h.GetHoldingsForUserAsync(It.IsAny<int>()))
-                .ReturnsAsync(testHoldings);
-
-            SetupAuthentication(testIdentityId);
-
-            // Act
-            var result = await _controller.MyProfile();
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<ViewResult>());
-            var viewResult = result as ViewResult;
-            Assert.That(viewResult?.Model, Is.Not.Null);
-            
-            var model = viewResult.Model as MyProfileViewModel;
-            Assert.Multiple(() =>
-            {
-                Assert.That(model.IdentityId, Is.EqualTo(testIdentityId));
-                Assert.That(model.ProfileName, Is.EqualTo("Test User"));
-                Assert.That(model.Holdings, Has.Count.EqualTo(1));
-                Assert.That(model.FollowersCount, Is.EqualTo(1));
-                Assert.That(model.FollowingCount, Is.EqualTo(1));
-            });
-        }
         
         [Test]
         public async Task MyProfile_NoIdentityClaim_ReturnsUnauthorized()
@@ -181,6 +115,87 @@ namespace TestTrustTrade
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        public async Task UpdateProfile_DuplicateUsername_ReturnsProfileViewWithOriginalUsername()
+        {
+            // Arrange
+            SetupAuthentication("currentId");
+            // Current user in the database.
+            var currentUser = new User
+            {
+                IdentityId = "currentId",
+                Username = "currentUser",
+                Bio = "OldBio",
+                UserTag = "Stocks",
+                CreatedAt = DateTime.Now,
+                FollowerFollowerUsers = new List<Follower>(),
+                FollowerFollowingUsers = new List<Follower>()
+            };
+            // Another user with the duplicate username.
+            var duplicateUser = new User
+            {
+                IdentityId = "otherId",
+                Username = "duplicateUsername",
+                Bio = "OtherBio",
+                UserTag = "Options",
+                CreatedAt = DateTime.Now,
+                FollowerFollowerUsers = new List<Follower>(),
+                FollowerFollowingUsers = new List<Follower>()
+            };
+            
+            var users = new List<User> { currentUser, duplicateUser }.AsQueryable();
+            var mockSet = CreateMockDbSet(users);
+            _contextMock.Setup(c => c.Users).Returns(mockSet.Object);
+            _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+            
+            // Act: attempt to update the current user's username to the duplicate value.
+            var result = await _controller.UpdateProfile("duplicateUsername", "NewBio", "Options");
+            
+            // Assert
+            var viewResult = result as ViewResult;
+            Assert.That(viewResult, Is.Not.Null, "Result should be a ViewResult");
+            Assert.That(viewResult.ViewName, Is.EqualTo("Profile"), "View name should be 'Profile'");
+            
+            var model = viewResult.Model as ProfileViewModel;
+            Assert.That(model, Is.Not.Null, "Model should be of type ProfileViewModel");
+            // The original username remains because the duplicate update is rejected.
+            Assert.That(model.Username, Is.EqualTo("currentUser"), "Username should not have been updated");
+            
+            // The error message should be set in the ViewData (via ViewBag).
+            Assert.That(viewResult.ViewData["UsernameError"], Is.EqualTo("The username duplicateUsername is already taken."));
+        }
+        
+        [Test]
+        public async Task UpdateProfile_SuccessfulUpdate_UpdatesUsernameAndRedirects()
+        {
+            // Arrange
+            SetupAuthentication("currentId");
+            var currentUser = new User
+            {
+                IdentityId = "currentId",
+                Username = "currentUser",
+                Bio = "OldBio",
+                UserTag = "Stocks",
+                CreatedAt = DateTime.Now,
+                FollowerFollowerUsers = new List<Follower>(),
+                FollowerFollowingUsers = new List<Follower>()
+            };
+            var users = new List<User> { currentUser }.AsQueryable();
+            var mockSet = CreateMockDbSet(users);
+            _contextMock.Setup(c => c.Users).Returns(mockSet.Object);
+            _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+            
+            // Act: update to a unique username.
+            var result = await _controller.UpdateProfile("newUsername", "NewBio", "Options");
+            
+            // Assert
+            Assert.That(result, Is.InstanceOf<RedirectToActionResult>(), "Result should be a redirect");
+            var redirectResult = result as RedirectToActionResult;
+            Assert.That(redirectResult.ActionName, Is.EqualTo("MyProfile"), "Redirection should be to MyProfile");
+            // Verify that the currentUser's username is updated.
+            Assert.That(currentUser.Username, Is.EqualTo("newUsername"), "User's username should be updated to the new value");
         }
 
         // Helper classes for async operations

@@ -9,19 +9,21 @@ public partial class Post
 
     public int UserId { get; set; }
 
-    public string? Title { get; set; }
+    public string Title { get; set; } = null!;
 
-    public string? Content { get; set; }
+    public string Content { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public string? Tag { get; set; }
+    public bool IsPublic { get; set; } = false;
 
-    public string? PrivacySetting { get; set; }
+    public decimal? PortfolioValueAtPosting { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual User User { get; set; } = null!;
+
+    public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

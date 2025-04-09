@@ -1,0 +1,11 @@
+#searchResults {
+    margin-top: 20px;
+}
+
+.search-result-item {
+    transition: background-color 0.3s;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
