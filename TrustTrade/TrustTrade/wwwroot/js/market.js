@@ -117,10 +117,7 @@ document.getElementById("cryptoBtn").addEventListener("click", () => loadMarketD
 
 async function loadMarketData(type) {
     try {
-        const response = await fetch(`/Market/Index?type=${type}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-
+        const response = await fetch(`/Market/SearchStocks?searchTerm=&type=${type}`);
         const html = await response.text();
 
         document.getElementById("marketCards").innerHTML = html;
@@ -130,8 +127,29 @@ async function loadMarketData(type) {
         document.getElementById("stockBtn").classList.toggle("active", type === "stock");
         document.getElementById("cryptoBtn").classList.toggle("active", type === "crypto");
 
-        renderSparklineCharts(); // Re-render charts after replacing DOM
+        renderSparklineCharts();
     } catch (err) {
         console.error("Failed to load market data:", err);
     }
 }
+
+document.getElementById("stockSearchInput").addEventListener("input", async function () {
+    const term = this.value.trim();
+    const isCrypto = document.getElementById("cryptoBtn").classList.contains("active");
+    const type = isCrypto ? "crypto" : "stock";
+
+    if (term.length < 1) {
+        loadMarketData(type); // fallback to default top 6
+        return;
+    }
+
+    try {
+        const response = await fetch(`/Market/SearchStocks?searchTerm=${encodeURIComponent(term)}&type=${type}`);
+        const html = await response.text();
+        document.getElementById("marketCards").innerHTML = html;
+
+        renderSparklineCharts?.(); 
+    } catch (error) {
+        console.error("Search failed:", error);
+    }
+});
