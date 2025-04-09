@@ -4,6 +4,9 @@ using TrustTrade.Models;
 
 namespace TrustTrade.DAL.Concrete;
 
+/// <summary>
+/// Repository for Tag entities.
+/// </summary>
 public class TagRepository : Repository<Tag>, ITagRepository
 {
     private DbSet<Tag> _tags;
@@ -13,16 +16,16 @@ public class TagRepository : Repository<Tag>, ITagRepository
         _tags = context.Tags;
     }
 
-    public List<string> GetAllTagNames()
+    public async Task<List<string>> GetAllTagNamesAsync()
     {
-        return _tags
+        return await _tags
             .Select(t => t.TagName)
-            .ToList();
+            .ToListAsync();
     }
 
-    public Tag? FindByTagName(string tagName)
+    public async Task<Tag?> FindByTagNameAsync(string tagName)
     {
-        return _tags
-            .FirstOrDefault(t => t.TagName.ToLower() == tagName.ToLower());
+        return await _tags
+            .FirstOrDefaultAsync(t => t.TagName.ToLower() == tagName.ToLower());
     }
 }

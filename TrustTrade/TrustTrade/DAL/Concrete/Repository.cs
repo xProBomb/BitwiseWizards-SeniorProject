@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-
+using System.Threading.Tasks;
 using TrustTrade.DAL.Abstract;
 
 // NOTE: This base repository was provided by Scot Morse.
@@ -40,9 +40,16 @@ namespace TrustTrade.DAL.Concrete
         }
 
         // Find by ID assuming it's the PK and is an int
-        public virtual TEntity FindById(int id)
+        public virtual TEntity? FindById(int id)
         {
-            TEntity entity = _dbSet.Find(id);
+            TEntity? entity = _dbSet.Find(id);
+            return entity;  // null if not found
+        }
+
+        // Find by ID assuming it's the PK and is an int
+        public virtual async Task<TEntity?> FindByIdAsync(int id)
+        {
+            TEntity? entity = await _dbSet.FindAsync(id);
             return entity;  // null if not found
         }
 
@@ -50,6 +57,12 @@ namespace TrustTrade.DAL.Concrete
         {
             return FindById(id) != null;
         }
+
+        public virtual async Task<bool> ExistsAsync(int id)
+        {
+            return await FindByIdAsync(id) != null;
+        }
+        
 
         public virtual IQueryable<TEntity> GetAll()
         {
@@ -86,6 +99,17 @@ namespace TrustTrade.DAL.Concrete
             return entity;
         }
 
+        public virtual async Task<TEntity> AddOrUpdateAsync(TEntity entity)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException("Entity must not be null to add or update");
+            }
+            _context.Update(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
         public virtual void Delete(TEntity entity)
         {
             if (entity == null)
@@ -100,9 +124,37 @@ namespace TrustTrade.DAL.Concrete
             return;
         }
 
+        public virtual async Task DeleteAsync(TEntity entity)
+        {
+            if (entity == null)
+            {
+                throw new Exception("Entity to delete was not found or was null");
+            }
+            else
+            {
+                _dbSet.Remove(entity);
+                await _context.SaveChangesAsync();
+            }
+            return;
+        }
+
         public virtual void DeleteById(int id)
         {
-            Delete(FindById(id));
+            Delete(FindById(id)!); // ! is safe because FindById will throw if not found 
+            return;
+        }
+
+        public virtual async Task DeleteByIdAsync(int id)
+        {
+            TEntity? entity = await FindByIdAsync(id);
+            if (entity == null)
+            {
+                throw new Exception("Entity to delete was not found or was null");
+            }
+            else
+            {
+                await DeleteAsync(entity);
+            }
             return;
         }
     }

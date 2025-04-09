@@ -139,7 +139,7 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void HomeController_HandlesPlaidPostCorrectly()
+        public async Task HomeController_HandlesPlaidPostCorrectly()
         {
             // Arrange - Set up the mock repository to return a post with plaid enabled
             var plaidPost = new Post
@@ -156,15 +156,15 @@ namespace TestTrustTrade
                 }
             };
 
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(new List<Post> { plaidPost });
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(1);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
+            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(new List<Post> { plaidPost });
+            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
+                .ReturnsAsync(1);
+            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
+                .ReturnsAsync(new List<string>());
 
             // Act
-            var result = _controller.Index() as ViewResult;
+            var result = await _controller.Index() as ViewResult;
             var model = result?.Model as IndexVM;
             var postPreview = model?.Posts?.FirstOrDefault();
 
