@@ -1,229 +1,28 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using TrustTrade.Helpers
 @using TrustTrade.ViewModels
 @model IndexVM
 
 <link rel="stylesheet" href="~/css/index.css" />
 
 @{
-    ViewData["Title"] = "Following";
-
-    // Determine which sort order is selected.
-    var selectedSortOrder = Model.SortOrder ?? "DateDesc";
-
-    // Define a list of sort options to display in the dropdown.
-    var sortOptions = new List<(string Value, string Text)>
-    {
-        ("DateDesc", "Newest First"),
-        ("DateAsc", "Oldest First")
-    };
+    ViewData["Title"] = "Home Page";
 }
 
-<!-- Sort Order Drop-down -->
-<form id="sortForm" method="get" asp-controller="Home" asp-action="Index">
-    <label for="sortOrder">Sort by:</label>
-    <select id="sortOrder" name="sortOrder" onchange="this.form.submit();">
-        @foreach (var option in sortOptions)
-        {
-            // If this option matches the current sort order, mark it as selected
-            if (option.Value == selectedSortOrder)
-            {
-                <option value="@option.Value" selected>@option.Text</option>
-            }
-            else
-            {
-                <option value="@option.Value">@option.Text</option>
-            }
-        }
-    </select>
-
-    <!-- Reset page to 1 when sort order changes -->
-    <input type="hidden" name="page" value="1" />
-    <input type="hidden" name="categoryFilter" value="@Model.SelectedCategory" />
-</form>
-
-<!-- Category Filter Drop-down -->
-<form id="filterForm" method="get" asp-controller="Home" asp-action="Index">
-    <label for="categoryFilter" class="mt-3">Category filter:</label>
-    <select id="categoryFilter" name="categoryFilter" class="mt-3" onchange="this.form.submit();">
-        @if (Model.SelectedCategory == null)
-        {
-            <option value="" selected>-- Select a Category --</option>
-        }
-        @foreach (var category in Model.Categories)
-        {
-            // If this option matches the current category filter, mark it as selected
-            if (category == Model.SelectedCategory)
-            {
-                <option value=@category selected>@category</option>
-            }
-            else
-            {
-                <option value="@category">@category</option>
-            }
-        }
-    </select>
-
-    <!-- Reset page to 1 when category filter changes -->
-    <input type="hidden" name="page" value="1" />
-    <input type="hidden" name="sortOrder" value="@selectedSortOrder" />
-
-    @if (Model.SelectedCategory != null)
-    {
-    <!-- Clear the category filter -->
-    <a class="btn btn-primary ms-3" 
-        asp-controller="Home" 
-        asp-action="Index" 
-        asp-route-sortOrder=@Model.SortOrder>
-        Clear Filter
-    </a>
-    }
-</form>
+<!-- Post Filters -->
+<div>
+    <partial name="../Posts/_Filters" model="Model.PostFilters" />
+</div>
 
 <!-- Post Preview Feed -->
-<h2 class="mt-5">Posts</h2>
-<ul class="list-group mt-4">
-    @if (Model.Posts != null && Model.Posts.Any())
-    {
-        foreach (var post in Model.Posts)
-        {
-            <!-- Display each post as a clickable list item -->
-            <li class="list-group-item clickable-post"
-                data-url="@Url.Action("Details", "Posts", new { id = post.Id })">
-                <div class="d-flex align-items-center">
-                    <!-- Profile Links -->
-                    <a asp-controller="Profile" 
-                        asp-action="UserProfile" 
-                        asp-route-username="@post.UserName"
-                        class="image-profile-link">
-                        @if (post.ProfilePicture != null)
-                        {
-                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(post.ProfilePicture)" alt="Profile Picture"
-                                 class="rounded-circle" style="width: 50px; height: 50px;">
-                        }
-                        else
-                        {
-                            <img src="/icons/defpfp.png" alt="Profile Picture"
-                                 class="rounded-circle" style="width: 50px; height: 50px;">
-                        }
-                    </a>
-                    <a asp-controller="Profile" 
-                        asp-action="UserProfile" 
-                        asp-route-username="@post.UserName"
-                        class="username-profile-link ms-2">
-                        @post.UserName
-                    </a>
-                    @if (post.IsPlaidEnabled)
-                    {
-                        if (post.PortfolioValueAtPosting.HasValue)
-                        {
-                            try
-                            {
-                                string value = @FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
-                                <span class="text-success ms-2">@value </span>
-                            }
-                            catch (Exception)
-                            {
-                                // Fallback in case of formatting issues
-                                <span class="text-success ms-2">$0 </span>
-                            }
-                        }
-                        // Always show checkmark for Plaid-enabled users
-                        <i class="bi bi-patch-check-fill text-success"></i>
-                    }
-                    <span class="ms-2">@post.TimeAgo</span>
-                </div>
-                <h3 style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;">@post.Title</h3>
-                <p>@post.Excerpt</p>
-                <!-- Like and Comment Buttons -->
-                <div class="d-flex align-items-center mt-4">
-                    <button class="btn btn-primary position-relative" aria-label="Like">
-                        <i class="bi bi-hand-thumbs-up"></i> @post.LikeCount
-                    </button>
-                    <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
-                        <i class="bi bi-chat"></i> @post.CommentCount
-                    </button>
-                </div>
-            </li>
-        }
-    }
-    else
-    {
-        <li class="list-group-item">
-            <p>No posts available.</p>
-        </li>
-    }
-</ul>
+<div class="mt-5"
+    <partial name="../Posts/_Feed" model="Model.Posts" />
+</div>
 
 <!-- Pagination Controls -->
-@if (Model.TotalPages > 1 && Model.PagesToShow != null)
-{
-    <ul class="pagination justify-content-center mt-5">
-        @if (Model.CurrentPage > 1)
-        {
-            <li class="page-item">
-                <a class="page-link"
-                    asp-controller="Home"
-                    asp-action="Index"
-                    asp-route-page="@(Model.CurrentPage - 1)"
-                    asp-route-sortOrder="@Model.SortOrder"
-                    asp-route-categoryFilter="@Model.SelectedCategory">
-                    Previous
-                </a>
-            </li>
-        }
-        else
-        {
-            <li class="page-item disabled">
-                <span class="page-link">Previous</span>
-            </li>
-        }
-
-        @foreach (int pageNumber in Model.PagesToShow)
-        {
-            if (pageNumber == Model.CurrentPage)
-            {
-                <li class="page-item active" aria-current="page">
-                    <span class="page-link">@pageNumber</span>
-                </li>
-            }
-            else
-            {
-                <li class="page-item">
-                    <a class="page-link"
-                        asp-controller="Home"
-                        asp-action="Index"
-                        asp-route-page="@pageNumber"
-                        asp-route-sortOrder="@Model.SortOrder"
-                        asp-route-categoryFilter="@Model.SelectedCategory">
-                        @pageNumber
-                    </a>
-                </li>
-            }
-        }
-
-        @if (Model.CurrentPage < Model.TotalPages)
-        {
-            <li class="page-item">
-                <a class="page-link"
-                    asp-controller="Home"
-                    asp-action="Index"
-                    asp-route-page="@(Model.CurrentPage + 1)"
-                    asp-route-sortOrder="@Model.SortOrder"
-                    asp-route-categoryFilter="@Model.SelectedCategory">
-                    Next
-                </a>
-            </li>
-        }
-        else
-        {
-            <li class="page-item disabled">
-                <span class="page-link">Next</span>
-            </li>
-        }
-    </ul>
-}
+<div class="mt-5">
+    <partial name="../Posts/_Pagination" model="Model.Pagination" />
+</div>
 
 @section Scripts {
-    <script src="~/js/index.js"></script>
+    <script src="~/js/postPreviews.js"></script>
 }
