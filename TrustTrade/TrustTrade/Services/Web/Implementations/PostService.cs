@@ -61,7 +61,7 @@ public class PostService : IPostService
         {
             CurrentPage = pageNumber,
             TotalPages = totalPages,
-            PagesToShow = PaginationHelper.GetPagination(totalPages, pageNumber, MAX_PAGES_TO_SHOW),
+            PagesToShow = PaginationHelper.GetPagination(pageNumber, totalPages, MAX_PAGES_TO_SHOW),
             CategoryFilter = categoryFilter
         };
     }
