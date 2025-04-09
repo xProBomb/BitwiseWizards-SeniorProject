@@ -15,6 +15,7 @@ using TrustTrade.Controllers;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.ViewModels;
+using TrustTrade.Services.Web.Interfaces;
 
 namespace TestTrustTrade
 {
@@ -22,9 +23,8 @@ namespace TestTrustTrade
     public class PlaidIconRenderingTests
     {
         private Mock<ILogger<HomeController>> _loggerMock;
-        private Mock<IPostRepository> _postRepositoryMock;
-        private Mock<ITagRepository> _tagRepositoryMock;
-        private Mock<TrustTradeDbContext> _dbContextMock;
+        private Mock<IPostService> _postServiceMock;
+        private Mock<IUserService> _userServiceMock;
         private HomeController _controller;
         private List<PostPreviewVM> _testPosts;
 
@@ -32,10 +32,13 @@ namespace TestTrustTrade
         public void Setup()
         {
             _loggerMock = new Mock<ILogger<HomeController>>();
-            _postRepositoryMock = new Mock<IPostRepository>();
-            _tagRepositoryMock = new Mock<ITagRepository>();
-            _dbContextMock = new Mock<TrustTradeDbContext>();
-            _controller = new HomeController(_dbContextMock.Object, _loggerMock.Object, _postRepositoryMock.Object, _tagRepositoryMock.Object);
+            _postServiceMock = new Mock<IPostService>();
+            _userServiceMock = new Mock<IUserService>();
+            _controller = new HomeController(
+                _loggerMock.Object, 
+                _postServiceMock.Object, 
+                _userServiceMock.Object
+            );
 
             // Create test post preview view models
             _testPosts = new List<PostPreviewVM>
@@ -136,41 +139,6 @@ namespace TestTrustTrade
             
             // Assert
             Assert.That(post.IsPlaidEnabled, Is.False, "IsPlaidEnabled should be false for test to be meaningful");
-        }
-
-        [Test]
-        public async Task HomeController_HandlesPlaidPostCorrectly()
-        {
-            // Arrange - Set up the mock repository to return a post with plaid enabled
-            var plaidPost = new Post
-            {
-                Id = 1,
-                UserId = 1,
-                Title = "Test Post",
-                Content = "Test Content",
-                User = new User
-                {
-                    Id = 1,
-                    Username = "PlaidUser",
-                    PlaidEnabled = true
-                }
-            };
-
-            _postRepositoryMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(new List<Post> { plaidPost });
-            _postRepositoryMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
-                .ReturnsAsync(1);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNamesAsync())
-                .ReturnsAsync(new List<string>());
-
-            // Act
-            var result = await _controller.Index() as ViewResult;
-            var model = result?.Model as IndexVM;
-            var postPreview = model?.Posts?.FirstOrDefault();
-
-            // Assert - Verify the post preview has Plaid enabled
-            Assert.That(postPreview, Is.Not.Null, "Post preview should exist");
-            Assert.That(postPreview.IsPlaidEnabled, Is.True, "IsPlaidEnabled should be true");
         }
 
         [Test]
