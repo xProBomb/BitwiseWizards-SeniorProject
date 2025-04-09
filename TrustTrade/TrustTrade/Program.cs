@@ -84,6 +84,9 @@ builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreReposito
 // Add services for verification history
 builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
 
+builder.Services.AddSingleton<IMarketRepository, MockMarketRepository>();
+
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
