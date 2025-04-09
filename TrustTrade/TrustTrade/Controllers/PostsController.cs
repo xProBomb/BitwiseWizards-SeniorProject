@@ -172,7 +172,8 @@ namespace TrustTrade.Controllers
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
                 PortfolioValueAtPosting = portfolioValue,
-                IsOwnedByCurrentUser = isOwnedByCurrentUser
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                ProfilePicture = post.User.ProfilePicture
             };
 
             return View(vm);
