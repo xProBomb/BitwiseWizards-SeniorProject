@@ -1,6 +1,5 @@
 /* Theme Switch Container */
 .theme-switch-wrapper {
-    position: relative;
     display: flex;
     align-items: center;
 }
