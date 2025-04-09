@@ -76,6 +76,7 @@ builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 // Add services to the container.
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
