@@ -29,6 +29,10 @@
   <ItemGroup>
     <ProjectReference Include="..\TrustTrade\TrustTrade.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="**/*.feature"/>
+  </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
