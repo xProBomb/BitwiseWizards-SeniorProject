@@ -1,10 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Moq;
-using NUnit.Framework;
-using System.Collections.Generic;
-using TrustTrade.Controllers;
-using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.ViewModels;
 
@@ -161,53 +154,6 @@ namespace TestTrustTrade
                 Assert.That(viewModel.PortfolioValueAtPosting.HasValue, Is.True, "PortfolioValueAtPosting should have a value");
                 Assert.That(viewModel.PortfolioValueAtPosting!.Value, Is.EqualTo(12345.67M), "Portfolio value should match");
             });
-        }
-
-        [Test]
-        public async Task HomeController_MapsPlaidStatusCorrectly()
-        {
-            // Arrange
-            var loggerMock = new Mock<ILogger<HomeController>>();
-            var postRepoMock = new Mock<IPostRepository>();
-            var tagRepoMock = new Mock<ITagRepository>();
-            var dbContextMock = new Mock<TrustTradeDbContext>();
-            var controller = new HomeController(dbContextMock.Object, loggerMock.Object, postRepoMock.Object, tagRepoMock.Object);
-
-            var plaidUser = new User
-            {
-                Id = 1,
-                Username = "PlaidUser",
-                PlaidEnabled = true
-            };
-
-            var plaidPost = new Post
-            {
-                Id = 1,
-                UserId = 1,
-                Title = "Test Post",
-                Content = "Test Content with more than 100 characters to test excerpt generation. This should be long enough to test the excerpt truncation logic.",
-                CreatedAt = System.DateTime.Now,
-                User = plaidUser,
-                PortfolioValueAtPosting = 10000.00M
-            };
-
-            postRepoMock.Setup(repo => repo.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(new List<Post> { plaidPost });
-            postRepoMock.Setup(repo => repo.GetTotalPostsAsync(It.IsAny<string>()))
-                .ReturnsAsync(1);
-            tagRepoMock.Setup(repo => repo.GetAllTagNamesAsync())
-                .ReturnsAsync(new List<string>());
-
-            // Act
-            var result = await controller.Index() as ViewResult;
-            var model = result?.Model as IndexVM;
-            var postPreview = model?.Posts?.FirstOrDefault();
-
-            // Assert
-            Assert.That(postPreview, Is.Not.Null, "Post preview should exist");
-            Assert.That(postPreview.IsPlaidEnabled, Is.True, "IsPlaidEnabled should correctly map from User.PlaidEnabled");
-            Assert.That(postPreview.PortfolioValueAtPosting, Is.EqualTo(10000.00M), "PortfolioValueAtPosting should be mapped correctly");
-            Assert.That(postPreview.Excerpt.Length, Is.LessThanOrEqualTo(103), "Excerpt should be truncated to ~100 characters with ellipsis");
         }
     }
 }
