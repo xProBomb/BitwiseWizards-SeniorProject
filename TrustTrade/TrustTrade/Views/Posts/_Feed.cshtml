@@ -1,0 +1,79 @@
+@using TrustTrade.Helpers
+@using TrustTrade.ViewModels
+@model List<PostPreviewVM>
+
+<link rel="stylesheet" href="~/css/index.css" />
+
+<h2>Posts</h2>
+<ul class="list-group mt-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var post in Model)
+        {
+            <!-- Display each post as a clickable list item -->
+            <li class="list-group-item clickable-post"
+                data-url="@Url.Action("Details", "Posts", new { id = post.Id })">
+                <div class="d-flex align-items-center">
+                    <!-- Profile Links -->
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="image-profile-link">
+                        @if (post.ProfilePicture != null)
+                        {
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(post.ProfilePicture)" alt="Profile Picture"
+                                 class="rounded-circle" style="width: 50px; height: 50px;">
+                        }
+                        else
+                        {
+                            <img src="/icons/defpfp.png" alt="Profile Picture"
+                                 class="rounded-circle" style="width: 50px; height: 50px;">
+                        }
+                    </a>
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="username-profile-link ms-2">
+                        @post.UserName
+                    </a>
+                    @if (post.IsPlaidEnabled)
+                    {
+                        if (post.PortfolioValueAtPosting.HasValue)
+                        {
+                            try
+                            {
+                                string value = @FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
+                                <span class="text-success ms-2">@value </span>
+                            }
+                            catch (Exception)
+                            {
+                                // Fallback in case of formatting issues
+                                <span class="text-success ms-2">$0 </span>
+                            }
+                        }
+                        // Always show checkmark for Plaid-enabled users
+                        <i class="bi bi-patch-check-fill text-success"></i>
+                    }
+                    <span class="ms-2">@post.TimeAgo</span>
+                </div>
+                <h3 style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;">@post.Title</h3>
+                <p>@post.Excerpt</p>
+                <!-- Like and Comment Buttons -->
+                <div class="d-flex align-items-center mt-4">
+                    <button class="btn btn-primary position-relative" aria-label="Like">
+                        <i class="bi bi-hand-thumbs-up"></i> @post.LikeCount
+                    </button>
+                    <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
+                        <i class="bi bi-chat"></i> @post.CommentCount
+                    </button>
+                </div>
+            </li>
+        }
+    }
+    else
+    {
+        <li class="list-group-item">
+            <p>No posts available.</p>
+        </li>
+    }
+</ul>
