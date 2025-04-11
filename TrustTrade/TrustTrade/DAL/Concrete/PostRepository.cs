@@ -15,113 +15,95 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
-    public async Task<List<Post>> GetPagedPostsAsync(string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public async Task<List<Post>> GetPagedPostsAsync(string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc")
     {
-        // Start with a query that includes the related User and Tags.
+        // Start with a query that includes related entities.
         IQueryable<Post> query = _posts
             .Include(p => p.User)
             .Include(p => p.Tags);
 
-        // Apply filtering based on the category parameter
-        if (!string.IsNullOrEmpty(category))
-        {
-            query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
-        }
+        query = ApplyCategoryFilter(query, categoryFilter);
+        query = ApplySorting(query, sortOrder);
+        query = ApplyPagination(query, pageNumber, pageSize);
 
-        // Apply sorting based on the sortOrder parameter while keeping your original structure
-        switch (sortOrder)
-        {
-            case "DateAsc":
-                query = query.OrderBy(p => p.CreatedAt);
-                break;
-            case "TitleAsc":
-                query = query.OrderBy(p => p.Title);
-                break;
-            case "TitleDesc":
-                query = query.OrderByDescending(p => p.Title);
-                break;
-            case "DateDesc":
-            default:
-                query = query.OrderByDescending(p => p.CreatedAt);
-                break;
-        }
-
-        // Apply pagination
-        return await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        return await query.ToListAsync();
     }
 
-    // Method to get the posts that a specific user is following
-    public async Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUser, string? category = null, int page = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public async Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc")
     {
-        // Start with a query that includes the related User and Tags.
+        // Start with a query that includes related entities.
         IQueryable<Post> query = _posts
             .Include(p => p.User)
-            .Include(p => p.Tags)
-            .Where(p => p.User.FollowerFollowerUsers.Any(f => f.FollowingUserId == currentUser));
+            .Include(p => p.Tags);
 
-        // Apply filtering based on the category parameter
-        if (!string.IsNullOrEmpty(category))
-        {
-            query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
-        }
+        query = ApplyUserFollowsFilter(query, currentUserId);
+        query = ApplyCategoryFilter(query, categoryFilter);
+        query = ApplySorting(query, sortOrder);
+        query = ApplyPagination(query, pageNumber, pageSize);
 
-        // Apply sorting based on the sortOrder parameter while keeping your original structure
-        switch (sortOrder)
-        {
-            case "DateAsc":
-                query = query.OrderBy(p => p.CreatedAt);
-                break;
-            case "TitleAsc":
-                query = query.OrderBy(p => p.Title);
-                break;
-            case "TitleDesc":
-                query = query.OrderByDescending(p => p.Title);
-                break;
-            case "DateDesc":
-            default:
-                query = query.OrderByDescending(p => p.CreatedAt);
-                break;
-        }
-
-        // Apply pagination
-        return await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        return await query.ToListAsync();
     }
 
-    public async Task<int> GetTotalPostsAsync(string? category = null)
+    public async Task<int> GetTotalPostsAsync(string? categoryFilter = null)
     {
         // Start with a query that includes the related Tags.
         IQueryable<Post> query = _posts
             .Include(p => p.Tags);
 
-        // Apply filtering based on the category parameter
-        if (!string.IsNullOrEmpty(category))
-        {
-            query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
-        }
+        query = ApplyCategoryFilter(query, categoryFilter);
 
         return await query.CountAsync();
     }
 
-    public async Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? category = null)
+    public async Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null)
     {
         // Start with a query that includes the related Tags.
         IQueryable<Post> query = _posts
-            .Include(p => p.Tags)
-            .Where(p => p.User.FollowerFollowerUsers.Any(f => f.FollowingUserId == currentUserId));
+            .Include(p => p.Tags);
 
-        // Apply filtering based on the category parameter
+        query = ApplyUserFollowsFilter(query, currentUserId);
+        query = ApplyCategoryFilter(query, categoryFilter);
+
+        return await query.CountAsync();
+    }
+
+    private static IQueryable<Post> ApplyUserFollowsFilter(IQueryable<Post> query, int currentUserId)
+    {
+        return query.Where(p => p.User.FollowerFollowerUsers.Any(f => f.FollowingUserId == currentUserId));
+    }
+
+    private static IQueryable<Post> ApplyCategoryFilter(IQueryable<Post> query, string? category)
+    {
         if (!string.IsNullOrEmpty(category))
         {
             query = query.Where(p => p.Tags.Any(t => t.TagName.ToLower() == category.ToLower()));
         }
-
-        return await query.CountAsync();
+        return query;
     }
+
+    private static IQueryable<Post> ApplySorting(IQueryable<Post> query, string sortOrder)
+    {
+        switch (sortOrder)
+        {
+            case "DateAsc":
+                return query.OrderBy(p => p.CreatedAt);
+            case "TitleAsc":
+                return query.OrderBy(p => p.Title);
+            case "TitleDesc":
+                return query.OrderByDescending(p => p.Title);
+            case "DateDesc":
+            default:
+                return query.OrderByDescending(p => p.CreatedAt);
+        }
+    }
+
+    private static IQueryable<Post> ApplyPagination(IQueryable<Post> query, int pageNumber, int pageSize)
+    {
+        return query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+    }
+
+
 }
 
