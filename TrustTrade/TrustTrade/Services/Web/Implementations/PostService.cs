@@ -15,6 +15,7 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly ITagRepository _tagRepository;
     private const int PAGE_SIZE = 10;
+    private const int MAX_PAGES_TO_SHOW = 7;
 
     public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository)
     {
@@ -30,9 +31,16 @@ public class PostService : IPostService
         return MapPostsToPostPreviewVM(posts);
     }
 
-    public async Task<List<PostPreviewVM>> GetFollowingPostPreviewsAsync(int currentUser, string? categoryFilter, int pageNumber, string sortOrder)
+    public async Task<List<PostPreviewVM>> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder)
     {
-        List<Post> posts = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUser, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+        List<Post> posts = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUserId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+
+        return MapPostsToPostPreviewVM(posts);
+    }
+
+    public async Task<List<PostPreviewVM>> GetUserPostPreviewsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder)
+    {
+        List<Post> posts = await _postRepository.GetPagedPostsByUserAsync(userId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
 
         return MapPostsToPostPreviewVM(posts);
     }
@@ -51,22 +59,12 @@ public class PostService : IPostService
 
     public async Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber)
     {
-        const int MAX_PAGES_TO_SHOW = 7;
-
-        // Determine total posts and pages
         int totalPosts = await _postRepository.GetTotalPostsAsync(categoryFilter);
-        int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
-        return new PaginationPartialVM
-        {
-            CurrentPage = pageNumber,
-            TotalPages = totalPages,
-            PagesToShow = PaginationHelper.GetPagination(pageNumber, totalPages, MAX_PAGES_TO_SHOW),
-            CategoryFilter = categoryFilter
-        };
+        return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
     }
 
-    private List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts)
+    private static List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts)
     {
         return posts.Select(p => new PostPreviewVM
         {
@@ -83,5 +81,18 @@ public class PostService : IPostService
             PortfolioValueAtPosting = p.PortfolioValueAtPosting,
             ProfilePicture = p.User.ProfilePicture
         }).ToList();
+    }
+
+    private static PaginationPartialVM MapToPaginationPartialVM(int currentPage, int totalPosts, string? categoryFilter)
+    {
+        int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
+
+        return new PaginationPartialVM
+        {
+            CurrentPage = currentPage,
+            TotalPages = totalPages,
+            PagesToShow = PaginationHelper.GetPagination(currentPage, totalPages, MAX_PAGES_TO_SHOW),
+            CategoryFilter = categoryFilter
+        };
     }
 }

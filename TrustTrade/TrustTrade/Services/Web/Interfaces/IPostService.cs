@@ -20,12 +20,22 @@ public interface IPostService
     /// <summary>
     /// Get a list of post previews for posts from users that the current user follows.
     /// </summary>
-    /// <param name="currentUser">The ID of the current user.</param>
+    /// <param name="currentUserId">The ID of the current user.</param>
     /// <param name="categoryFilter">The category filter to apply.</param>
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<List<PostPreviewVM>> GetFollowingPostPreviewsAsync(int currentUser, string? categoryFilter, int pageNumber, string sortOrder);
+    Task<List<PostPreviewVM>> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder);
+
+    /// <summary>
+    /// Get a list of post previews for posts from a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose posts to retrieve.</param>
+    /// <param name="categoryFilter">The category filter to apply.</param>
+    /// <param name="pageNumber">The page number for pagination.</param>
+    /// <param name="sortOrder">The sort order for the posts.</param>
+    /// <returns>A list of post previews.</returns>
+    Task<List<PostPreviewVM>> GetUserPostPreviewsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder);
 
     /// <summary>
     /// Build the post filters for the view model.
