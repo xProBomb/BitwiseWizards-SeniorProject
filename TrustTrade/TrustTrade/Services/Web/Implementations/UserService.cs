@@ -43,4 +43,24 @@ public class UserService : IUserService
         _logger.LogInformation($"Successfully retrieved user '{currentUser.Username}' with IdentityId '{identityUserId}'.");
         return currentUser;
     }
+
+    public async Task<User?> GetUserByUsernameAsync(string username)
+    {
+        IdentityUser? identityUser = await _userManager.FindByNameAsync(username);
+        if (identityUser == null)
+        {
+            _logger.LogWarning($"Identity user with username '{username}' not found.");
+            return null;
+        }
+
+        User? user = await _userRepository.FindByIdentityIdAsync(identityUser.Id, true);
+        if (user == null)
+        {
+            _logger.LogWarning($"User with IdentityId '{identityUser.Id}' not found in the database.");
+            return null;
+        }
+
+        _logger.LogInformation($"Successfully retrieved user '{user.Username}' with IdentityId '{identityUser.Id}'.");
+        return user;
+    }
 }
