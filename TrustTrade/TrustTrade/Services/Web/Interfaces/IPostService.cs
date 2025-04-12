@@ -53,4 +53,22 @@ public interface IPostService
     /// <returns>A PaginationPartialVM object containing pagination information.</returns>
     Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber);
 
+    /// <summary>
+    /// Build the pagination for the view model based on the current user's followed posts.
+    /// </summary>
+    /// <param name="currentUserId">The ID of the current user.</param>
+    /// <param name="categoryFilter">The category filter to apply.</param>
+    /// <param name="pageNumber">The page number for pagination.</param>
+    /// <returns>A PaginationPartialVM object containing pagination information.</returns>
+    Task<PaginationPartialVM> BuildFollowingPaginationAsync(int currentUserId, string? categoryFilter, int pageNumber);
+
+    /// <summary>
+    /// Build the pagination for the view model based on a specific user's posts.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose posts to retrieve.</param>
+    /// <param name="categoryFilter">The category filter to apply.</param>
+    /// <param name="pageNumber">The page number for pagination.</param>
+    /// <returns>A PaginationPartialVM object containing pagination information.</returns>
+    Task<PaginationPartialVM> BuildUserPaginationAsync(int userId, string? categoryFilter, int pageNumber);
+
 }

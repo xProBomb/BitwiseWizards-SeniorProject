@@ -64,6 +64,20 @@ public class PostService : IPostService
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
     }
 
+    public async Task<PaginationPartialVM> BuildFollowingPaginationAsync(int currentUserId, string? categoryFilter, int pageNumber)
+    {
+        int totalPosts = await _postRepository.GetTotalPostsByUserFollowsAsync(currentUserId, categoryFilter);
+        
+        return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
+    }
+
+    public async Task<PaginationPartialVM> BuildUserPaginationAsync(int userId, string? categoryFilter, int pageNumber)
+    {
+        int totalPosts = await _postRepository.GetTotalPostsByUserAsync(userId, categoryFilter);
+
+        return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
+    }
+
     private static List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts)
     {
         return posts.Select(p => new PostPreviewVM
