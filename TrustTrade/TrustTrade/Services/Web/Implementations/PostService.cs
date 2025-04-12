@@ -80,21 +80,44 @@ public class PostService : IPostService
 
     private static List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts)
     {
-        return posts.Select(p => new PostPreviewVM
+        List<PostPreviewVM> postPreviews = new List<PostPreviewVM>();
+
+        foreach (Post post in posts)
         {
-            Id = p.Id,
-            UserName = p.User.Username,
-            Title = p.Title,
-            Excerpt = p.Content != null && p.Content.Length > 100 
-                ? $"{p.Content.Substring(0, 100)}..." 
-                : p.Content ?? string.Empty,
-            TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt),
-            LikeCount = p.Likes.Count,
-            CommentCount = p.Comments.Count,
-            IsPlaidEnabled = p.User.PlaidEnabled ?? false,
-            PortfolioValueAtPosting = p.PortfolioValueAtPosting,
-            ProfilePicture = p.User.ProfilePicture
-        }).ToList();
+            var isPlaidEnabled = post.User.PlaidEnabled ?? false;
+            string? portfolioValue = null;
+
+            // Retreive and format the portfolio value if Plaid is enabled
+            if (isPlaidEnabled)
+            {
+                if (post.PortfolioValueAtPosting.HasValue)
+                {
+                    portfolioValue = FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
+                }
+                else
+                {
+                    portfolioValue = "$0";
+                }
+            }
+
+            postPreviews.Add(new PostPreviewVM
+            {
+                Id = post.Id,
+                UserName = post.User.Username,
+                Title = post.Title,
+                Excerpt = post.Content != null && post.Content.Length > 100 
+                    ? $"{post.Content.Substring(0, 100)}..." 
+                    : post.Content ?? string.Empty,
+                TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
+                LikeCount = post.Likes.Count,
+                CommentCount = post.Comments.Count,
+                IsPlaidEnabled = post.User.PlaidEnabled ?? false,
+                PortfolioValueAtPosting = portfolioValue,
+                ProfilePicture = post.User.ProfilePicture
+            });
+        }
+
+        return postPreviews;
     }
 
     private static PaginationPartialVM MapToPaginationPartialVM(int currentPage, int totalPosts, string? categoryFilter)
