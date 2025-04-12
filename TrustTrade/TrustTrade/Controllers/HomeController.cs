@@ -55,7 +55,7 @@ namespace TrustTrade.Controllers
 
             // Build filters and pagination
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, page);
+            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, page);
 
             var vm = new IndexVM
             {
