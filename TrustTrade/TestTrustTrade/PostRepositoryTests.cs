@@ -171,7 +171,7 @@ public class PostRepositoryTests
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = await postRepository.GetPagedPostsAsync(page: 1, pageSize: 10, sortOrder: "DateAsc");
+        var results = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "DateAsc");
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
@@ -192,7 +192,7 @@ public class PostRepositoryTests
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = await postRepository.GetPagedPostsAsync(page: 1, pageSize: 10, sortOrder: "TitleAsc");
+        var results = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "TitleAsc");
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
@@ -219,7 +219,7 @@ public class PostRepositoryTests
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = await postRepository.GetPagedPostsAsync(category: categoryName);
+        var results = await postRepository.GetPagedPostsAsync(categoryFilter: categoryName);
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(expectedCount), "Should return expected number of posts in category.");
