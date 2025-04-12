@@ -17,6 +17,7 @@ public class UserServiceTests
     private UserService _userService;
 
     private User _user1;
+    private IdentityUser _identityUser1;
 
     [SetUp]
     public void SetUp()
@@ -43,6 +44,12 @@ public class UserServiceTests
             Username = "johnDoe",
             Email = "johndoe@example.com",
             PasswordHash = "dummyHash"
+        };
+
+        _identityUser1 = new IdentityUser
+        {
+            Id = "test-identity-1",
+            UserName = "johnDoe",
         };
     }
 
@@ -96,6 +103,59 @@ public class UserServiceTests
         // Assert
         Assert.That(result, Is.Null);
         _userManagerMock.Verify(u => u.GetUserId(It.IsAny<ClaimsPrincipal>()), Times.Once);
+        _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()), Times.Once);
+    }
+
+    [Test]
+    public async Task GetUserByUsernameAsync_WhenUserFound_ReturnsUser()
+    {
+        // Arrange
+        _userManagerMock.Setup(u => u.FindByNameAsync(It.IsAny<string>()))
+            .ReturnsAsync(_identityUser1);
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
+
+        // Act
+        var result = await _userService.GetUserByUsernameAsync("johnDoe");
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Id, Is.EqualTo(_user1.Id));
+        Assert.That(result.IdentityId, Is.EqualTo(_user1.IdentityId));
+        _userManagerMock.Verify(u => u.FindByNameAsync("johnDoe"), Times.Once);
+        _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()), Times.Once);
+    }
+
+    [Test]
+    public async Task GetUserByUsernameAsync_WhenIdentityUserNotFound_ReturnsNull()
+    {
+        // Arrange
+        _userManagerMock.Setup(u => u.FindByNameAsync(It.IsAny<string>()))
+            .ReturnsAsync(() => null);
+
+        // Act
+        var result = await _userService.GetUserByUsernameAsync("nonExistentUser");
+
+        // Assert
+        Assert.That(result, Is.Null);
+        _userManagerMock.Verify(u => u.FindByNameAsync("nonExistentUser"), Times.Once);
+    }
+
+    [Test]
+    public async Task GetUserByUsernameAsync_WhenUserNotFound_ReturnsNull()
+    {
+        // Arrange
+        _userManagerMock.Setup(u => u.FindByNameAsync(It.IsAny<string>()))
+            .ReturnsAsync(_identityUser1);
+        _userRepositoryMock.Setup(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()))
+            .ReturnsAsync(() => null);
+
+        // Act
+        var result = await _userService.GetUserByUsernameAsync("johnDoe");
+
+        // Assert
+        Assert.That(result, Is.Null);
+        _userManagerMock.Verify(u => u.FindByNameAsync("johnDoe"), Times.Once);
         _userRepositoryMock.Verify(r => r.FindByIdentityIdAsync("test-identity-1", It.IsAny<bool>()), Times.Once);
     }
 }
