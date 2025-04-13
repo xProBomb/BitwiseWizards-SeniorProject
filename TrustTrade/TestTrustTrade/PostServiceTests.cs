@@ -112,7 +112,7 @@ public class PostServiceTests
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result[0].Title, Is.EqualTo("Post 2"));
         Assert.That(result[0].IsPlaidEnabled, Is.True);
-        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo(10000.00M));
+        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()), Times.Once);
     }
 
@@ -163,7 +163,7 @@ public class PostServiceTests
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result[0].Title, Is.EqualTo("Post 2"));
         Assert.That(result[0].IsPlaidEnabled, Is.True);
-        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo(10000.00M));
+        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()), Times.Once);
     }
 
