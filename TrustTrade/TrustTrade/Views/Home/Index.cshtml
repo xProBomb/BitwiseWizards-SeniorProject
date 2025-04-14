@@ -8,21 +8,99 @@
     ViewData["Title"] = "Home Page";
 }
 
-<!-- Post Filters -->
-<div>
-    <partial name="../Posts/_Filters" model="Model.PostFilters" />
-</div>
+<div class="container">
+    <div class="row">
+        <!-- Main content column - takes full width on small devices, 8 columns on medium+ -->
+        <div class="col-12 col-md-8">
+            <!-- Post Filters -->
+            <div>
+                <partial name="../Posts/_Filters" model="Model.PostFilters" />
+            </div>
 
-<!-- Post Preview Feed -->
-<div class="mt-5">
-    <partial name="../Posts/_Feed" model="Model.Posts" />
-</div>
+            <!-- Post Preview Feed -->
+            <div class="mt-5">
+                <partial name="../Posts/_Feed" model="Model.Posts" />
+            </div>
 
-<!-- Pagination Controls -->
-<div class="mt-5">
-    <partial name="../Posts/_Pagination" model="Model.Pagination" />
+            <!-- Pagination Controls -->
+            <div class="mt-5">
+                <partial name="../Posts/_Pagination" model="Model.Pagination" />
+            </div>
+        </div>
+        <!-- Financial News sidebar - hidden on small devices, 4 columns on medium+ -->
+        <div class="col-md-4 d-none d-md-block">
+            <div class="sidebar-widget">
+                <div id="financialNewsWidget">
+                    <!-- Initial Loading Spinner -->
+                    <div class="loading-spinner text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading financial news...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const newsWidgetContainer = document.getElementById('financialNewsWidget');
+
+        // Function to load widget content
+        function loadNewsWidget(url) {
+            if (!newsWidgetContainer) return; // Exit if container not found
+
+            // Show loading state
+            newsWidgetContainer.innerHTML = `<div class="loading-spinner text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading financial news...</p></div>`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    newsWidgetContainer.innerHTML = html;
+                    // No need to re-attach handlers here because we use delegation
+                })
+                .catch(error => {
+                    console.error('Error loading financial news widget content:', error);
+                    newsWidgetContainer.innerHTML =
+                        '<div class="alert alert-warning p-3 m-0 border-0">Unable to load financial news at this time.</div>';
+                });
+        }
+
+        // --- Initial Load ---
+        if (newsWidgetContainer) {
+            const initialUrl = '@Url.Action("NewsWidget", "FinancialNews")'; // Fetch default (All)
+            loadNewsWidget(initialUrl);
+
+            // --- Event Delegation for Tab Clicks ---
+            newsWidgetContainer.addEventListener('click', function(event) {
+                // Check if the clicked element is a category tab
+                const clickedTab = event.target.closest('.category-tab');
+
+                if (clickedTab) {
+                    event.preventDefault(); // Prevent default link behavior if any
+
+                    const url = clickedTab.getAttribute('data-url');
+                    if (url) {
+                        // Visually update active tab immediately (optional, can be done in partial)
+                        const allTabs = newsWidgetContainer.querySelectorAll('.category-tab');
+                        allTabs.forEach(t => t.classList.remove('active'));
+                        clickedTab.classList.add('active');
+
+                        // Load content for the clicked tab
+                        loadNewsWidget(url);
+                    }
+                }
+            });
+        }
+    });
+</script>
     <script src="~/js/postFeed.js"></script>
 }
