@@ -14,7 +14,6 @@ public class PostServiceTests
     private Mock<IPostRepository> _postRepositoryMock;
     private Mock<ITagRepository> _tagRepositoryMock;
     private PostService _postService;
-
     private List<Post> _posts;
     private List<Post> _postsWithPlaidEnabledUser;
 
@@ -287,5 +286,43 @@ public class PostServiceTests
         Assert.That(result.PagesToShow, Is.EquivalentTo(new List<int> { 1, 2, 3 }));
         Assert.That(result.CategoryFilter, Is.Null);
         _postRepositoryMock.Verify(repo => repo.GetTotalPostsAsync(It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task BuildFollowingPaginationAsync_ReturnsCorrectPagination()
+    {
+        // Arrange
+        _postRepositoryMock.Setup(r => r.GetTotalPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>()))
+            .ReturnsAsync(25);
+
+        // Act
+        var result = await _postService.BuildFollowingPaginationAsync(1, null, 2);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.InstanceOf<PaginationPartialVM>());
+        Assert.That(result.CurrentPage, Is.EqualTo(2));
+        Assert.That(result.TotalPages, Is.EqualTo(3)); // 25 posts / 10 per page = 3 pages
+        Assert.That(result.PagesToShow, Is.EquivalentTo(new List<int> { 1, 2, 3 }));
+        Assert.That(result.CategoryFilter, Is.Null);
+        _postRepositoryMock.Verify(repo => repo.GetTotalPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task BuildUserPaginationAsync_ReturnsCorrectPagination()
+    {
+        // Arrange
+        _postRepositoryMock.Setup(r => r.GetTotalPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>()))
+            .ReturnsAsync(25);
+
+        // Act
+        var result = await _postService.BuildUserPaginationAsync(1, null, 2);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.InstanceOf<PaginationPartialVM>());
+        Assert.That(result.CurrentPage, Is.EqualTo(2));
+        Assert.That(result.TotalPages, Is.EqualTo(3)); // 25 posts / 10 per page = 3 pages
+        Assert.That(result.PagesToShow, Is.EquivalentTo(new List<int> { 1, 2, 3 }));
+        Assert.That(result.CategoryFilter, Is.Null);
+        _postRepositoryMock.Verify(repo => repo.GetTotalPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
     }
 }
