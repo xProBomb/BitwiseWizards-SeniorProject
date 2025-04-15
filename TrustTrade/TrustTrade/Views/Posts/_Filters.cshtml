@@ -36,7 +36,7 @@
     </select>
 
     <!-- Reset page to 1 when sort order changes -->
-    <input type="hidden" name="page" value="1" />
+    <input type="hidden" name="pageNumber" value="1" />
     <input type="hidden" name="categoryFilter" value="@Model.SelectedCategory" />
 </form>
 
@@ -63,7 +63,7 @@
     </select>
 
     <!-- Reset page to 1 when category filter changes -->
-    <input type="hidden" name="page" value="1" />
+    <input type="hidden" name="pageNumber" value="1" />
     <input type="hidden" name="sortOrder" value="@selectedSortOrder" />
 
     @if (Model.SelectedCategory != null)

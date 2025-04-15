@@ -1,0 +1,27 @@
+@using TrustTrade.ViewModels
+@model UserPostsVM
+
+<link rel="stylesheet" href="~/css/index.css" />
+
+@{
+    ViewData["Title"] = "User Posts";
+}
+
+<!-- Post Filters -->
+<div>
+    <partial name="../Posts/_Filters" model="Model.PostFilters" />
+</div>
+
+<!-- Post Preview Feed -->
+<div class="mt-5"
+    <partial name="../Posts/_Feed" model="Model.Posts" />
+</div>
+
+<!-- Pagination Controls -->
+<div class="mt-5">
+    <partial name="../Posts/_Pagination" model="Model.Pagination" />
+</div>
+
+@section Scripts {
+    <script src="~/js/postFeed.js"></script>
+}
