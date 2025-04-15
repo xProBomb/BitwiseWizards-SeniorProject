@@ -1,88 +1,256 @@
+@* File: Views/FinancialNews/Index.cshtml *@
 @model IEnumerable<TrustTrade.Models.FinancialNewsItem>
+@using System.Linq;
+
 @{
     ViewData["Title"] = "Financial News";
+    // Cast ViewBag properties for easier null/logic handling
+    string currentCategory = (string)ViewBag.CurrentCategory;
+    string currentSearchTerm = (string)ViewBag.SearchTerm;
+    int pageSize = ViewBag.PageSize is int pz ? pz : 20; // Default to 20 if not set
+    int initialItemCount = ViewBag.InitialItemCount is int iic ? iic : (Model?.Count() ?? 0);
+    // Determine if more pages *might* exist initially based on first load
+    bool potentiallyMorePages = initialItemCount >= pageSize;
 }
 
 <div class="financial-news-page">
+    @* --- Page Header, Search Form, Filter Controls --- *@
+    @* (These sections remain unchanged from your provided code) *@
     <div class="page-header">
         <h1>Financial News</h1>
         <p class="text-muted">Stay updated with the latest market news and insights</p>
     </div>
-    
-    <div class="filter-controls">
-        <div class="category-tabs">
-            <a href="@Url.Action("Index", "FinancialNews")" class="btn @(ViewBag.CurrentCategory == null ? "btn-primary" : "btn-outline-primary")">All</a>
-            <a href="@Url.Action("Index", "FinancialNews", new { category = "Stock" })" class="btn @(ViewBag.CurrentCategory == "Stock" ? "btn-primary" : "btn-outline-primary")">Stocks</a>
-            <a href="@Url.Action("Index", "FinancialNews", new { category = "Crypto" })" class="btn @(ViewBag.CurrentCategory == "Crypto" ? "btn-primary" : "btn-outline-primary")">Crypto</a>
-        </div>
+
+    <div class="search-section mb-4">
+        <form method="get" action="@Url.Action("Index", "FinancialNews")" class="search-form">
+            <div class="input-group">
+                <input type="text" name="searchTerm" class="form-control"
+                       placeholder="Search news..." value="@currentSearchTerm">
+                @if (!string.IsNullOrEmpty(currentCategory))
+                {
+                    <input type="hidden" name="category" value="@currentCategory" />
+                }
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
     </div>
-    
-    <div class="news-container">
-        @if (Model.Any())
+
+    <div class="filter-controls mb-4">
+        <div class="category-tabs">
+            <a href="@Url.Action("Index", "FinancialNews", new { category = (string)null, searchTerm = currentSearchTerm })"
+               class="btn @(currentCategory == null ? "btn-primary" : "btn-outline-primary")">All</a>
+            <a href="@Url.Action("Index", "FinancialNews", new { category = "Stock", searchTerm = currentSearchTerm })"
+               class="btn @(currentCategory == "Stock" ? "btn-primary" : "btn-outline-primary")">Stocks</a>
+            <a href="@Url.Action("Index", "FinancialNews", new { category = "Crypto", searchTerm = currentSearchTerm })"
+               class="btn @(currentCategory == "Crypto" ? "btn-primary" : "btn-outline-primary")">Crypto</a>
+        </div>
+
+        @if (!string.IsNullOrEmpty(currentSearchTerm))
         {
-            foreach (var newsItem in Model)
-            {
-                <div class="news-card">
-                    <div class="news-metadata">
-                        <span class="news-source">@newsItem.Source</span>
-                        <span class="news-date">@newsItem.TimePublished.ToString("MMM dd, yyyy HH:mm")</span>
-                    </div>
-                    
-                    <h3 class="news-title">
-                        <a href="@newsItem.Url" target="_blank" rel="noopener noreferrer">@newsItem.Title</a>
-                    </h3>
-                    
-                    @if (!string.IsNullOrEmpty(newsItem.Summary))
-                    {
-                        <p class="news-summary">@newsItem.Summary</p>
-                    }
-                    
-                    <div class="news-footer">
-                        <div class="sentiment-section">
-                            @if (!string.IsNullOrEmpty(newsItem.OverallSentimentLabel))
-                            {
-                                <div class="sentiment-badge @newsItem.OverallSentimentLabel.ToLower().Replace(" ", "-")">
-                                    <i class="fas @(newsItem.OverallSentimentLabel.Contains("Bullish") ? "fa-arrow-up" : 
-                                                 newsItem.OverallSentimentLabel.Contains("Bearish") ? "fa-arrow-down" : "fa-minus")"></i>
-                                    @newsItem.OverallSentimentLabel
-                                </div>
-                            }
-                        </div>
-                        
-                        @if (newsItem.TickerSentiments != null && newsItem.TickerSentiments.Any())
-                        {
-                            <div class="tickers-section">
-                                <span class="tickers-label">Related:</span>
-                                @foreach (var ticker in newsItem.TickerSentiments.OrderByDescending(t => t.RelevanceScore).Take(5))
-                                {
-                                    <span class="ticker-badge @ticker.TickerSentimentLabel?.ToLower().Replace(" ", "-")">
-                                        $@ticker.TickerSymbol
-                                    </span>
-                                }
-                            </div>
-                        }
-                        
-                        @if (newsItem.Topics != null && newsItem.Topics.Any())
-                        {
-                            <div class="topics-section">
-                                <span class="topics-label">Topics:</span>
-                                @foreach (var topic in newsItem.Topics.OrderByDescending(t => t.RelevanceScore).Take(3))
-                                {
-                                    <span class="topic-badge">@topic.TopicName</span>
-                                }
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="no-news-message">
-                <i class="fas fa-newspaper fa-3x"></i>
-                <h3>No financial news available</h3>
-                <p>Check back later for the latest updates on stocks and cryptocurrencies.</p>
+            <div class="search-results-info mt-2">
+                <p class="text-muted">
+                    Showing results for: <strong>@currentSearchTerm</strong>
+                    <a href="@Url.Action("Index", "FinancialNews", new { category = currentCategory, searchTerm = (string)null })"
+                       class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="bi bi-x"></i> Clear Search
+                    </a>
+                </p>
             </div>
         }
     </div>
-</div>
+    @* --- End Header/Search/Filters --- *@
+
+
+    @* --- News Items Container (for initial load and infinite scroll appends) --- *@
+    <div id="news-items-container" class="news-container">
+        @* Render the initial page's items using the partial view *@
+        @if (Model != null && Model.Any())
+        {
+            @await Html.PartialAsync("_NewsItemsPartial", Model)
+        }
+
+        @* Show "No news" ONLY if the initial load had zero items AND no search was active *@
+        @if (Model == null || !Model.Any())
+        {
+            if (string.IsNullOrEmpty(currentSearchTerm))
+            {
+                <div class="no-news-message">
+                    @* Standard Font Awesome icon - make sure FA is linked or use Bootstrap Icons *@
+                    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                    @* Or Bootstrap Icon: <i class="bi bi-newspaper fs-1 text-muted mb-3"></i> *@
+                    <h3>No financial news available</h3>
+                    <p>Check back later for the latest updates.</p>
+                </div>
+            }
+            else // No initial items, but a search term *was* active
+            {
+                <div class="no-news-message">
+                    <i class="bi bi-search fs-1 text-muted mb-3"></i>
+                    <h3>No results found for "@currentSearchTerm"</h3>
+                    <p>Try different keywords.</p>
+                </div>
+            }
+        }
+    </div> @* --- End #news-items-container --- *@
+
+
+    @* --- Loading Indicator (Initially Hidden) --- *@
+    <div id="loading-indicator" style="display: none;" class="text-center p-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading more news...</span>
+        </div>
+         <p class="text-muted mt-2">Loading more news...</p>
+    </div>
+
+
+    @* --- End of Content Marker (Initially Hidden) --- *@
+    <div id="end-of-content" style="display: none;" class="text-center p-4 text-muted">
+        <hr>
+        <p><i class="bi bi-check-circle"></i> You've reached the end of the news.</p>
+    </div>
+
+</div> @* --- End .financial-news-page --- *@
+
+
+@* --- JavaScript for Infinite Scroll --- *@
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const newsContainer = document.getElementById('news-items-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const endOfContentMarker = document.getElementById('end-of-content');
+
+            // --- State Variables ---
+            let currentPage = 2; // Start loading from page 2 after initial load
+            let isLoading = false;
+            // Initialize state from C# variables passed via ViewBag/Model
+            let currentCategory = @Html.Raw(Json.Serialize(currentCategory));
+            let currentSearchTerm = @Html.Raw(Json.Serialize(currentSearchTerm));
+            let pageSize = @pageSize;
+            let hasMorePages = @Html.Raw(Json.Serialize(potentiallyMorePages)); // Initial guess
+
+             // If the initial load didn't even return one item, assume no more pages
+             if (@initialItemCount === 0) {
+                 hasMorePages = false;
+                 // If there were no initial items, show the end marker immediately (if applicable)
+                 if (newsContainer.querySelector('.news-card') === null) { // Check if container is truly empty
+                      if (endOfContentMarker && !document.querySelector('.no-news-message')) { // Don't show if "No news" message is already there
+                          endOfContentMarker.style.display = 'block';
+                      }
+                 }
+             }
+
+
+            // --- Function to Load More News ---
+            async function loadMoreNews() {
+                if (isLoading || !hasMorePages) {
+                    console.log(`Skipping load: isLoading=${isLoading}, hasMorePages=${hasMorePages}`);
+                    return;
+                }
+
+                isLoading = true;
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+                if (endOfContentMarker) endOfContentMarker.style.display = 'none';
+
+                // Construct the URL for the LoadMoreNews action
+                const url = new URL('@Url.Action("LoadMoreNews", "FinancialNews")', window.location.origin);
+                url.searchParams.append('page', currentPage);
+                if (currentCategory) {
+                    url.searchParams.append('category', currentCategory);
+                }
+                if (currentSearchTerm) {
+                    url.searchParams.append('searchTerm', currentSearchTerm);
+                }
+
+                try {
+                    console.log(`Fetching page ${currentPage}: ${url.toString()}`);
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const html = await response.text();
+
+                    if (html && html.trim().length > 0) {
+                        // Append the new news cards
+                        if (newsContainer) {
+                            newsContainer.insertAdjacentHTML('beforeend', html);
+                        }
+                        currentPage++; // Prepare for the next page
+
+                        // Check if the last fetch might be the end
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = html;
+                        const itemsFetched = tempDiv.children.length;
+                        console.log(`Fetched ${itemsFetched} items.`);
+                        if (itemsFetched < pageSize) {
+                            console.log('End of pages suspected (fetched < pageSize).');
+                            hasMorePages = false;
+                            if (endOfContentMarker) endOfContentMarker.style.display = 'block';
+                        }
+
+                    } else {
+                        // Empty response means no more pages
+                        console.log('End of pages reached (empty response).');
+                        hasMorePages = false;
+                        if (endOfContentMarker) endOfContentMarker.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error loading more news:', error);
+                    if (loadingIndicator) {
+                         loadingIndicator.innerHTML = '<p class="text-danger">Could not load more news. Please try refreshing.</p>';
+                         // Keep indicator visible to show the error
+                         return; // Stop trying on error
+                    }
+                     hasMorePages = false; // Stop trying on error
+                } finally {
+                    isLoading = false;
+                    // Hide loading indicator only if it wasn't replaced by an error message
+                    if (loadingIndicator && !loadingIndicator.querySelector('.text-danger')) {
+                       loadingIndicator.style.display = 'none';
+                    }
+                }
+            }
+
+            // --- Scroll Event Handling ---
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            function checkScroll() {
+                 const scrollBuffer = 350; // Pixels from bottom to trigger load
+                 // Check if bottom of viewport is close to bottom of document body
+                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - scrollBuffer) {
+                     if (!isLoading && hasMorePages) { // Extra check before calling
+                         console.log("Scroll trigger: Near bottom, attempting to load more...");
+                         loadMoreNews();
+                     }
+                 }
+            }
+
+            // Attach the debounced scroll listener
+            window.addEventListener('scroll', debounce(checkScroll, 150)); // Check scroll position ~6 times/sec
+
+            // --- Initial Check ---
+            // If the initial content doesn't fill the viewport, try loading more immediately.
+             function initialLoadCheck() {
+                if (window.innerHeight >= document.body.offsetHeight && hasMorePages) {
+                    console.log("Initial check: Content doesn't fill screen, loading more...");
+                    loadMoreNews();
+                }
+             }
+             // Use a small delay to let the page render fully first
+             setTimeout(initialLoadCheck, 500);
+
+        });
+    </script>
+}

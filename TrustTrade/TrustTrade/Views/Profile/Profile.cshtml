@@ -289,7 +289,8 @@
                             <!-- Bio Field -->
                             <div class="mb-3">
                                 <label class="form-label">About</label>
-                                <textarea name="Bio" class="form-control" rows="4">@Model.Bio</textarea>
+                                <textarea name="Bio" class="form-control" rows="4" maxlength="256">@Model.Bio</textarea>
+                                <span asp-validation-for="Bio" class="text-danger"></span>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Trading Preference</label>
