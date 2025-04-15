@@ -23,14 +23,14 @@ namespace TrustTrade.Controllers
             _userService = userService;
         }
 
-        public async Task<IActionResult> Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Index(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
         {
             // Retrieve posts
-            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, page, sortOrder);
+            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
     
             // Build filters and pagination
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, page);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
 
             var vm = new IndexVM
             {
@@ -43,7 +43,7 @@ namespace TrustTrade.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Following(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Following(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
         {
             User? user = await _userService.GetCurrentUserAsync(User);
             if (user == null) return Unauthorized();            
@@ -51,11 +51,11 @@ namespace TrustTrade.Controllers
             int currentUserId = user.Id;
 
             // Retrieve posts
-            List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, page, sortOrder);
+            List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
 
             // Build filters and pagination
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, page);
+            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
 
             var vm = new IndexVM
             {
