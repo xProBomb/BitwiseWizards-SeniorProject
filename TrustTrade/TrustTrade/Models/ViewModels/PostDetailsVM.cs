@@ -23,4 +23,6 @@ public class PostDetailsVM
     public string? PortfolioValueAtPosting { get; set; }
 
     public bool IsOwnedByCurrentUser { get; set; }
+
+    public byte[]? ProfilePicture { get; set; }
 }
