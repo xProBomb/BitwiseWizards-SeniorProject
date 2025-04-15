@@ -71,4 +71,28 @@ public class UserRepositoryTests
         // Assert
         Assert.That(result, Is.Null);
     }
+
+    [TestCase("johnDoe")]
+    [TestCase("johndoe")] // Case insensitivity test
+    [TestCase("JOHNDOE")] // Case insensitivity test
+    public async Task FindByUsernameAsync_WhenUserExists_ReturnsUser(string username)
+    {
+        // Arrange & Act
+        var result = await _userRepository.FindByUsernameAsync(username);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Id, Is.EqualTo(1));
+        Assert.That(result.Username, Is.EqualTo("johnDoe"));
+    }
+
+    [Test]
+    public async Task FindByUsernameAsync_WhenUserDoesNotExist_ReturnsNull()
+    {
+        // Arrange & Act
+        var result = await _userRepository.FindByUsernameAsync("non-existent-username");
+
+        // Assert
+        Assert.That(result, Is.Null);
+    }
 }
