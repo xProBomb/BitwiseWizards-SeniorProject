@@ -1,0 +1,61 @@
+@model IEnumerable<TrustTrade.Models.FinancialNewsItem>
+
+@* This partial ONLY renders the individual news cards *@
+@if (Model != null && Model.Any())
+{
+    foreach (var newsItem in Model)
+    {
+        <div class="news-card">
+            <div class="news-metadata">
+                <span class="news-source">@newsItem.Source</span>
+                <span class="news-date">@newsItem.TimePublished.ToString("MMM dd, yyyy HH:mm")</span>
+            </div>
+
+            <h3 class="news-title">
+                <a href="@newsItem.Url" target="_blank" rel="noopener noreferrer">@newsItem.Title</a>
+            </h3>
+
+            @if (!string.IsNullOrEmpty(newsItem.Summary))
+            {
+                <p class="news-summary">@newsItem.Summary</p>
+            }
+
+            <div class="news-footer">
+                <div class="sentiment-section">
+                    @if (!string.IsNullOrEmpty(newsItem.OverallSentimentLabel))
+                    {
+                        <div class="sentiment-badge @newsItem.OverallSentimentLabel.ToLower().Replace(" ", "-")">
+                            @newsItem.OverallSentimentLabel
+                        </div>
+                    }
+                </div>
+
+                @if (newsItem.TickerSentiments != null && newsItem.TickerSentiments.Any())
+                {
+                    <div class="tickers-section">
+                        <span class="tickers-label">Related:</span>
+                        @foreach (var ticker in newsItem.TickerSentiments.OrderByDescending(t => t.RelevanceScore).Take(5))
+                        {
+                            <span class="ticker-badge @ticker.TickerSentimentLabel?.ToLower().Replace(" ", "-")">
+                                $@ticker.TickerSymbol
+                            </span>
+                        }
+                    </div>
+                }
+
+                @if (newsItem.Topics != null && newsItem.Topics.Any())
+                {
+                    <div class="topics-section">
+                        <span class="topics-label">Topics:</span>
+                        @foreach (var topic in newsItem.Topics.OrderByDescending(t => t.RelevanceScore).Take(3))
+                        {
+                            <span class="topic-badge">@topic.TopicName</span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+@* IMPORTANT: Do NOT include the "No news items" message here.
+   Returning an empty result from the controller will signal the end. *@
