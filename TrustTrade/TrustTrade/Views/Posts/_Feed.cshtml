@@ -11,7 +11,7 @@
         foreach (var post in Model)
         {
             <!-- Display each post as a clickable list item -->
-            <li class="list-group-item clickable-post"
+            <li class="list-group-item"
                 data-url="@Url.Action("Details", "Posts", new { id = post.Id })">
                 <div class="d-flex align-items-center">
                     <!-- Profile Links -->
@@ -46,18 +46,20 @@
                             <i class="bi bi-patch-check-fill"></i>
                         </span>
                     }
-                    <span class="ms-2">@post.TimeAgo</span>
+                    <span class="ms-2 clickable-post">@post.TimeAgo</span>
                 </div>
-                <h3 style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;">@post.Title</h3>
-                <p>@post.Excerpt</p>
+                <h3 class="clickable-post" style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;">@post.Title</h3>
+                <p class="clickable-post">@post.Excerpt</p>
                 <!-- Like and Comment Buttons -->
-                <div class="d-flex align-items-center mt-4">
-                    <button class="btn btn-primary position-relative" aria-label="Like">
-                        <i class="bi bi-hand-thumbs-up"></i> @post.LikeCount
+                <div class="d-flex mt-3">
+                    <button class="btn btn-sm btn-outline-primary like-btn @(post.IsLikedByCurrentUser ? "liked" : "")" 
+                            data-post-id="@post.Id">
+                        <i class="bi @(post.IsLikedByCurrentUser ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i>
+                        <span class="like-count">@post.LikeCount</span>
                     </button>
-                    <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
+                    <a asp-controller="Posts" asp-action="Details" asp-route-id="@post.Id" class="btn btn-sm btn-outline-primary ms-2">
                         <i class="bi bi-chat"></i> @post.CommentCount
-                    </button>
+                    </a>
                 </div>
             </li>
         }

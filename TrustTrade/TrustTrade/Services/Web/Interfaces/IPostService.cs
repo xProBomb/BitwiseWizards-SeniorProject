@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TrustTrade.Models;
 using TrustTrade.ViewModels;
 
@@ -70,5 +72,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <returns>A PaginationPartialVM object containing pagination information.</returns>
     Task<PaginationPartialVM> BuildUserPaginationAsync(int userId, string? categoryFilter, int pageNumber);
+
+    Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int currentUserId);
 
 }

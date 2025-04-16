@@ -15,6 +15,8 @@ public class PostPreviewVM
     public string? TimeAgo { get; set; }
     
     public int LikeCount { get; set; }
+    
+    public bool IsLikedByCurrentUser { get; set; }
 
     public int CommentCount { get; set; }
 
