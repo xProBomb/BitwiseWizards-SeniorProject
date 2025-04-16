@@ -1,4 +1,5 @@
 using TrustTrade.Models;
+using TrustTrade.Helpers;
 using TrustTrade.ViewModels;
 
 namespace TestTrustTrade
@@ -145,14 +146,14 @@ namespace TestTrustTrade
                 Id = post.Id,
                 UserName = post.User.Username,
                 IsPlaidEnabled = post.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = post.PortfolioValueAtPosting
+                PortfolioValueAtPosting = FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value)
             };
             
             // Assert
             Assert.Multiple(() => {
                 Assert.That(viewModel.IsPlaidEnabled, Is.True, "IsPlaidEnabled should be true");
-                Assert.That(viewModel.PortfolioValueAtPosting.HasValue, Is.True, "PortfolioValueAtPosting should have a value");
-                Assert.That(viewModel.PortfolioValueAtPosting!.Value, Is.EqualTo(12345.67M), "Portfolio value should match");
+                Assert.That(viewModel.PortfolioValueAtPosting, Is.Not.Null, "PortfolioValueAtPosting should have a value");
+                Assert.That(viewModel.PortfolioValueAtPosting, Is.EqualTo("$12.3K"), "Portfolio value should match");
             });
         }
     }
