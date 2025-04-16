@@ -24,19 +24,18 @@ public class MarketRepository : IMarketRepository
         {
             return _mockCryptoData
                 .OrderByDescending(c => Math.Abs(c.Change))
-                .Take(6)
                 .ToList();
         }
 
         return await _context.Stocks
             .OrderByDescending(s => Math.Abs(s.DailyChange))
-            .Take(6)
             .Select(s => new StockViewModel
             {
                 Ticker = s.TickerSymbol,
-                Name = "", // Optional future: join with a company name table
+                Name = "",
                 Price = s.StockPrice,
-                Change = s.DailyChange
+                Change = s.DailyChange,
+                LastUpdated = s.LastUpdated
             })
             .ToListAsync();
     }
