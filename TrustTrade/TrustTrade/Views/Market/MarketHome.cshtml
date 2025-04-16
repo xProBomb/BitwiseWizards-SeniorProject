@@ -35,7 +35,8 @@
         <div class="mb-3">
             <canvas id="stockChart" height="200"></canvas>
         </div>
-        <p class="text-muted">More stock details coming soon...</p>
+        <p class="text-muted">Last Updated: @Model.FirstOrDefault()?.LastUpdated?.ToString("g")</p>
+
       </div>
     </div>
   </div>
