@@ -1,11 +1,10 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using TrustTrade.ViewModels
-@model IndexVM
+@model UserPostsVM
 
 <link rel="stylesheet" href="~/css/index.css" />
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "User Posts";
 }
 
 <!-- Post Filters -->
@@ -14,7 +13,7 @@
 </div>
 
 <!-- Post Preview Feed -->
-<div class="mt-5">
+<div class="mt-5"
     <partial name="../Posts/_Feed" model="Model.Posts" />
 </div>
 

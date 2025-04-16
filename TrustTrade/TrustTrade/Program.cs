@@ -7,6 +7,7 @@ using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Services;
+using TrustTrade.Services.Background;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.Services.Web.Implementations;
 
@@ -87,6 +88,20 @@ builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRe
 
 builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 
+// Add HttpClient factory
+builder.Services.AddHttpClient();
+
+// Register DAL services
+builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
+
+// Register application services
+builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
+
+// Register background service - only in production environments
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHostedService<FinancialNewsBackgroundService>();
+}
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();

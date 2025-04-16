@@ -1,0 +1,532 @@
+/* Financial News Widget Styles */
+.financial-news-widget {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.financial-news-widget .widget-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.financial-news-widget .category-tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.financial-news-widget .category-tab {
+    padding: 6px 12px;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    color: #6c757d;
+}
+
+.financial-news-widget .category-tab.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: 500;
+}
+
+.financial-news-widget .news-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.financial-news-widget .news-item:last-child {
+    border-bottom: none;
+}
+
+.financial-news-widget .news-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.financial-news-widget .news-title {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.financial-news-widget .news-title a {
+    color: #212529;
+    text-decoration: none;
+}
+
+.financial-news-widget .news-title a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.financial-news-widget .sentiment-indicator {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.financial-news-widget .bullish {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.financial-news-widget .somewhat-bullish {
+    background-color: #e6f3e6;
+    color: #1e7e34;
+}
+
+.financial-news-widget .neutral {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.financial-news-widget .somewhat-bearish {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.financial-news-widget .bearish {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.financial-news-widget .ticker-list {
+    margin-top: 6px;
+}
+
+.financial-news-widget .ticker-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    margin-right: 5px;
+    font-size: 0.75rem;
+    background-color: #e9ecef;
+    color: #495057;
+    border-radius: 3px;
+}
+
+.financial-news-widget .ticker-badge.bullish {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.financial-news-widget .ticker-badge.somewhat-bullish {
+    background-color: #e6f3e6;
+    color: #1e7e34;
+}
+
+.financial-news-widget .ticker-badge.bearish {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.financial-news-widget .ticker-badge.somewhat-bearish {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.financial-news-widget .view-more {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.financial-news-widget .view-more a {
+    font-size: 0.9rem;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.financial-news-widget .view-more a:hover {
+    text-decoration: underline;
+}
+
+.financial-news-widget .no-news {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* ============================================= */
+/* === Financial News Page (Theme-Aware) ======= */
+/* ============================================= */
+
+.financial-news-page {
+    padding: 20px 0;
+}
+
+/* --- Header & Filters --- */
+.financial-news-page .page-header {
+    margin-bottom: 2rem; /* More space */
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.financial-news-page .page-header h1 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.financial-news-page .page-header p.text-muted {
+    font-size: 1.1rem;
+    color: var(--bs-secondary-color); /* Use theme variable */
+}
+
+.financial-news-page .search-section {
+    max-width: 700px; /* Slightly wider */
+    margin: 0 auto 2.5rem; /* More bottom margin */
+}
+
+.financial-news-page .search-form .input-group {
+    border-radius: 50rem; /* Pill shape */
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07); /* Slightly deeper shadow */
+    border: 1px solid var(--bs-border-color);
+}
+/* Dark theme shadow adjustment */
+[data-bs-theme="dark"] .financial-news-page .search-form .input-group {
+    box-shadow: 0 3px 8px rgba(255, 255, 255, 0.05);
+}
+
+
+.financial-news-page .search-form .form-control {
+    border: none; /* Remove inner border */
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: var(--bs-body-bg); /* Theme background */
+    color: var(--bs-body-color); /* Theme text */
+}
+
+.financial-news-page .search-form .form-control:focus {
+    box-shadow: none;
+}
+
+.financial-news-page .search-form .btn {
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none; /* Remove inner border */
+    background-color: var(--bs-primary);
+    color: white;
+}
+.financial-news-page .search-form .btn:hover {
+    background-color: var(--bs-primary-dark); /* Slightly darker hover */
+}
+
+.financial-news-page .filter-controls {
+    margin-bottom: 2.5rem; /* More space */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.financial-news-page .filter-controls .category-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.financial-news-page .filter-controls .category-tabs .btn {
+    border-radius: 50rem; /* Pill shape */
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+}
+
+.financial-news-page .search-results-info {
+    margin-left: auto; /* Push to right */
+    font-size: 0.9rem;
+    color: var(--bs-secondary-color);
+}
+
+/* --- News Container & Cards --- */
+.financial-news-page .news-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Min card width */
+    gap: 1.75rem;
+}
+
+.financial-news-page .news-card {
+    background-color: var(--bs-body-bg); /* Use theme background */
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem; /* More padding */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+/* Dark theme shadow adjustment */
+[data-bs-theme="dark"] .financial-news-page .news-card {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.04);
+}
+
+
+.financial-news-page .news-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+/* Dark theme hover shadow */
+[data-bs-theme="dark"] .financial-news-page .news-card:hover {
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.07);
+}
+
+
+/* --- Card Content --- */
+.financial-news-page .news-metadata {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color); /* Use theme variable */
+}
+
+.financial-news-page .news-source {
+    font-weight: 600;
+    color: var(--bs-body-color); /* Make source slightly more prominent */
+}
+
+.financial-news-page .news-title {
+    font-size: 1.2rem; /* Adjusted size */
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.financial-news-page .news-title a {
+    color: var(--bs-body-color); /* Use theme variable */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.financial-news-page .news-title a:hover {
+    color: var(--bs-primary); /* Use theme primary */
+}
+
+.financial-news-page .news-summary {
+    color: var(--bs-secondary-color); /* Use theme variable */
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    flex-grow: 1; /* Push footer down */
+}
+
+/* --- Card Footer --- */
+.financial-news-page .news-footer {
+    display: flex;
+    flex-direction: column; /* Stack sections */
+    gap: 0.75rem; /* Space between sections */
+    margin-top: auto; /* Push to bottom */
+    padding-top: 1rem;
+    border-top: 1px solid var(--bs-border-color-translucent); /* Theme border */
+    font-size: 0.8rem;
+}
+
+.financial-news-page .sentiment-section,
+.financial-news-page .tickers-section,
+.financial-news-page .topics-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem; /* Space between items in a section */
+}
+
+.financial-news-page .tickers-label,
+.financial-news-page .topics-label {
+    color: var(--bs-secondary-color); /* Theme secondary */
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* --- Shared Badge Styles --- */
+.financial-news-page .sentiment-badge,
+.financial-news-page .ticker-badge,
+.financial-news-page .topic-badge {
+    display: inline-flex; /* Use flex for potential icons */
+    align-items: center;
+    gap: 0.3rem; /* Space between icon and text if needed */
+    padding: 0.25rem 0.65rem;
+    border-radius: 50rem; /* Pill shape */
+    font-size: 0.78rem; /* Slightly larger */
+    font-weight: 500;
+    line-height: 1.3;
+    text-transform: capitalize;
+    border: 1px solid transparent; /* Base border */
+}
+
+/* --- Sentiment/Ticker Badges - LIGHT THEME (Matches Widget) --- */
+.financial-news-page .sentiment-badge.bullish,
+.financial-news-page .ticker-badge.bullish {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.financial-news-page .sentiment-badge.somewhat-bullish,
+.financial-news-page .ticker-badge.somewhat-bullish {
+    background-color: #e2f0e1; /* Slightly different shade */
+    color: #1e7e34;
+    border-color: #d7e9d8;
+}
+
+.financial-news-page .sentiment-badge.neutral,
+.financial-news-page .ticker-badge.neutral {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-color: #dee2e6;
+}
+
+.financial-news-page .sentiment-badge.somewhat-bearish,
+.financial-news-page .ticker-badge.somewhat-bearish {
+    background-color: #fdf3d8; /* Slightly different shade */
+    color: #856404;
+    border-color: #fceec9;
+}
+
+.financial-news-page .sentiment-badge.bearish,
+.financial-news-page .ticker-badge.bearish {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+/* --- Sentiment/Ticker Badges - DARK THEME OVERRIDES --- */
+[data-bs-theme="dark"] .financial-news-page .sentiment-badge.bullish,
+[data-bs-theme="dark"] .financial-news-page .ticker-badge.bullish {
+    background-color: rgba(var(--bs-success-rgb), 0.2); /* Use BS variable with alpha */
+    color: var(--bs-success-text-emphasis);
+    border-color: rgba(var(--bs-success-rgb), 0.3);
+}
+
+[data-bs-theme="dark"] .financial-news-page .sentiment-badge.somewhat-bullish,
+[data-bs-theme="dark"] .financial-news-page .ticker-badge.somewhat-bullish {
+    background-color: rgba(var(--bs-success-rgb), 0.15); /* Slightly less alpha */
+    color: var(--bs-success-text-emphasis);
+    border-color: rgba(var(--bs-success-rgb), 0.25);
+}
+
+[data-bs-theme="dark"] .financial-news-page .sentiment-badge.neutral,
+[data-bs-theme="dark"] .financial-news-page .ticker-badge.neutral {
+    background-color: rgba(var(--bs-secondary-rgb), 0.2);
+    color: var(--bs-secondary-text-emphasis);
+    border-color: rgba(var(--bs-secondary-rgb), 0.3);
+}
+
+[data-bs-theme="dark"] .financial-news-page .sentiment-badge.somewhat-bearish,
+[data-bs-theme="dark"] .financial-news-page .ticker-badge.somewhat-bearish {
+    background-color: rgba(var(--bs-warning-rgb), 0.15); /* Use warning for yellowish */
+    color: var(--bs-warning-text-emphasis);
+    border-color: rgba(var(--bs-warning-rgb), 0.25);
+}
+
+[data-bs-theme="dark"] .financial-news-page .sentiment-badge.bearish,
+[data-bs-theme="dark"] .financial-news-page .ticker-badge.bearish {
+    background-color: rgba(var(--bs-danger-rgb), 0.2);
+    color: var(--bs-danger-text-emphasis);
+    border-color: rgba(var(--bs-danger-rgb), 0.3);
+}
+
+/* --- Topic Badges (Theme Aware) --- */
+.financial-news-page .topic-badge {
+    background-color: var(--bs-tertiary-bg); /* Use theme tertiary */
+    color: var(--bs-emphasis-color); /* Good contrast text */
+    border-color: var(--bs-border-color-translucent);
+}
+
+
+/* --- No News / Loading / End Markers --- */
+.financial-news-page .no-news-message {
+    grid-column: 1 / -1; /* Span full grid width */
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-tertiary-bg);
+    border-radius: 0.75rem;
+    border: 1px dashed var(--bs-border-color-translucent);
+}
+
+.financial-news-page .no-news-message i { /* Icon styling */
+    font-size: 2.5rem; /* Adjust icon size */
+    margin-bottom: 1rem;
+    color: var(--bs-secondary-color); /* Make icon match text */
+    opacity: 0.7;
+}
+
+.financial-news-page .no-news-message h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--bs-emphasis-color); /* More prominent text */
+}
+
+#loading-indicator,
+#end-of-content {
+    grid-column: 1 / -1; /* Span full grid width */
+    margin-top: 2rem;
+}
+
+#end-of-content hr {
+    margin-bottom: 1rem;
+    border-color: var(--bs-border-color-translucent);
+}
+#end-of-content p {
+    color: var(--bs-secondary-color);
+}
+
+
+/* --- Remove Widget Styles (if they were in the same file) --- */
+/* You can now remove or comment out the old .financial-news-widget styles */
+/* .financial-news-widget { ... } */
+/* ... etc ... */
+
+/* Search section styles */
+.search-section {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.search-form .input-group {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.search-form .form-control {
+    border-right: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+.search-form .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+.search-form .btn {
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-results-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Highlight search terms in results */
+.highlight {
+    background-color: rgba(255, 255, 0, 0.3);
+    padding: 0 2px;
+    border-radius: 2px;
+}

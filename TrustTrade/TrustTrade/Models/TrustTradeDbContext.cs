@@ -9,7 +9,7 @@ public partial class TrustTradeDbContext : DbContext
     public TrustTradeDbContext()
     {
     }
-    
+
     public TrustTradeDbContext(DbContextOptions<TrustTradeDbContext> options)
         : base(options)
     {
@@ -36,8 +36,13 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
-    
+
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
+
+    public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
+    public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
+    public virtual DbSet<FinancialNewsTickerSentiment> FinancialNewsTickerSentiments { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -172,24 +177,24 @@ public partial class TrustTradeDbContext : DbContext
                 .HasConstraintName("FK_Posts_User");
 
             entity.HasMany(p => p.Tags)
-            .WithMany(t => t.Posts)
-            .UsingEntity<Dictionary<string, object>>(
-                "PostTags",
-                j => j.HasOne<Tag>().WithMany()
-                    .HasForeignKey("TagID")
-                    .HasConstraintName("FK_PostTags_Tag")
-                    .OnDelete(DeleteBehavior.Cascade),
-                j => j.HasOne<Post>().WithMany()
-                    .HasForeignKey("PostID")
-                    .HasConstraintName("FK_PostTags_Post")
-                    .OnDelete(DeleteBehavior.Cascade),
-                j =>
-                {
-                    j.HasKey("PostID", "TagID").HasName("PK__PostTags__7C45AF9C52906CEA");
-                    j.ToTable("PostTags");
-                    j.Property<int>("PostID").HasColumnName("PostID");
-                    j.Property<int>("TagID").HasColumnName("TagID");
-                });
+                .WithMany(t => t.Posts)
+                .UsingEntity<Dictionary<string, object>>(
+                    "PostTags",
+                    j => j.HasOne<Tag>().WithMany()
+                        .HasForeignKey("TagID")
+                        .HasConstraintName("FK_PostTags_Tag")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne<Post>().WithMany()
+                        .HasForeignKey("PostID")
+                        .HasConstraintName("FK_PostTags_Post")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("PostID", "TagID").HasName("PK__PostTags__7C45AF9C52906CEA");
+                        j.ToTable("PostTags");
+                        j.Property<int>("PostID").HasColumnName("PostID");
+                        j.Property<int>("TagID").HasColumnName("TagID");
+                    });
         });
 
         modelBuilder.Entity<Stock>(entity =>
@@ -305,7 +310,7 @@ public partial class TrustTradeDbContext : DbContext
                 .HasForeignKey<PortfolioVisibilitySettings>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-        
+
         modelBuilder.Entity<VerificationHistory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__VerificationHistory__3214EC27");
@@ -326,6 +331,24 @@ public partial class TrustTradeDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_VerificationHistory_User");
         });
+
+        // Create a unique index on the Url field to prevent duplicates
+        modelBuilder.Entity<FinancialNewsItem>()
+            .HasIndex(n => n.Url)
+            .IsUnique();
+
+        // Configure cascading delete for related entities
+        modelBuilder.Entity<FinancialNewsTopic>()
+            .HasOne(t => t.NewsItem)
+            .WithMany(n => n.Topics)
+            .HasForeignKey(t => t.NewsItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FinancialNewsTickerSentiment>()
+            .HasOne(ts => ts.NewsItem)
+            .WithMany(n => n.TickerSentiments)
+            .HasForeignKey(ts => ts.NewsItemId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         OnModelCreatingPartial(modelBuilder);
     }

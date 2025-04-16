@@ -38,21 +38,13 @@
                     </a>
                     @if (post.IsPlaidEnabled)
                     {
-                        if (post.PortfolioValueAtPosting.HasValue)
-                        {
-                            try
+                        <span class="text-success ms-2">
+                            @if (!string.IsNullOrEmpty(post.PortfolioValueAtPosting))
                             {
-                                string value = @FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value);
-                                <span class="text-success ms-2">@value </span>
+                                @post.PortfolioValueAtPosting
                             }
-                            catch (Exception)
-                            {
-                                // Fallback in case of formatting issues
-                                <span class="text-success ms-2">$0 </span>
-                            }
-                        }
-                        // Always show checkmark for Plaid-enabled users
-                        <i class="bi bi-patch-check-fill text-success"></i>
+                            <i class="bi bi-patch-check-fill"></i>
+                        </span>
                     }
                     <span class="ms-2">@post.TimeAgo</span>
                 </div>

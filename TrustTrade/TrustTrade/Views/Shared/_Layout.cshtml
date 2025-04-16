@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/TrustTrade.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/themeSwitcher.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/search.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/financial-news.css" asp-append-version="true" />
     <script src="~/js/ThemeSwitcher.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -84,10 +85,16 @@
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
-                     <a class="sidebar-nav-link @IsActive("MarketHome")" asp-controller="Market" asp-action="Index">
+                    <a class="sidebar-nav-link @IsActive("MarketHome")" asp-controller="Market" asp-action="Index">
 
                         <i class="bi bi-graph-up sidebar-icon"></i>
                         Market
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @IsActive("FinancialNews")" asp-controller="FinancialNews" asp-action="Index">
+                        <i class="bi bi-newspaper sidebar-icon"></i>
+                        Financial News
                     </a>
                 </li>
             </ul>

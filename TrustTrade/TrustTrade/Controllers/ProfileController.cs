@@ -6,6 +6,7 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.Models.ViewModels;
 using TrustTrade.ViewModels;
+using TrustTrade.Services.Web.Interfaces;
 
 namespace TrustTrade.Controllers
 {
@@ -15,21 +16,26 @@ namespace TrustTrade.Controllers
         private readonly TrustTradeDbContext _context;
         private readonly IHoldingsRepository _holdingsRepository;
         private readonly ILogger<ProfileController> _logger;
+        private readonly IPostService _postService;
         private readonly IProfileService _profileService;
+        private readonly IUserService _userService;
         private readonly IPerformanceScoreRepository _performanceScoreRepository;
 
         public ProfileController(
             TrustTradeDbContext context,
             IHoldingsRepository holdingsRepository,
             ILogger<ProfileController> logger,
+            IPostService postService,
             IProfileService profileService,
-            IPerformanceScoreRepository performanceScoreRepository
-            )
+            IUserService userService,
+            IPerformanceScoreRepository performanceScoreRepository)
         {
             _context = context;
             _holdingsRepository = holdingsRepository;
             _logger = logger;
+            _postService = postService;
             _profileService = profileService;
+            _userService = userService;
             _performanceScoreRepository = performanceScoreRepository;
         }
 
@@ -523,6 +529,27 @@ namespace TrustTrade.Controllers
             }
 
             return Json(new { success = true });
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/Profile/User/{username}/Posts")]
+        public async Task<IActionResult> UserPosts(string username, string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        {
+            var user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            var postPreviews = await _postService.GetUserPostPreviewsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+            var paginationVM = await _postService.BuildUserPaginationAsync(user.Id, categoryFilter, pageNumber);
+
+            var vm = new UserPostsVM
+            {
+                Posts = postPreviews,
+                Pagination = paginationVM,
+                PostFilters = postFiltersVM,
+            };
+
+            return View(vm);
         }
     }
 }
