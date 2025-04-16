@@ -22,18 +22,18 @@ namespace TrustTrade.Controllers
         }
 
         // Renders the main Search page
-        [HttpGet]
-        public IActionResult SearchUser()
+        [HttpGet("/Search")]
+        public IActionResult Search()
         {
             return View();
         }
 
-        [HttpGet]
+        [HttpGet("Search/Posts")]
         public async Task<IActionResult> SearchPosts(string search, string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
         {
             if (string.IsNullOrWhiteSpace(search))
             {
-                return RedirectToAction("SearchUser");
+                return RedirectToAction("Search");
             }
 
             List<string> searchTerms = search.Split(' ').ToList();

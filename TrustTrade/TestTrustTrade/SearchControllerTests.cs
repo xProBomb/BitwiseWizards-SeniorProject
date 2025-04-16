@@ -231,7 +231,7 @@ namespace TrustTrade.Tests.Controllers
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.ActionName, Is.EqualTo("SearchUser"));
+            Assert.That(result.ActionName, Is.EqualTo("Search"));
         }
     }
 }
