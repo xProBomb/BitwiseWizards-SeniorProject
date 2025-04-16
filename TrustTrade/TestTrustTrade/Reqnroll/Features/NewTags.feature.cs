@@ -20,18 +20,18 @@ namespace TestTrustTrade.Reqnroll.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Calculator test")]
+    [NUnit.Framework.DescriptionAttribute("Adding New Tags to Posts")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class CalculatorTestFeature
+    public partial class AddingNewTagsToPostsFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Reqnroll/Features", "Calculator test", "Simple calculator for adding two numbers", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Reqnroll/Features", "Adding New Tags to Posts", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "Calculator.feature"
+#line 1 "NewTags.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -83,16 +83,14 @@ namespace TestTrustTrade.Reqnroll.Features
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Adding two numbers")]
-        [NUnit.Framework.CategoryAttribute("mytag")]
-        public async System.Threading.Tasks.Task AddingTwoNumbers()
+        [NUnit.Framework.DescriptionAttribute("Viewing tag section shows existing tags and add tag input")]
+        public async System.Threading.Tasks.Task ViewingTagSectionShowsExistingTagsAndAddTagInput()
         {
-            string[] tagsOfScenario = new string[] {
-                    "mytag"};
+            string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Adding two numbers", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 6
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Viewing tag section shows existing tags and add tag input", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 3
+    this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -101,17 +99,50 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
+#line 4
+    await testRunner.GivenAsync("I am creating a new post", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 5
+    await testRunner.WhenAsync("I look at the tags section", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 6
+    await testRunner.ThenAsync("I should see existing tags as checkboxes", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
 #line 7
-    await testRunner.GivenAsync("the first number is 50", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.AndAsync("I should see an input field for adding new tags", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 8
-    await testRunner.AndAsync("the second number is 50", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Adding a new tag with valid input")]
+        public async System.Threading.Tasks.Task AddingANewTagWithValidInput()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Adding a new tag with valid input", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 9
-    await testRunner.WhenAsync("I add the two numbers", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    this.ScenarioInitialize(scenarioInfo);
 #line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
 #line 10
-    await testRunner.ThenAsync("the result should be 100", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.GivenAsync("I am on the post creation page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 11
+    await testRunner.WhenAsync("I enter a new tag name in the input field", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 12
+    await testRunner.AndAsync("I click the \"Add Tag\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 13
+    await testRunner.ThenAsync("the new tag should be added to the list as a selected checkbox", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
