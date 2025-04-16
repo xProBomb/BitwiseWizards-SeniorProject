@@ -51,8 +51,10 @@ window.openStockModal = async function (ticker) {
     document.getElementById("modalTicker").innerText = ticker;
 
     try {
-        const response = await fetch(`/api/market/history?ticker=${ticker}`);
-        const data = await response.json();
+        const data = Array.from({ length: 30 }, (_, i) => ({
+            time: `T-${30 - i}`,
+            price: (100 + Math.sin(i / 3) * 10 + Math.random() * 5).toFixed(2)
+        }));
 
         waitForChartCanvas(() => {
             const canvas = document.getElementById('stockChart');
