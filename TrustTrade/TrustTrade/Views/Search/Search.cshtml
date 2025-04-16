@@ -4,17 +4,17 @@
 
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h1 class="fw-bold display-6">Find a User</h1>
-        <p class="text-muted">Search the TrustTrade community by username</p>
+        <h1 class="fw-bold display-6">Search</h1>
+        <p class="text-muted">Discover the TrustTrade community</p>
     </div>
 
     <div class="search-bar-wrapper mx-auto mb-4" style="max-width: 600px;">
-        <div class="input-group input-group-lg shadow rounded-pill overflow-hidden">
-            <input type="text" class="form-control border-0 ps-4" id="searchTerm" name="searchTerm" placeholder="Search for a username..." aria-label="Search">
-            <span class="input-group-text bg-white border-0 pe-4">
+        <form asp-controller="Search" asp-action="SearchPosts" method="get" class="input-group input-group-lg shadow rounded-pill overflow-hidden">
+            <input type="text" class="form-control border-0 ps-4" id="searchTerm" name="search" placeholder="Search..." aria-label="Search">
+            <button type="submit" class="input-group-text bg-white border-0 pe-4">
                 <i class="bi bi-search"></i>
-            </span>
-        </div>
+            </button>
+        </form>
     </div>
 
     <div id="searchResults">

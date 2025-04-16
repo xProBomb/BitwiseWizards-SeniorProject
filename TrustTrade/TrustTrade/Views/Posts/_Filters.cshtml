@@ -38,6 +38,7 @@
     <!-- Reset page to 1 when sort order changes -->
     <input type="hidden" name="pageNumber" value="1" />
     <input type="hidden" name="categoryFilter" value="@Model.SelectedCategory" />
+    <input type="hidden" name="search" value="@(Model.SearchQuery)" />
 </form>
 
 <!-- Category Filter Drop-down -->
@@ -65,12 +66,14 @@
     <!-- Reset page to 1 when category filter changes -->
     <input type="hidden" name="pageNumber" value="1" />
     <input type="hidden" name="sortOrder" value="@selectedSortOrder" />
+    <input type="hidden" name="search" value="@(Model.SearchQuery)" />
 
     @if (Model.SelectedCategory != null)
     {
     <!-- Clear the category filter -->
     <a class="btn btn-primary ms-3" 
-        asp-route-sortOrder=@Model.SortOrder>
+        asp-route-sortOrder=@Model.SortOrder
+        asp-route-search="@(Model.SearchQuery)">
         Clear Filter
     </a>
     }

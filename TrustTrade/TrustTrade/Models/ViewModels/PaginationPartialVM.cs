@@ -11,4 +11,6 @@ public class PaginationPartialVM
     public string SortOrder { get; set; } = string.Empty;
 
     public string? CategoryFilter { get; set; } = string.Empty;
+
+    public string? SearchQuery { get; set; }
 }
