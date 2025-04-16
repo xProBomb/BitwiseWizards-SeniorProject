@@ -40,12 +40,23 @@ public interface IPostService
     Task<List<PostPreviewVM>> GetUserPostPreviewsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder);
 
     /// <summary>
+    /// Search for posts based on a list of search terms.
+    /// </summary>
+    /// <param name="searchTerms">The search terms to filter posts.</param>
+    /// <param name="categoryFilter">The category filter to apply.</param>
+    /// <param name="pageNumber">The page number for pagination.</param>
+    /// <param name="sortOrder">The sort order for the posts.</param>
+    /// <returns>A list of post previews.</returns>
+    Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, string? categoryFilter, int pageNumber, string sortOrder);
+
+    /// <summary>
     /// Build the post filters for the view model.
     /// </summary>
     /// <param name="categoryFilter">The selected category filter.</param>
     /// <param name="sortOrder">The selected sort order.</param>
+    /// <param name="searchQuery">The search query string.</param>
     /// <returns>A PostFiltersPartialVM object containing filter information.</returns>
-    Task<PostFiltersPartialVM> BuildPostFiltersAsync(string? categoryFilter, string sortOrder);
+    Task<PostFiltersPartialVM> BuildPostFiltersAsync(string? categoryFilter, string sortOrder, string? searchQuery = null);
 
     /// <summary>
     /// Build the pagination for the view model.
@@ -73,6 +84,15 @@ public interface IPostService
     /// <returns>A PaginationPartialVM object containing pagination information.</returns>
     Task<PaginationPartialVM> BuildUserPaginationAsync(int userId, string? categoryFilter, int pageNumber);
 
+    /// <summary>
+    /// Build the pagination for the view model based on search terms.
+    /// </summary>
+    /// <param name="search">The search string to filter posts.</param>
+    /// <param name="searchTerms">The search terms to filter posts.</param>
+    /// <param name="categoryFilter">The category filter to apply.</param>
+    /// <param name="pageNumber">The page number for pagination.</param>
+    /// <returns>A PaginationPartialVM object containing pagination information.</returns>
+    Task<PaginationPartialVM> BuildSearchPaginationAsync(string search, List<string> searchTerms, string? categoryFilter, int pageNumber);
     Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int currentUserId);
 
 }

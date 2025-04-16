@@ -9,4 +9,6 @@ public class PostFiltersPartialVM
     public List<string> Categories { get; set; } = new List<string>();
 
     public string? SelectedCategory { get; set; }
+
+    public string? SearchQuery { get; set; }
 }
