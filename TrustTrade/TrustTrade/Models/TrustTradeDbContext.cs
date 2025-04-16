@@ -204,6 +204,7 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.LastUpdated)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.DailyChange).HasColumnType("decimal(13, 2)");
             entity.Property(e => e.StockPrice).HasColumnType("decimal(13, 2)");
             entity.Property(e => e.TickerSymbol)
                 .HasMaxLength(10)

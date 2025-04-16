@@ -11,6 +11,8 @@ public partial class Stock
 
     public decimal StockPrice { get; set; }
 
+    public decimal DailyChange { get; set; }
+
     public DateTime? LastUpdated { get; set; }
 
     public virtual ICollection<Trade> Trades { get; set; } = new List<Trade>();
