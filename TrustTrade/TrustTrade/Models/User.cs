@@ -25,6 +25,7 @@ public partial class User
 
     public byte[]? ProfilePicture { get; set; }
 
+    [StringLength(256, ErrorMessage = "Bio cannot exceed 128 characters")]
     public string? Bio { get; set; }
 
     public bool? IsAdmin { get; set; }

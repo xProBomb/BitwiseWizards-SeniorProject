@@ -1,0 +1,166 @@
+.market-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.market-search {
+    flex: 1;
+    min-width: 250px;
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    color: #f0f0f0;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+
+.market-search::placeholder {
+    color: #aaa;
+}
+
+.market-search:focus {
+    outline: none;
+    border-color: #32cd32;
+    box-shadow: 0 0 0 2px rgba(50, 205, 50, 0.2);
+}
+
+.market-toggle .btn {
+    min-width: 100px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.2rem;
+    transition: background-color 0.2s, color 0.2s, border 0.2s;
+}
+
+.market-toggle .btn.active {
+    background-color: #32cd32;
+    color: #000;
+    border-color: #32cd32;
+}
+
+.market-toggle .btn:hover {
+    background-color: #28a745;
+    color: #fff;
+    border-color: #28a745;
+}
+
+.stock-card {
+    background-color: #1f1f1f;
+    color: #fff;
+    border: 1px solid #2b2b2b;
+    border-radius: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    height: 100%;
+}
+
+.stock-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0, 255, 100, 0.15);
+}
+
+.stock-card .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.stock-card .price {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.positive { color: #32cd32; }
+.negative { color: #ff4d4d; }
+
+.stock-card canvas {
+    height: 60px !important;
+    max-height: 60px;
+}
+
+.modal-content {
+    background-color: #1b1b1b;
+    color: #f0f0f0;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+.svg-icon {
+    display: flex;
+    align-items: center;
+}
+
+.expand-icon {
+    margin-top: auto;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.expand-icon svg {
+    transition: transform 0.2s ease;
+}
+
+.stock-card:hover .expand-icon {
+    opacity: 1;
+}
+
+.stock-card:hover .expand-icon svg {
+    transform: scale(1.1);
+}
+
+.stock-up:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(50, 205, 50, 0.3);
+}
+
+.stock-down:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(255, 77, 77, 0.3);
+}
+
+.invest-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    color: #000000;
+    background-color: transparent;
+    border: 1px solid #000000;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none;
+    color: white;
+    text-decoration: none;
+}
+
+.invest-btn:hover {
+    color: #fff;
+    background-color: #d35b49;
+    border-color: #cf3d3d;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.invest-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(33, 140, 255, 0.4);
+}
+
+.stock-card .invest-btn {
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+}
+
+.stock-card:hover .invest-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+

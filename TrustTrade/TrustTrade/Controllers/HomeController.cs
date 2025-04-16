@@ -1,147 +1,67 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using TrustTrade.Models;
-using TrustTrade.DAL.Abstract;
 using TrustTrade.ViewModels;
-using TrustTrade.Helpers;
-using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using TrustTrade.Services.Web.Interfaces;
 
 namespace TrustTrade.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly TrustTradeDbContext _context;
         private readonly ILogger<HomeController> _logger;
-        private readonly IPostRepository _postRepository;
-        private readonly ITagRepository _tagRepository;
+        private readonly IPostService _postService;
+        private readonly IUserService _userService;
 
         public HomeController(
-            TrustTradeDbContext context,
             ILogger<HomeController> logger, 
-            IPostRepository postRepository, 
-            ITagRepository tagRepository)
+            IPostService postService,
+            IUserService userService)
         {
-            _context = context;
             _logger = logger;
-            _postRepository = postRepository;
-            _tagRepository = tagRepository;
+            _postService = postService;
+            _userService = userService;
         }
 
-        public IActionResult Index(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Index(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
         {
-            const int PAGE_SIZE = 10;
+            // Retrieve posts
+            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
+    
+            // Build filters and pagination
+            PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
 
-            // Retrieve paged posts from your repository.
-            List<Post> posts = _postRepository.GetPagedPosts(categoryFilter, page, PAGE_SIZE, sortOrder);
-
-            // Map to the view model for the post preview
-            List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
-            {
-                Id = p.Id,
-                UserName = p.User.Username,
-                Title = p.Title,
-                Excerpt = p.Content != null && p.Content.Length > 100 
-                    ? $"{p.Content.Substring(0, 100)}..." 
-                    : p.Content ?? string.Empty,
-                TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt),
-                LikeCount = p.Likes.Count,
-                CommentCount = p.Comments.Count,
-                IsPlaidEnabled = p.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = p.PortfolioValueAtPosting,
-                ProfilePicture = p.User.ProfilePicture
-            }).ToList();
-            
-            //            // For debugging 
-//            foreach (var post in postPreviews)
-//            {
-//                _logger.LogInformation($"Post {post.Id} by {post.UserName}: PlaidEnabled={post.IsPlaidEnabled}, PortfolioValue={post.PortfolioValueAtPosting}");
-//            }
-
-            // Determine total pages
-            int totalPosts = _postRepository.GetTotalPosts(categoryFilter);
-            int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
-
-            // Retrieve all tag names for the category filter
-            List<string> tagNames = _tagRepository.GetAllTagNames();
-
-            // Build the view model, including the current sort order
             var vm = new IndexVM
             {
                 Posts = postPreviews,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7),
-                SortOrder = sortOrder,
-                Categories = tagNames,
-                SelectedCategory = categoryFilter
+                Pagination = paginationVM,
+                PostFilters = postFiltersVM,
             };
 
             return View(vm);
         }
 
         [Authorize]
-        public async Task<IActionResult> Following(string? categoryFilter = null, int page = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Following(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
         {
-            const int PAGE_SIZE = 10;
-
-            // Get the current user's ID
-            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(identityId))
-            {
-                _logger.LogWarning("User.Identity is null or NameIdentifier claim is missing.");
-                return Unauthorized();
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
-            if (user == null)
-            {
-                _logger.LogWarning("User not found for IdentityId: {IdentityId}", identityId);
-                return NotFound();
-            }
+            User? user = await _userService.GetCurrentUserAsync(User);
+            if (user == null) return Unauthorized();            
 
             int currentUserId = user.Id;
 
-            // Retrieve paged posts from your repository.
-            List<Post> posts = _postRepository.GetPagedPostsByUserFollows(currentUserId, categoryFilter, page, PAGE_SIZE, sortOrder);
+            // Retrieve posts
+            List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
 
-            // Map to the view model for the post preview
-            List<PostPreviewVM> postPreviews = posts.Select(p => new PostPreviewVM
-            {
-                Id = p.Id,
-                UserName = p.User.Username,
-                Title = p.Title,
-                Excerpt = p.Content != null && p.Content.Length > 100 
-                    ? $"{p.Content.Substring(0, 100)}..." 
-                    : p.Content ?? string.Empty,
-                TimeAgo = TimeAgoHelper.GetTimeAgo(p.CreatedAt),
-                LikeCount = p.Likes.Count,
-                CommentCount = p.Comments.Count,
-                IsPlaidEnabled = p.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = p.PortfolioValueAtPosting,
-                ProfilePicture = p.User.ProfilePicture
-            }).ToList();
+            // Build filters and pagination
+            PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
 
-            // Determine total pages
-            int totalPosts = _postRepository.GetTotalPostsByUserFollows(currentUserId, categoryFilter);
-            int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
-
-            // Retrieve all tag names for the category filter
-            List<string> tagNames = _tagRepository.GetAllTagNames();
-
-            // Build the view model, including the current sort order
             var vm = new IndexVM
             {
-                CurrentUserId = currentUserId,
-                CurrentUserName = User.Identity.IsAuthenticated ? User.Identity.Name : null,
                 Posts = postPreviews,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PagesToShow = PaginationHelper.GetPagination(page, totalPages, 7),
-                SortOrder = sortOrder,
-                Categories = tagNames,
-                SelectedCategory = categoryFilter
+                Pagination = paginationVM,
+                PostFilters = postFiltersVM,
             };
 
             return View(vm);

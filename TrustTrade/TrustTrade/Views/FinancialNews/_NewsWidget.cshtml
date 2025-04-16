@@ -1,0 +1,104 @@
+@model IEnumerable<TrustTrade.Models.FinancialNewsItem>
+
+<div class="financial-news-widget">
+    <h3 class="widget-title">Financial News</h3>
+    
+    <div class="category-tabs">
+        <a href="javascript:void(0)" class="category-tab @(ViewBag.CurrentCategory == null ? "active" : "")" 
+           data-url="@Url.Action("NewsWidget", "FinancialNews", new { count = 5 })">All</a>
+        <a href="javascript:void(0)" class="category-tab @(ViewBag.CurrentCategory == "Stock" ? "active" : "")" 
+           data-url="@Url.Action("NewsWidget", "FinancialNews", new { category = "Stock", count = 5 })">Stocks</a>
+        <a href="javascript:void(0)" class="category-tab @(ViewBag.CurrentCategory == "Crypto" ? "active" : "")" 
+           data-url="@Url.Action("NewsWidget", "FinancialNews", new { category = "Crypto", count = 5 })">Crypto</a>
+    </div>
+    
+    <div class="news-list">
+        @if (Model.Any())
+        {
+            foreach (var newsItem in Model)
+            {
+                <div class="news-item">
+                    <div class="news-header">
+                        <span class="news-source">@newsItem.Source</span>
+                        <span class="news-date">@newsItem.TimePublished.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <h4 class="news-title">
+                        <a href="@newsItem.Url" target="_blank" rel="noopener noreferrer">@newsItem.Title</a>
+                    </h4>
+                    
+                    @if (!string.IsNullOrEmpty(newsItem.OverallSentimentLabel))
+                    {
+                        <div class="sentiment-indicator @newsItem.OverallSentimentLabel.ToLower().Replace(" ", "-")">
+                            @newsItem.OverallSentimentLabel
+                        </div>
+                    }
+                    
+                    @if (newsItem.TickerSentiments != null && newsItem.TickerSentiments.Any())
+                    {
+                        <div class="ticker-list">
+                            @foreach (var ticker in newsItem.TickerSentiments.OrderByDescending(t => t.RelevanceScore).Take(3))
+                            {
+                                <span class="ticker-badge @ticker.TickerSentimentLabel?.ToLower().Replace(" ", "-")">
+                                    $@ticker.TickerSymbol
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            
+            <div class="view-more">
+                <a href="@Url.Action("Index", "FinancialNews", new { category = ViewBag.CurrentCategory })">View More News</a>
+            </div>
+        }
+        else
+        {
+            <div class="no-news">
+                <p>No financial news available at this time.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Re-initialize or ensure tab click handlers are present if loaded via AJAX
+    // (The current implementation attaches handlers after the fetch in Index.cshtml,
+    // but if tabs are reloaded, handlers might need re-attachment depending on how it's done)
+    document.querySelectorAll('.financial-news-widget .category-tab').forEach(tab => {
+        if (!tab.dataset.handlerAttached) { // Prevent multiple handlers
+            tab.addEventListener('click', function() {
+                const widgetContainer = this.closest('.financial-news-widget');
+                const newsList = widgetContainer.querySelector('.news-list');
+                const tabs = widgetContainer.querySelectorAll('.category-tab');
+                const url = this.getAttribute('data-url');
+
+                // Show loading state in news list
+                newsList.innerHTML = `<div class="loading-spinner text-center p-4"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+
+                // Remove active class from all tabs in this widget
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+
+                fetch(url)
+                    .then(response => response.ok ? response.text() : Promise.reject(`HTTP error ${response.status}`))
+                    .then(html => {
+                        // Need to parse the incoming HTML to extract only the *new* .news-list content
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = html;
+                        const newContent = tempDiv.querySelector('.news-list');
+                        if (newContent) {
+                            newsList.innerHTML = newContent.innerHTML;
+                        } else {
+                            newsList.innerHTML = '<div class="no-news text-center text-muted p-3"><p class="mb-0 small">Could not load news content.</p></div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching filtered news:', error);
+                        newsList.innerHTML = '<div class="no-news text-center text-muted p-3"><p class="mb-0 small">Error loading news.</p></div>';
+                    });
+            });
+            tab.dataset.handlerAttached = 'true';
+        }
+    });
+</script>

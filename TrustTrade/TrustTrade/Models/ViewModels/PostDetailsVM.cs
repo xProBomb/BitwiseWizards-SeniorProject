@@ -16,6 +16,8 @@ public class PostDetailsVM
     
     public int LikeCount { get; set; }
 
+    public bool IsLikedByCurrentUser { get; set; }
+
     public int CommentCount { get; set; }
 
     public bool IsPlaidEnabled { get; set; }
@@ -23,4 +25,6 @@ public class PostDetailsVM
     public string? PortfolioValueAtPosting { get; set; }
 
     public bool IsOwnedByCurrentUser { get; set; }
+
+    public byte[]? ProfilePicture { get; set; }
 }

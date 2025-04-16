@@ -78,6 +78,124 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.FinancialNewsItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Authors")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("FetchedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OverallSentimentLabel")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<float?>("OverallSentimentScore")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TimePublished")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Url")
+                        .IsUnique();
+
+                    b.ToTable("FinancialNewsItems");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.FinancialNewsTickerSentiment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NewsItemId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("RelevanceScore")
+                        .HasColumnType("real");
+
+                    b.Property<string>("TickerSentimentLabel")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<float?>("TickerSentimentScore")
+                        .HasColumnType("real");
+
+                    b.Property<string>("TickerSymbol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewsItemId");
+
+                    b.ToTable("FinancialNewsTickerSentiments");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.FinancialNewsTopic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NewsItemId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("RelevanceScore")
+                        .HasColumnType("real");
+
+                    b.Property<string>("TopicName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewsItemId");
+
+                    b.ToTable("FinancialNewsTopics");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Follower", b =>
                 {
                     b.Property<int>("Id")
@@ -497,9 +615,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Profile_Name");
 
-                    b.Property<string>("ProfilePicture")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                    b.Property<byte[]>("ProfilePicture")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("UserTag")
                         .HasColumnType("nvarchar(max)");
@@ -593,6 +710,28 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Navigation("Post");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.FinancialNewsTickerSentiment", b =>
+                {
+                    b.HasOne("TrustTrade.Models.FinancialNewsItem", "NewsItem")
+                        .WithMany("TickerSentiments")
+                        .HasForeignKey("NewsItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NewsItem");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.FinancialNewsTopic", b =>
+                {
+                    b.HasOne("TrustTrade.Models.FinancialNewsItem", "NewsItem")
+                        .WithMany("Topics")
+                        .HasForeignKey("NewsItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NewsItem");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Follower", b =>
@@ -713,6 +852,13 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasConstraintName("FK_VerificationHistory_User");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.FinancialNewsItem", b =>
+                {
+                    b.Navigation("TickerSentiments");
+
+                    b.Navigation("Topics");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.PlaidConnection", b =>

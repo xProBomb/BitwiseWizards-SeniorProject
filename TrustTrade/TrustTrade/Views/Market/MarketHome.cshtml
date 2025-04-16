@@ -1,0 +1,50 @@
+@model List<TrustTrade.ViewModels.StockViewModel>
+@{
+    ViewData["Title"] = "Market";
+    var isCrypto = ViewBag.Type?.ToString() == "crypto";
+}
+<link rel="stylesheet" href="~/css/market.css" asp-append-version="true" />
+
+<!-- Toolbar -->
+<div class="market-toolbar mb-4">
+    <input type="text" class="form-control market-search" id="stockSearchInput" placeholder="Search stocks or crypto..." />
+    <div class="btn-group market-toggle">
+        <button id="stockBtn" class="btn btn-outline-primary @(isCrypto ? "" : "active")">Stock</button>
+        <button id="cryptoBtn" class="btn btn-outline-primary @(isCrypto ? "active" : "")">Crypto</button>
+    </div>
+</div>
+
+<!-- Section Heading -->
+<h4 class="text-muted mb-3" id="marketTitle">Top @(isCrypto ? "Cryptocurrencies" : "Stocks")</h4>
+
+<!-- Results container -->
+<div id="marketCards">
+    @await Html.PartialAsync("_MarketCardsPartial", Model)
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="stockModal" tabindex="-1" aria-labelledby="stockModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header border-bottom">
+        <h1 class="modal-title fs-5" id="stockModalLabel">Stock Details</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Ticker:</strong> <span id="modalTicker"></span></p>
+        <div class="mb-3">
+            <canvas id="stockChart" height="200"></canvas>
+        </div>
+        <p class="text-muted">Last Updated: @Model.FirstOrDefault()?.LastUpdated?.ToString("g")</p>
+        
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/market.js" asp-append-version="true"></script>
+}
