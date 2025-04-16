@@ -13,7 +13,7 @@ public class MarketModalSteps
     [BeforeScenario]
     public void Setup()
     {
-        _driver = new ChromeDriver();
+        _driver = new ChromeDriver(); 
     }
 
     [AfterScenario]
@@ -22,8 +22,8 @@ public class MarketModalSteps
         _driver?.Quit();
     }
 
-    [Given("I am on the market page")]
-    public void GivenIAmOnTheMarketPage()
+    [Given("I am on the market page with modal")]
+    public void GivenIAmOnTheModalMarketPage()
     {
         _driver.Navigate().GoToUrl("http://localhost:5102/Market"); 
     }
