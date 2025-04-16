@@ -42,21 +42,28 @@
             }
             @if (Model.HasRatedScore)
             {
-                <span class="performance-score @GetScoreColorClass(Model.PerformanceScore)"
-                      data-bs-toggle="tooltip"
-                      data-bs-html="true"
-                      title="Performance Score: @Model.PerformanceScore.ToString("N0")">
-                    @Model.PerformanceScore.ToString("N0")
-                </span>
+                <div class="performance-badge @GetScoreColorClass(Model.PerformanceScore)"
+                     data-bs-toggle="tooltip"
+                     data-bs-placement="right"
+                     title="Performance Score">
+                    <span class="score-value">@Model.PerformanceScore.ToString("N0")</span>
+                    @if (isOwner)
+                    {
+                        <button type="button" class="score-info-btn" data-bs-toggle="modal" data-bs-target="#scoreBreakdownModal">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                    }
+                </div>
             }
             else
             {
-                <span class="not-rated-badge"
-                      data-bs-toggle="tooltip"
-                      data-bs-html="true"
-                      title="Not Yet Rated - Requires Plaid connection, posts, and holdings">
+                <div class="performance-badge not-rated"
+                     data-bs-toggle="tooltip"
+                     data-bs-placement="right"
+                     title="Not Yet Rated - Requires Plaid connection, posts, and holdings">
+                    <span class="score-value">--</span>
                     <i class="bi bi-dash-circle"></i>
-                </span>
+                </div>
             }
         </h2>
         <div>
@@ -76,10 +83,11 @@
         @functions {
             string GetScoreColorClass(decimal score)
             {
-                if (score < 50) return "score-red";
-                if (score >= 50 && score <= 79) return "score-yellow";
-                if (score > 79 && score < 89) return "score-green";
-                return "score-purple";
+                if (score < 40) return "score-poor";
+                if (score >= 40 && score < 60) return "score-fair";
+                if (score >= 60 && score < 80) return "score-good";
+                if (score >= 80 && score < 95) return "score-excellent";
+                return "score-elite";
             }
         }
         <!-- Modal for updating profile picture -->
@@ -108,34 +116,92 @@
         <!-- For the self-view breakdown modal -->
         @if (isOwner && Model.HasRatedScore)
         {
-            <div class="mt-3">
-                <button type="button" class="btn btn-sm btn-secondary"
-                        data-bs-toggle="modal" data-bs-target="#scoreBreakdownModal">
-                    View Score Details
-                </button>
-            </div>
-
-            <div class="modal fade" id="scoreBreakdownModal" tabindex="-1">
-                <div class="modal-dialog">
+            <div class="modal fade" id="scoreBreakdownModal" tabindex="-1" aria-labelledby="scoreModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Your Performance Score: @Model.PerformanceScore.ToString("N0")</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            <h5 class="modal-title" id="scoreModalLabel">Your Performance Score</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <p>Your performance score is calculated based on several factors:</p>
-                            <ul class="list-group">
+                            <!-- Main score display -->
+                            <div class="text-center mb-4">
+                                <div class="score-circle @GetScoreColorClass(Model.PerformanceScore)">
+                                    <span class="score-number">@Model.PerformanceScore.ToString("N0")</span>
+                                </div>
+                                <div class="score-label mt-2">@GetScoreRating(Model.PerformanceScore)</div>
+                            </div>
+
+                            <!-- Score component breakdown -->
+                            <div class="score-components">
                                 @foreach (var item in Model.ScoreBreakdown)
                                 {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        @item.Key
-                                        <span class="badge bg-primary rounded-pill">@item.Value.ToString("N0")</span>
-                                    </li>
+                                    <div class="score-component">
+                                        <div class="component-header">
+                                            <span class="component-name">@item.Key</span>
+                                            <span class="component-value @GetComponentClass(item.Value)">@item.Value.ToString("N0")</span>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar @GetComponentProgressClass(item.Value)"
+                                                 role="progressbar"
+                                                 style="width: @Math.Min(item.Value, 100)%;"
+                                                 aria-valuenow="@item.Value"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        <div class="component-desc">@GetComponentDescription(item.Key)</div>
+                                    </div>
                                 }
-                            </ul>
-                            <div class="mt-3">
-                                <p class="text-muted">Scores are updated when you create posts, refresh holdings, and receive engagement from other users.</p>
                             </div>
+                            @functions {
+                                string GetScoreRating(decimal score)
+                                {
+                                    if (score < 40) return "Needs Improvement";
+                                    if (score >= 40 && score < 60) return "Fair";
+                                    if (score >= 60 && score < 80) return "Good";
+                                    if (score >= 80 && score < 95) return "Excellent";
+                                    return "Elite";
+                                }
+
+                                string GetComponentClass(decimal value)
+                                {
+                                    if (value < 40) return "text-danger";
+                                    if (value >= 40 && value < 60) return "text-warning";
+                                    if (value >= 60 && value < 80) return "text-info";
+                                    return "text-success";
+                                }
+
+                                string GetComponentProgressClass(decimal value)
+                                {
+                                    if (value < 40) return "bg-danger";
+                                    if (value >= 40 && value < 60) return "bg-warning";
+                                    if (value >= 60 && value < 80) return "bg-info";
+                                    return "bg-success";
+                                }
+
+                                string GetComponentDescription(string key)
+                                {
+                                    switch (key)
+                                    {
+                                        case "Holdings in Green":
+                                            return "Percentage of your portfolio positions with positive returns";
+                                        case "Community Feedback":
+                                            return "How well your posts and analyses are received by other users";
+                                        case "Portfolio Performance":
+                                            return "Overall growth of your investment portfolio over time";
+                                        default:
+                                            return "Contributing factor to your overall performance score";
+                                    }
+                                }
+                            }
+
+                            <div class="score-footer mt-4">
+                                <p class="text-muted">Your score updates as you make trades, create posts, and engage with the community. Higher scores indicate stronger investment performance and community reputation.</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>
                         </div>
                     </div>
                 </div>
@@ -289,7 +355,8 @@
                             <!-- Bio Field -->
                             <div class="mb-3">
                                 <label class="form-label">About</label>
-                                <textarea name="Bio" class="form-control" rows="4">@Model.Bio</textarea>
+                                <textarea name="Bio" class="form-control" rows="4" maxlength="256">@Model.Bio</textarea>
+                                <span asp-validation-for="Bio" class="text-danger"></span>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Trading Preference</label>
@@ -505,7 +572,249 @@
     </script>
 }
 
+<style>
+    /* Performance Score Badge Styles */
+    .performance-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1.5rem;
+        margin-left: 0.5rem;
+        font-weight: bold;
+        color: white;
+        position: relative;
+    }
+
+    .score-value {
+        font-size: 1.1rem;
+        letter-spacing: 0.05rem;
+    }
+
+    .score-info-btn {
+        background: none;
+        border: none;
+        color: white;
+        opacity: 0.8;
+        margin-left: 0.5rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .score-info-btn:hover {
+        opacity: 1;
+    }
+
+    .score-poor {
+        background-color: #dc3545;
+        border: 2px solid #b02a37;
+    }
+
+    .score-fair {
+        background-color: #fd7e14;
+        border: 2px solid #dc6502;
+    }
+
+    .score-good {
+        background-color: #0dcaf0;
+        border: 2px solid #0aa2c0;
+    }
+
+    .score-excellent {
+        background-color: #198754;
+        border: 2px solid #146c43;
+    }
+
+    .score-elite {
+        background: linear-gradient(45deg, #8a2be2, #4b0082);
+        border: 2px solid #6a0dad;
+    }
+
+    .not-rated {
+        background-color: #6c757d;
+        border: 2px solid #5c636a;
+    }
+
+    /* Modal Score Circle */
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        background: white;
+        position: relative;
+    }
+
+    .score-circle::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 50%;
+        z-index: -1;
+    }
+
+    .score-circle.score-poor {
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+    }
+
+    .score-circle.score-fair {
+        box-shadow: 0 0 20px rgba(253, 126, 20, 0.3);
+    }
+
+    .score-circle.score-good {
+        box-shadow: 0 0 20px rgba(13, 202, 240, 0.3);
+    }
+
+    .score-circle.score-excellent {
+        box-shadow: 0 0 20px rgba(25, 135, 84, 0.3);
+    }
+
+    .score-circle.score-elite {
+        box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+    }
+
+    .score-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .score-label {
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    /* Score Components Section */
+    .score-components {
+        margin-top: 2rem;
+    }
+
+    .score-component {
+        margin-bottom: 1.5rem;
+    }
+
+    .component-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .component-name {
+        font-weight: 500;
+    }
+
+    .component-value {
+        font-weight: bold;
+    }
+
+    .progress {
+        height: 0.8rem;
+        border-radius: 1rem;
+        background-color: #f0f0f0;
+        margin-bottom: 0.5rem;
+    }
+
+    .component-desc {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    /* Additional animation for modal opening */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+    }
+
+    .modal.show .modal-dialog {
+        transform: none;
+    }
+    
+</style>
 
 @section Scripts {
     <script src="~/js/profile.js"></script>
 }
+
+<script>
+    // Enhanced Performance Score UI Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Add animation to score breakdown modal
+        const scoreModal = document.getElementById('scoreBreakdownModal');
+        if (scoreModal) {
+            scoreModal.addEventListener('show.bs.modal', function() {
+                // Animate score number counting up
+                const scoreNumber = document.querySelector('.score-number');
+                if (scoreNumber) {
+                    const finalScore = parseInt(scoreNumber.textContent);
+                    animateValue(scoreNumber, 0, finalScore, 1000);
+                }
+
+                // Animate progress bars
+                setTimeout(() => {
+                    document.querySelectorAll('.progress-bar').forEach(bar => {
+                        bar.style.transition = 'width 1s ease-out';
+                        bar.style.width = bar.getAttribute('aria-valuenow') + '%';
+                    });
+                }, 300);
+            });
+
+            // Reset animations when modal is closed
+            scoreModal.addEventListener('hidden.bs.modal', function() {
+                document.querySelectorAll('.progress-bar').forEach(bar => {
+                    bar.style.transition = 'none';
+                    bar.style.width = '0%';
+                });
+            });
+        }
+
+        // Function to animate counting
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = value;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Highlight effect for performance badge on hover
+        const performanceBadge = document.querySelector('.performance-badge');
+        if (performanceBadge) {
+            performanceBadge.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+
+            performanceBadge.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        }
+
+        // Make entire performance badge clickable if it's the owner's profile
+        const infoBtn = document.querySelector('.score-info-btn');
+        if (performanceBadge && infoBtn) {
+            performanceBadge.style.cursor = 'pointer';
+            performanceBadge.addEventListener('click', function(e) {
+                // Don't trigger if the actual button was clicked (to avoid double triggering)
+                if (e.target !== infoBtn && !infoBtn.contains(e.target)) {
+                    infoBtn.click();
+                }
+            });
+        }
+    });
+    </script>
