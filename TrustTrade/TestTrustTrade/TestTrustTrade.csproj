@@ -9,6 +9,10 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+  <PropertyGroup>
+  <GenerateFeatureFileCodeBehind>true</GenerateFeatureFileCodeBehind>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Going.Plaid" Version="6.35.0" />
