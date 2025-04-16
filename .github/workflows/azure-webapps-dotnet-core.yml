@@ -45,7 +45,11 @@ jobs:
       - name: Build with dotnet
         run: dotnet build TrustTrade/TrustTrade/TrustTrade.csproj --configuration Release
       - name: dotnet publish
-        run: dotnet publish TrustTrade/TrustTrade/TrustTrade.csproj -c Release -o ./published-app
+        run: dotnet publish TrustTrade/TrustTrade/TrustTrade.csproj -c Release -o ./published-app /p:UseAppHost=false
+      - name: Verify publish output
+        run: |
+          dir ./published-app
+          type ./published-app/web.config
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -64,6 +68,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+      - name: Display structure of downloaded files
+        run: dir
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
