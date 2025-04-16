@@ -26,6 +26,7 @@ namespace TrustTrade.DAL.Concrete
         private readonly IConfiguration _configuration;
         private readonly ILogger<AlphaVantageNewsService> _logger;
         private readonly string _apiKey;
+        private readonly TrustTradeDbContext _dbContext;
 
         /// <summary>
         /// Constructor for AlphaVantageNewsService
@@ -34,19 +35,21 @@ namespace TrustTrade.DAL.Concrete
             IFinancialNewsRepository repository,
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration,
-            ILogger<AlphaVantageNewsService> logger)
+            ILogger<AlphaVantageNewsService> logger,
+            TrustTradeDbContext dbContext)
         {
             _repository = repository;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
             _logger = logger;
             _apiKey = _configuration["AlphaVantage:ApiKey"];
+            _dbContext = dbContext;
         }
 
         /// <summary>
         /// Retrieves the latest financial news from the database
         /// </summary>
-        public async Task<IEnumerable<FinancialNewsItem>> GetLatestNewsAsync(string category = null, int count = 10)
+        public async Task<IEnumerable<FinancialNewsItem>> GetLatestNewsAsync(string category = null, int count = 15)
         {
             return await _repository.GetLatestNewsAsync(category, count);
         }
@@ -95,7 +98,7 @@ namespace TrustTrade.DAL.Concrete
         /// Makes the actual API call to Alpha Vantage
         /// </summary>
         private async Task<NewsResponse?> FetchNewsFromAlphaVantageAsync(string tickers, string category)
-    {
+        {
         if (string.IsNullOrEmpty(_apiKey))
         {
             _logger.LogError("Cannot fetch news: Alpha Vantage API key is missing.");
@@ -323,5 +326,35 @@ namespace TrustTrade.DAL.Concrete
 
     return addedCount;
 }
+        /// <summary>
+        /// Searches for news items by keyword in title and summary
+        /// </summary>
+        public async Task<IEnumerable<FinancialNewsItem>> SearchNewsAsync(string searchTerm, string category = null, int count = 10)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return await GetLatestNewsAsync(category, count);
+            }
+
+            searchTerm = searchTerm.ToLower(); // Case-insensitive search
+
+            IQueryable<FinancialNewsItem> query = _dbContext.FinancialNewsItems
+                .Where(n => n.IsActive &&
+                            (n.Title.ToLower().Contains(searchTerm) || 
+                             n.Summary.ToLower().Contains(searchTerm)));
+
+            // Apply category filter if provided
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(n => n.Category == category);
+            }
+            
+            return await query
+                .OrderByDescending(n => n.TimePublished)
+                .Take(count)
+                .Include(n => n.Topics)
+                .Include(n => n.TickerSentiments)
+                .ToListAsync();
+        }
     }
 }
