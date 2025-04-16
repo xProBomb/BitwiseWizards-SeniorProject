@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NUnit.Framework;
 using System.Security.Claims;
 using TrustTrade.Controllers;
 using TrustTrade.DAL.Abstract;
@@ -11,11 +10,7 @@ using Microsoft.AspNetCore.Http;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using TrustTrade.ViewModels;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
+using TrustTrade.Services.Web.Interfaces;
 
 namespace TestTrustTrade
 {
@@ -29,9 +24,15 @@ namespace TestTrustTrade
         private Mock<TrustTradeDbContext> _contextMock;
         private Mock<IHoldingsRepository> _holdingsRepoMock;
         private Mock<ILogger<ProfileController>> _loggerMock;
+        private Mock<IPostService> _postServiceMock;
         private Mock<IProfileService> _profileServiceMock;
+        private Mock<IUserService> _userServiceMock;
         private Mock<IPerformanceScoreRepository> _performanceScoreRepository;
         private ProfileController _controller;
+        private User _user;
+        private List<PostPreviewVM> _postPreviews;
+        private PostFiltersPartialVM _postFiltersPartialVM;
+        private PaginationPartialVM _paginationPartialVM;
         
         [TearDown]
         public void TearDown()
@@ -46,16 +47,52 @@ namespace TestTrustTrade
             _contextMock = new Mock<TrustTradeDbContext>();
             _holdingsRepoMock = new Mock<IHoldingsRepository>();
             _loggerMock = new Mock<ILogger<ProfileController>>();
+            _postServiceMock = new Mock<IPostService>();
             _profileServiceMock = new Mock<IProfileService>();
+            _userServiceMock = new Mock<IUserService>();
             _performanceScoreRepository = new Mock<IPerformanceScoreRepository>();
 
             _controller = new ProfileController(
                 _contextMock.Object,
                 _holdingsRepoMock.Object,
                 _loggerMock.Object,
+                _postServiceMock.Object,
                 _profileServiceMock.Object,
+                _userServiceMock.Object,
                 _performanceScoreRepository.Object
             );
+
+            // Mock users
+            _user = new User
+            {
+                Id = 1,
+                IdentityId = "test-identity-1",
+                ProfileName = "johnDoe",
+                Username = "johnDoe",
+                Email = "johndoe@example.com",
+                PasswordHash = "dummyHash"
+            };
+
+            _postPreviews = new List<PostPreviewVM>
+            {
+                new PostPreviewVM
+                    {
+                        Id = 1,
+                        Title = "Post 1",
+                        IsPlaidEnabled = true
+                    }
+            };
+
+            _postFiltersPartialVM = new PostFiltersPartialVM
+            {
+                SelectedCategory = "Category1",
+            };
+
+            _paginationPartialVM = new PaginationPartialVM
+            {
+                CurrentPage = 1,
+                TotalPages = 3
+            };
         }
 
         private Mock<DbSet<T>> CreateMockDbSet<T>(IQueryable<T> data) where T : class
@@ -410,6 +447,50 @@ namespace TestTrustTrade
             
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundResult>(), "Should return NotFound when user doesn't exist");
+        }
+
+        [Test]
+        public async Task UserPosts_ReturnsAViewResult()
+        {
+            // Arrange
+            _userServiceMock.Setup(s => s.GetUserByUsernameAsync(It.IsAny<string>()))
+                .ReturnsAsync(_user);
+            _postServiceMock.Setup(s => s.GetUserPostPreviewsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_postPreviews);
+            _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(_postFiltersPartialVM);
+            _postServiceMock.Setup(s => s.BuildUserPaginationAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
+                .ReturnsAsync(_paginationPartialVM);
+            
+            // Act
+            var result = await _controller.UserPosts(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>());
+
+            Assert.That(result, Is.Not.Null.And.InstanceOf<ViewResult>());
+        }
+
+        [Test]
+        public async Task UserPosts_ReturnsUserPostsVM()
+        {
+            // Arrange
+            _userServiceMock.Setup(s => s.GetUserByUsernameAsync(It.IsAny<string>()))
+                .ReturnsAsync(_user);
+            _postServiceMock.Setup(s => s.GetUserPostPreviewsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_postPreviews);
+            _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(_postFiltersPartialVM);
+            _postServiceMock.Setup(s => s.BuildUserPaginationAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
+                .ReturnsAsync(_paginationPartialVM);
+
+            // Act
+            var result = await _controller.UserPosts(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()) as ViewResult;
+            var model = result?.Model as UserPostsVM;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(model, Is.Not.Null.And.InstanceOf<UserPostsVM>());
+            Assert.That(model.Posts, Is.EqualTo(_postPreviews));
+            Assert.That(model.PostFilters, Is.EqualTo(_postFiltersPartialVM));
+            Assert.That(model.Pagination, Is.EqualTo(_paginationPartialVM));
         }
 
         /// <summary>

@@ -7,8 +7,4 @@ public class IndexVM
     public PaginationPartialVM? Pagination { get; set; }
 
     public PostFiltersPartialVM? PostFilters { get; set; }
-
-    public int? CurrentUserId { get; set; }
-
-    public string? CurrentUserName { get; set; }
 }

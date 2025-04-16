@@ -29,4 +29,18 @@ public class UserRepository : Repository<User>, IUserRepository
         
         return await users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
     }
+
+    public async Task<User?> FindByUsernameAsync(string username, bool includeRelated = false)
+    {
+        IQueryable<User> users = _users;
+
+        if (includeRelated)
+        {
+            users = users
+                .Include(u => u.Comments)
+                .Include(u => u.FollowerFollowerUsers);
+        }
+        
+        return await users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+    }
 }

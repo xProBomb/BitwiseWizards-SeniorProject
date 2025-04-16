@@ -8,7 +8,7 @@
         {
             <li class="page-item">
                 <a class="page-link"
-                    asp-route-page="@(Model.CurrentPage - 1)"
+                    asp-route-pageNumber="@(Model.CurrentPage - 1)"
                     asp-route-sortOrder="@Model.SortOrder"
                     asp-route-categoryFilter="@Model.CategoryFilter">
                     Previous
@@ -34,7 +34,7 @@
             {
                 <li class="page-item">
                     <a class="page-link"
-                        asp-route-page="@pageNumber"
+                        asp-route-pageNumber="@pageNumber"
                         asp-route-sortOrder="@Model.SortOrder"
                         asp-route-categoryFilter="@Model.CategoryFilter">
                         @pageNumber
@@ -47,7 +47,7 @@
         {
             <li class="page-item">
                 <a class="page-link"
-                    asp-route-page="@(Model.CurrentPage + 1)"
+                    asp-route-pageNumber="@(Model.CurrentPage + 1)"
                     asp-route-sortOrder="@Model.SortOrder"
                     asp-route-categoryFilter="@Model.CategoryFilter">
                     Next
