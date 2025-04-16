@@ -45,7 +45,14 @@ public class PostService : IPostService
         return MapPostsToPostPreviewVM(posts);
     }
 
-    public async Task<PostFiltersPartialVM> BuildPostFiltersAsync(string? categoryFilter, string sortOrder)
+    public async Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, string? categoryFilter, int pageNumber, string sortOrder)
+    {
+        List<Post> posts = await _postRepository.SearchPostsAsync(searchTerms, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+
+        return MapPostsToPostPreviewVM(posts);
+    }
+
+    public async Task<PostFiltersPartialVM> BuildPostFiltersAsync(string? categoryFilter, string sortOrder, string? searchQuery = null)
     {
         List<string> tagNames = await _tagRepository.GetAllTagNamesAsync();
 
@@ -53,7 +60,8 @@ public class PostService : IPostService
         {
             SelectedCategory = categoryFilter,
             SortOrder = sortOrder,
-            Categories = tagNames
+            Categories = tagNames,
+            SearchQuery = searchQuery,
         };
     }
 
@@ -76,6 +84,13 @@ public class PostService : IPostService
         int totalPosts = await _postRepository.GetTotalPostsByUserAsync(userId, categoryFilter);
 
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
+    }
+
+    public async Task<PaginationPartialVM> BuildSearchPaginationAsync(string search, List<string> searchTerms, string? categoryFilter, int pageNumber)
+    {
+        int totalPosts = await _postRepository.GetTotalPostsBySearchAsync(searchTerms, categoryFilter);
+
+        return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter, search);
     }
 
     private static List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts)
@@ -120,7 +135,7 @@ public class PostService : IPostService
         return postPreviews;
     }
 
-    private static PaginationPartialVM MapToPaginationPartialVM(int currentPage, int totalPosts, string? categoryFilter)
+    private static PaginationPartialVM MapToPaginationPartialVM(int currentPage, int totalPosts, string? categoryFilter, string? searchQuery = null)
     {
         int totalPages = (int)Math.Ceiling((double)totalPosts / PAGE_SIZE);
 
@@ -129,7 +144,8 @@ public class PostService : IPostService
             CurrentPage = currentPage,
             TotalPages = totalPages,
             PagesToShow = PaginationHelper.GetPagination(currentPage, totalPages, MAX_PAGES_TO_SHOW),
-            CategoryFilter = categoryFilter
+            CategoryFilter = categoryFilter,
+            SearchQuery = searchQuery,
         };
     }
 }
