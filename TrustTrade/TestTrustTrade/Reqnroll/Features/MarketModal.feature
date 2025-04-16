@@ -4,6 +4,6 @@ Feature: Market Modal Expansion
   So that the modal with stock details appears
 
   Scenario: Expanding stock modal
-    Given I am on the market page with modal
+    Given I am on the market page
     When I click on a stock card
     Then the stock modal should be visible

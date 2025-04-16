@@ -32,7 +32,7 @@ namespace TestTrustTrade.Reqnroll.Features
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Reqnroll/Features", "Market Modal Expansion", "  As a user on the market page\r\n  I want to click a stock card\r\n  So that the mod" +
                 "al with stock details appears", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "MarketModal.feature"
+#line 1 "MarketModal.Feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -101,7 +101,7 @@ namespace TestTrustTrade.Reqnroll.Features
             {
                 await this.ScenarioStartAsync();
 #line 7
-    await testRunner.GivenAsync("I am on the market page with modal", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I am on the market page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 8
     await testRunner.WhenAsync("I click on a stock card", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
