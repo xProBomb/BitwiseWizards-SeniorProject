@@ -64,7 +64,7 @@ namespace TrustTrade.Controllers
                 Title = createPostVM.Title,
                 Content = createPostVM.Content,
                 IsPublic = createPostVM.IsPublic ?? false, // Should never be null due to validation
-                // PortfolioValueAtPosting will be set below if available
+                                                           // PortfolioValueAtPosting will be set below if available
             };
 
             // Only attempt to refresh and calculate portfolio value if Plaid is enabled
@@ -117,12 +117,16 @@ namespace TrustTrade.Controllers
             foreach (string tagName in createPostVM.SelectedTags)
             {
                 Tag? tag = await _tagRepository.FindByTagNameAsync(tagName);
-                if (tag != null)
+                if (tag == null)
                 {
-                    // Add the tag to the post and the post to the tag
-                    post.Tags.Add(tag);
-                    tag.Posts.Add(post);
+                    // If the tag doesn't exist, create it and add it to the database
+                    tag = new Tag { TagName = tagName };
+                    await _tagRepository.AddOrUpdateAsync(tag);
                 }
+
+                // Add the tag to the post and the post to the tag
+                post.Tags.Add(tag);
+                tag.Posts.Add(post);
             }
 
             // Save the post to the database
@@ -240,10 +244,14 @@ namespace TrustTrade.Controllers
             foreach (string tagName in postEditVM.SelectedTags)
             {
                 Tag? tag = await _tagRepository.FindByTagNameAsync(tagName);
-                if (tag != null)
+                if (tag == null)
                 {
-                    post.Tags.Add(tag);
+                    // If the tag doesn't exist, create it and add it to the database
+                    tag = new Tag { TagName = tagName };
+                    await _tagRepository.AddOrUpdateAsync(tag);
                 }
+
+                post.Tags.Add(tag);
             }
 
             // Save the updated post

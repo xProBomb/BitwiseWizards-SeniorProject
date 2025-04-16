@@ -61,8 +61,12 @@
                                                @(Model.SelectedTags.Contains(tag) ? "checked" : "") />
                                         <label class="form-check-label" for="tag-@tag">@tag</label>
                                     </div>
-                                </div>
+                                </div>   
                             }
+                            <div class="mt-3">
+                                <input type="text" class="form-control" id="newTag" placeholder="Add a new tag..." />
+                                <button type="button" class="btn btn-primary mt-2" id="addTagButton">Add Tag</button>
+                            </div>
                         </div>
                     }
                 </div>
@@ -89,4 +93,5 @@
 
 @section Scripts {
     <script src="~/js/postActions.js"></script>
+    <script src="~/js/create.js"></script>
 }
