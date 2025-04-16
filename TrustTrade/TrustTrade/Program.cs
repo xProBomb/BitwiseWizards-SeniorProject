@@ -7,6 +7,9 @@ using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Services;
+using TrustTrade.Services.Background;
+using TrustTrade.Services.Web.Interfaces;
+using TrustTrade.Services.Web.Implementations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +31,8 @@ builder.Services.AddScoped<IHoldingsRepository, HoldingsRepository>();
 builder.Services.AddScoped<ISearchUserRepository, SearchUserRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -63,6 +68,7 @@ builder.Services.ConfigureApplicationCookie(options => {
 // Add Plaid services
 builder.Services.AddPlaid(builder.Configuration.GetSection("Plaid"));
 
+
 // MVC Configuration
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -73,12 +79,31 @@ builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
 
 // Add services for verification history
 builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
+
+builder.Services.AddScoped<IMarketRepository, MarketRepository>();
+
+// Add HttpClient factory
+builder.Services.AddHttpClient();
+
+// Register DAL services
+builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
+
+// Register application services
+builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
+
+// Register background service - only in production environments
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHostedService<FinancialNewsBackgroundService>();
+}
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();

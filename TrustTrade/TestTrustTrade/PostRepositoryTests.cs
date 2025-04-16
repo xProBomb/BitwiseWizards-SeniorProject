@@ -2,7 +2,8 @@ using Moq;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.DAL.Concrete;
 using TrustTrade.Models;
-using Microsoft.EntityFrameworkCore;
+using Moq.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace TestTrustTrade;
 
@@ -10,21 +11,9 @@ namespace TestTrustTrade;
 public class PostRepositoryTests
 {
     private Mock<TrustTradeDbContext> _mockDbContext;
-    private Mock<DbSet<Post>> _mockPostDbSet;
     private List<Post> _posts;
     private List<User> _users;
     private List<Tag> _tags;
-
-    // A helper to make dbset queryable
-    private Mock<DbSet<T>> GetMockDbSet<T>(IQueryable<T> entities) where T : class
-    {
-        var mockSet = new Mock<DbSet<T>>();
-        mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(entities.Provider);
-        mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(entities.Expression);
-        mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(entities.ElementType);
-        mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(entities.GetEnumerator());
-        return mockSet;
-    }
 
 
     [SetUp]
@@ -118,20 +107,19 @@ public class PostRepositoryTests
         _tags[4].Posts.Add(_posts[4]); // Tag 5 (Crypto) -> Post 5
 
         _mockDbContext = new Mock<TrustTradeDbContext>();
-        _mockPostDbSet = GetMockDbSet(_posts.AsQueryable());
-        _mockDbContext.Setup(c => c.Posts).Returns(_mockPostDbSet.Object);
-        _mockDbContext.Setup(c => c.Set<Post>()).Returns(_mockPostDbSet.Object); 
+        _mockDbContext.Setup(c => c.Posts).ReturnsDbSet(_posts);
+        _mockDbContext.Setup(c => c.Set<Post>()).ReturnsDbSet(_posts);
     }
 
     [Test]
-    public void GetTotalPosts_WhenNoParametersGiven_ReturnsTotalNumberOfPosts()
+    public async Task GetTotalPostsAsync_WhenNoParametersGiven_ReturnsTotalNumberOfPosts()
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
         var expected = _posts.Count;
 
         // Act
-        var result = postRepository.GetTotalPosts();
+        var result = await postRepository.GetTotalPostsAsync();
 
         // Assert
         Assert.That(result, Is.EqualTo(expected));
@@ -142,27 +130,41 @@ public class PostRepositoryTests
     [TestCase("Loss", 3)]
     [TestCase("Stocks", 4)]
     [TestCase("Crypto", 5)]
-    public void GetTotalPosts_WhenCategoryFilterUsed_ReturnsTotalNumberOfPostsInCategory(string category, int expected)
+    public async Task GetTotalPostsAsync_WhenCategoryFilterUsed_ReturnsTotalNumberOfPostsInCategory(string category, int expected)
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var result = postRepository.GetTotalPosts(category);
+        var result = await postRepository.GetTotalPostsAsync(category);
 
         // Assert
         Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
-    public void GetPagedPosts_WhenNoParametersGiven_Returns10PostsSortedByDateDesc()
+    public async Task GetTotalPostsByUserAsync_WhenUserFollows_ReturnsTotalNumberOfPostsByUser()
+    {
+        // Arrange
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+        var userId = 1;
+
+        // Act
+        var result = await postRepository.GetTotalPostsByUserAsync(userId);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task GetPagedPostsAsync_WhenNoParametersGiven_Returns10PostsSortedByDateDesc()
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
         // By default, category = null, sortOrder = "DateDesc", page=1, pageSize=10
-        var results = postRepository.GetPagedPosts();
+        var results = await postRepository.GetPagedPostsAsync();
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default.");
@@ -177,13 +179,13 @@ public class PostRepositoryTests
     }
 
     [Test]
-    public void GetPagedPosts_WhenDateAscSortOrderUsed_Returns10PostsSortedByDateAsc()
+    public async Task GetPagedPostsAsync_WhenDateAscSortOrderUsed_Returns10PostsSortedByDateAsc()
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = postRepository.GetPagedPosts(page: 1, pageSize: 10, sortOrder: "DateAsc");
+        var results = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "DateAsc");
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
@@ -198,13 +200,13 @@ public class PostRepositoryTests
     }
 
     [Test]
-    public void GetPagedPosts_WhenTitleAscSortOrderUsed_Returns10PostsSortedByTitleAsc()
+    public async Task GetPagedPostsAsync_WhenTitleAscSortOrderUsed_Returns10PostsSortedByTitleAsc()
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = postRepository.GetPagedPosts(page: 1, pageSize: 10, sortOrder: "TitleAsc");
+        var results = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "TitleAsc");
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
@@ -225,13 +227,13 @@ public class PostRepositoryTests
     [TestCase("Crypto", 5)]
     [TestCase("memes", 1)] // Case insensitivity check
     [TestCase("GAIN", 2)]  // Case insensitivity check
-    public void GetPagedPosts_WhenCategoryFilterUsed_ReturnsPostsInCategory(string categoryName, int expectedCount)
+    public async Task GetPagedPostsAsync_WhenCategoryFilterUsed_ReturnsPostsInCategory(string categoryName, int expectedCount)
     {
         // Arrange
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = postRepository.GetPagedPosts(category: categoryName);
+        var results = await postRepository.GetPagedPostsAsync(categoryFilter: categoryName);
 
         // Assert
         Assert.That(results.Count, Is.EqualTo(expectedCount), "Should return expected number of posts in category.");
@@ -241,6 +243,28 @@ public class PostRepositoryTests
         {
             var tagNames = post.Tags.Select(t => t.TagName).ToList();
             Assert.That(tagNames, Has.Some.EqualTo(categoryName).IgnoreCase, $"Post does not have the expected category: {categoryName}");
+        }
+    }
+
+    [Test]
+    public async Task GetPagedPostsByUserAsync_WhenNoParametersGiven_Returns10PostsByUserSortedByDateDesc()
+    {
+        // Arrange
+        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
+        var userId = 1;
+
+        // Act
+        var results = await postRepository.GetPagedPostsByUserAsync(userId);
+
+        // Assert
+        Assert.That(results.Count, Is.EqualTo(1), "Should return 10 posts by default.");
+        // Verify descending order by CreatedAt
+        for (int i = 0; i < results.Count - 1; i++)
+        {
+            Assert.That(
+                results[i].CreatedAt >= results[i + 1].CreatedAt,
+                $"Posts are not sorted by descending CreatedAt at index {i}."
+            );
         }
     }
 }

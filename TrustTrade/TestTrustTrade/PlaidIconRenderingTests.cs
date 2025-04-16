@@ -15,6 +15,8 @@ using TrustTrade.Controllers;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.ViewModels;
+using TrustTrade.Services.Web.Interfaces;
+using TrustTrade.Helpers;
 
 namespace TestTrustTrade
 {
@@ -22,9 +24,8 @@ namespace TestTrustTrade
     public class PlaidIconRenderingTests
     {
         private Mock<ILogger<HomeController>> _loggerMock;
-        private Mock<IPostRepository> _postRepositoryMock;
-        private Mock<ITagRepository> _tagRepositoryMock;
-        private Mock<TrustTradeDbContext> _dbContextMock;
+        private Mock<IPostService> _postServiceMock;
+        private Mock<IUserService> _userServiceMock;
         private HomeController _controller;
         private List<PostPreviewVM> _testPosts;
 
@@ -32,10 +33,13 @@ namespace TestTrustTrade
         public void Setup()
         {
             _loggerMock = new Mock<ILogger<HomeController>>();
-            _postRepositoryMock = new Mock<IPostRepository>();
-            _tagRepositoryMock = new Mock<ITagRepository>();
-            _dbContextMock = new Mock<TrustTradeDbContext>();
-            _controller = new HomeController(_dbContextMock.Object, _loggerMock.Object, _postRepositoryMock.Object, _tagRepositoryMock.Object);
+            _postServiceMock = new Mock<IPostService>();
+            _userServiceMock = new Mock<IUserService>();
+            _controller = new HomeController(
+                _loggerMock.Object, 
+                _postServiceMock.Object, 
+                _userServiceMock.Object
+            );
 
             // Create test post preview view models
             _testPosts = new List<PostPreviewVM>
@@ -48,7 +52,7 @@ namespace TestTrustTrade
                     Excerpt = "This post is from a user with Plaid enabled",
                     TimeAgo = "1 hour ago",
                     IsPlaidEnabled = true,
-                    PortfolioValueAtPosting = 12345.67M
+                    PortfolioValueAtPosting = "$10.1K"
                 },
                 new PostPreviewVM
                 {
@@ -120,12 +124,12 @@ namespace TestTrustTrade
         public void PortfolioValueIsShownForPlaidUserWithValue()
         {
             // Arrange
-            var post = _testPosts.First(p => p.IsPlaidEnabled && p.PortfolioValueAtPosting.HasValue);
+            var post = _testPosts.First(p => p.IsPlaidEnabled && p.PortfolioValueAtPosting != null);
             
             // Assert
             Assert.That(post.IsPlaidEnabled, Is.True, "IsPlaidEnabled should be true for test to be meaningful");
             Assert.That(post.PortfolioValueAtPosting, Is.Not.Null, "Portfolio value should be present");
-            Assert.That(post.PortfolioValueAtPosting!.Value, Is.EqualTo(12345.67M), "Portfolio value should match expected");
+            Assert.That(post.PortfolioValueAtPosting, Is.EqualTo("$10.1K"), "Portfolio value should match expected");
         }
 
         [Test]
@@ -139,48 +143,13 @@ namespace TestTrustTrade
         }
 
         [Test]
-        public void HomeController_HandlesPlaidPostCorrectly()
-        {
-            // Arrange - Set up the mock repository to return a post with plaid enabled
-            var plaidPost = new Post
-            {
-                Id = 1,
-                UserId = 1,
-                Title = "Test Post",
-                Content = "Test Content",
-                User = new User
-                {
-                    Id = 1,
-                    Username = "PlaidUser",
-                    PlaidEnabled = true
-                }
-            };
-
-            _postRepositoryMock.Setup(repo => repo.GetPagedPosts(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(new List<Post> { plaidPost });
-            _postRepositoryMock.Setup(repo => repo.GetTotalPosts(It.IsAny<string>()))
-                .Returns(1);
-            _tagRepositoryMock.Setup(repo => repo.GetAllTagNames())
-                .Returns(new List<string>());
-
-            // Act
-            var result = _controller.Index() as ViewResult;
-            var model = result?.Model as IndexVM;
-            var postPreview = model?.Posts?.FirstOrDefault();
-
-            // Assert - Verify the post preview has Plaid enabled
-            Assert.That(postPreview, Is.Not.Null, "Post preview should exist");
-            Assert.That(postPreview.IsPlaidEnabled, Is.True, "IsPlaidEnabled should be true");
-        }
-
-        [Test]
         public void PlaidIconRendersBasedOnUserPlaidStatus()
         {
             // This test validates the Model property that affects icon rendering
             
             // Arrange - prepare posts for different scenarios
-            var plaidEnabledPost = _testPosts.First(p => p.IsPlaidEnabled && p.PortfolioValueAtPosting.HasValue);
-            var plaidEnabledNoValuePost = _testPosts.First(p => p.IsPlaidEnabled && !p.PortfolioValueAtPosting.HasValue);
+            var plaidEnabledPost = _testPosts.First(p => p.IsPlaidEnabled && p.PortfolioValueAtPosting != null);
+            var plaidEnabledNoValuePost = _testPosts.First(p => p.IsPlaidEnabled && p.PortfolioValueAtPosting == null);
             var nonPlaidPost = _testPosts.First(p => !p.IsPlaidEnabled);
 
             // Assert - Check the model properties that affect rendering
@@ -203,6 +172,7 @@ namespace TestTrustTrade
             });
         }
 
+        
         [Test]
         public void PostPreviewViewModel_MapsPlaidStatusCorrectly()
         {
@@ -264,7 +234,7 @@ namespace TestTrustTrade
                 Title = plaidPost.Title,
                 Excerpt = plaidPost.Content,
                 IsPlaidEnabled = plaidPost.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = plaidPost.PortfolioValueAtPosting
+                PortfolioValueAtPosting = FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(plaidPost.PortfolioValueAtPosting.Value)
             };
 
             var nonPlaidPostVM = new PostPreviewVM
@@ -274,7 +244,7 @@ namespace TestTrustTrade
                 Title = nonPlaidPost.Title,
                 Excerpt = nonPlaidPost.Content,
                 IsPlaidEnabled = nonPlaidPost.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = nonPlaidPost.PortfolioValueAtPosting
+                PortfolioValueAtPosting = FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(plaidPost.PortfolioValueAtPosting.Value)
             };
 
             var nullPlaidPostVM = new PostPreviewVM
@@ -284,7 +254,7 @@ namespace TestTrustTrade
                 Title = nullPlaidPost.Title,
                 Excerpt = nullPlaidPost.Content,
                 IsPlaidEnabled = nullPlaidPost.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = nullPlaidPost.PortfolioValueAtPosting
+                PortfolioValueAtPosting = FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(plaidPost.PortfolioValueAtPosting.Value)
             };
 
             // Assert

@@ -1,0 +1,72 @@
+@using TrustTrade.Helpers
+@using TrustTrade.ViewModels
+@model List<PostPreviewVM>
+
+<link rel="stylesheet" href="~/css/index.css" />
+
+<h2>Posts</h2>
+<ul class="list-group mt-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var post in Model)
+        {
+            <!-- Display each post as a clickable list item -->
+            <li class="list-group-item">
+                <div class="d-flex align-items-center">
+                    <!-- Profile Links -->
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="image-profile-link">
+                        @if (post.ProfilePicture != null)
+                        {
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(post.ProfilePicture)" alt="Profile Picture"
+                                 class="rounded-circle" style="width: 50px; height: 50px;">
+                        }
+                        else
+                        {
+                            <img src="/icons/defpfp.png" alt="Profile Picture"
+                                 class="rounded-circle" style="width: 50px; height: 50px;">
+                        }
+                    </a>
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@post.UserName"
+                        class="username-profile-link ms-2">
+                        @post.UserName
+                    </a>
+                    @if (post.IsPlaidEnabled)
+                    {
+                        <span class="text-success ms-2">
+                            @if (!string.IsNullOrEmpty(post.PortfolioValueAtPosting))
+                            {
+                                @post.PortfolioValueAtPosting
+                            }
+                            <i class="bi bi-patch-check-fill"></i>
+                        </span>
+                    }
+                    <span class="ms-2 clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.TimeAgo</span>
+                </div>
+                <h3 class="clickable-post" style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Title</h3>
+                <p class="clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Excerpt</p>
+                <!-- Like and Comment Buttons -->
+                <div class="d-flex mt-3">
+                    <button class="btn btn-sm btn-outline-primary like-btn @(post.IsLikedByCurrentUser ? "liked" : "")" 
+                            data-post-id="@post.Id">
+                        <i class="bi @(post.IsLikedByCurrentUser ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i>
+                        <span class="like-count">@post.LikeCount</span>
+                    </button>
+                    <a asp-controller="Posts" asp-action="Details" asp-route-id="@post.Id" class="btn btn-sm btn-outline-primary ms-2">
+                        <i class="bi bi-chat"></i> @post.CommentCount
+                    </a>
+                </div>
+            </li>
+        }
+    }
+    else
+    {
+        <li class="list-group-item">
+            <p>No posts available.</p>
+        </li>
+    }
+</ul>

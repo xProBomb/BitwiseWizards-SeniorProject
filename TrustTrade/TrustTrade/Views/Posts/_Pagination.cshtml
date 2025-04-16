@@ -1,0 +1,64 @@
+@using TrustTrade.ViewModels
+@model PaginationPartialVM
+
+@if (Model.TotalPages > 1 && Model.PagesToShow != null)
+{
+    <ul class="pagination justify-content-center">
+        @if (Model.CurrentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                    asp-route-pageNumber="@(Model.CurrentPage - 1)"
+                    asp-route-sortOrder="@Model.SortOrder"
+                    asp-route-categoryFilter="@Model.CategoryFilter">
+                    Previous
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        }
+
+        @foreach (int pageNumber in Model.PagesToShow)
+        {
+            if (pageNumber == Model.CurrentPage)
+            {
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">@pageNumber</span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link"
+                        asp-route-pageNumber="@pageNumber"
+                        asp-route-sortOrder="@Model.SortOrder"
+                        asp-route-categoryFilter="@Model.CategoryFilter">
+                        @pageNumber
+                    </a>
+                </li>
+            }
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                    asp-route-pageNumber="@(Model.CurrentPage + 1)"
+                    asp-route-sortOrder="@Model.SortOrder"
+                    asp-route-categoryFilter="@Model.CategoryFilter">
+                    Next
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        }
+    </ul>
+}
