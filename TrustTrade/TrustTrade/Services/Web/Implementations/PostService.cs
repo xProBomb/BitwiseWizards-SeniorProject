@@ -132,4 +132,38 @@ public class PostService : IPostService
             CategoryFilter = categoryFilter
         };
     }
+
+    public async Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int currentUserId)
+    {
+        List<Post> posts = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+
+        return posts.Select(post =>
+        {
+            string? portfolioValue = null;
+
+            if (post.User.PlaidEnabled == true)
+            {
+                portfolioValue = post.PortfolioValueAtPosting.HasValue
+                    ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value)
+                    : "$0";
+            }
+
+            return new PostPreviewVM
+            {
+                Id = post.Id,
+                UserName = post.User.Username,
+                Title = post.Title,
+                Excerpt = post.Content != null && post.Content.Length > 100 
+                    ? $"{post.Content.Substring(0, 100)}..." 
+                    : post.Content ?? string.Empty,
+                TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
+                LikeCount = post.Likes.Count,
+                CommentCount = post.Comments.Count,
+                IsPlaidEnabled = post.User.PlaidEnabled ?? false,
+                PortfolioValueAtPosting = portfolioValue,
+                ProfilePicture = post.User.ProfilePicture,
+                IsLikedByCurrentUser = post.Likes.Any(l => l.UserId == currentUserId)
+            };
+        }).ToList();
+    }
 }

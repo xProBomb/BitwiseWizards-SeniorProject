@@ -16,6 +16,8 @@ public class PostDetailsVM
     
     public int LikeCount { get; set; }
 
+    public bool IsLikedByCurrentUser { get; set; }
+
     public int CommentCount { get; set; }
 
     public bool IsPlaidEnabled { get; set; }

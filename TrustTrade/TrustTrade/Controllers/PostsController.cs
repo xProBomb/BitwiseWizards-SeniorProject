@@ -153,10 +153,13 @@ namespace TrustTrade.Controllers
             }
 
             bool isOwnedByCurrentUser = false;
+            bool isLikedByCurrentUser = false;
             User? user = await _userService.GetCurrentUserAsync(User);
             if (user != null && user.Id == post.UserId)
             {
                 isOwnedByCurrentUser = true;
+
+                isLikedByCurrentUser = post.Likes.Any(l => l.UserId == user.Id);
             }
 
             // Map the post to the view model
@@ -169,6 +172,7 @@ namespace TrustTrade.Controllers
                 TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
                 Tags = post.Tags.Select(t => t.TagName).ToList(),
                 LikeCount = post.Likes.Count,
+                IsLikedByCurrentUser = isLikedByCurrentUser,
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = isPlaidEnabled,
                 PortfolioValueAtPosting = portfolioValue,
