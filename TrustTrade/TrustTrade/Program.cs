@@ -65,11 +65,6 @@ builder.Services.ConfigureApplicationCookie(options => {
 // Add Plaid services
 builder.Services.AddPlaid(builder.Configuration.GetSection("Plaid"));
 
-// Add Market Data services
-builder.Services.Configure<MarketDataOptions>(
-builder.Configuration.GetSection("MarketData"));
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<IMarketDataService, MarketDataService>();
 
 // MVC Configuration
 builder.Services.AddControllersWithViews();
