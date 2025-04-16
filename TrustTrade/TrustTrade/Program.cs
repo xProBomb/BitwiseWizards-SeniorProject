@@ -31,6 +31,8 @@ builder.Services.AddScoped<IHoldingsRepository, HoldingsRepository>();
 builder.Services.AddScoped<ISearchUserRepository, SearchUserRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -66,6 +68,7 @@ builder.Services.ConfigureApplicationCookie(options => {
 // Add Plaid services
 builder.Services.AddPlaid(builder.Configuration.GetSection("Plaid"));
 
+
 // MVC Configuration
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -85,7 +88,7 @@ builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreReposito
 // Add services for verification history
 builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
 
-builder.Services.AddSingleton<IMarketRepository, MockMarketRepository>();
+builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 
 // Add HttpClient factory
 builder.Services.AddHttpClient();

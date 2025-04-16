@@ -84,8 +84,11 @@
             <p class="card-text mt-4">@Model.Content</p>
             <!-- Like and Comment Buttons -->
             <div class="d-flex align-items-center mt-4">
-                <button class="btn btn-primary position-relative" aria-label="Like">
-                    <i class="bi bi-hand-thumbs-up"></i> @Model.LikeCount
+                <button class="btn btn-primary like-btn position-relative @(Model.IsLikedByCurrentUser ? "liked" : "")" 
+                        data-post-id="@Model.Id" 
+                        aria-label="Like">
+                    <i class="bi @(Model.IsLikedByCurrentUser ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i> 
+                    <span class="like-count">@Model.LikeCount</span>
                 </button>
                 <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
                     <i class="bi bi-chat"></i> @Model.CommentCount
