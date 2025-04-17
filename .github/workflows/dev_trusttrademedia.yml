@@ -4,6 +4,8 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - TrustTradeMedia
 
 on:
+  pull_request:
+    branches: [ "dev", "main" ]
   push:
     branches:
       - dev
