@@ -125,3 +125,42 @@
     box-shadow: 0 4px 20px rgba(255, 77, 77, 0.3);
 }
 
+.invest-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    color: #000000;
+    background-color: transparent;
+    border: 1px solid #000000;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none;
+    color: white;
+    text-decoration: none;
+}
+
+.invest-btn:hover {
+    color: #fff;
+    background-color: #d35b49;
+    border-color: #cf3d3d;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.invest-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(33, 140, 255, 0.4);
+}
+
+.stock-card .invest-btn {
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+}
+
+.stock-card:hover .invest-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
