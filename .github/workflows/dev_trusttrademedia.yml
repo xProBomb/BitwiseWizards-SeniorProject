@@ -1,70 +1,51 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - TrustTradeMedia
+name: Build and Deploy TrustTrade to Azure (Free Tier)
 
 on:
   pull_request:
     branches: [ "dev", "main" ]
-  push:
-    branches:
-      - dev
+    types: [closed]
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: TrustTradeMedia
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: 'TrustTrade/TrustTrade/TrustTrade.csproj'
+
 jobs:
-  build:
+  build-and-deploy:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Restore Dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+      - name: Build Application (32-bit)
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore /p:PlatformTarget=x86
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+      # Publishing with specific settings for Free tier and 32-bit Windows
+      - name: Publish Application
+        run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --no-build --output ./publish /p:UseAppHost=false /p:PlatformTarget=x86
 
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: .net-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_22EDCE6F430E4C09B4A1B75727713C69 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A937EEED78BF478D8F795E95FB787373 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BECB13A542E743068D1586C0F594B8F7 }}
-
+      # Simple deploy with publish profile only (no slot specified - Free tier doesn't support slots)
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
-          app-name: 'TrustTradeMedia'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
+
+      - name: Deployment Result
+        if: always()
+        run: |
+          echo "Deployment completed to https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          echo "Check Azure Portal for details if deployment failed"
