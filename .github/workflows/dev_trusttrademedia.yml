@@ -1,0 +1,51 @@
+name: Build and Deploy TrustTrade to Azure (Free Tier)
+
+on:
+  pull_request:
+    branches: [ "dev", "main" ]
+    types: [closed]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: TrustTradeMedia
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: 'TrustTrade/TrustTrade/TrustTrade.csproj'
+
+jobs:
+  build-and-deploy:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore Dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build Application (32-bit)
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore /p:PlatformTarget=x86
+
+      # Publishing with specific settings for Free tier and 32-bit Windows
+      - name: Publish Application
+        run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --no-build --output ./publish /p:UseAppHost=false /p:PlatformTarget=x86
+
+      # Simple deploy with publish profile only (no slot specified - Free tier doesn't support slots)
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
+
+      - name: Deployment Result
+        if: always()
+        run: |
+          echo "Deployment completed to https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          echo "Check Azure Portal for details if deployment failed"
