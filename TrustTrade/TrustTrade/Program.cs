@@ -33,6 +33,10 @@ builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
+builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
+builder.Services.AddScoped<IMarketRepository, MarketRepository>();
+builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
@@ -79,27 +83,14 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 // Add services to the container.
+builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
 
-// Add services for performance scoring
-builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
-
-// Add services for verification history
-builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
-
-builder.Services.AddScoped<IMarketRepository, MarketRepository>();
-
 // Add HttpClient factory
 builder.Services.AddHttpClient();
-
-// Register DAL services
-builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
-
-// Register application services
-builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
 
 // Register background service - only in production environments
 if (!builder.Environment.IsDevelopment())
