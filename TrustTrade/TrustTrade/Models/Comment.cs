@@ -15,6 +15,8 @@ public partial class Comment
 
     public DateTime CreatedAt { get; set; }
 
+    public decimal? PortfolioValueAtPosting { get; set; }
+
     public virtual Post Post { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
