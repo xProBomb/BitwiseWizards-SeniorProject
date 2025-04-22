@@ -1,48 +1,65 @@
 const searchInput = document.getElementById('searchTerm');
+const searchType = document.getElementById('searchType');
 const resultsContainer = document.getElementById('searchResults');
-let timer;
 
-// Attach keyup event
-if (searchInput) {
-    searchInput.addEventListener('keyup', function () {
+let currentPage = 1;
+let loading = false;
+let lastSearch = "";
+
+function performSearch(term, page = 1, append = false) {
+    const type = searchType.value;
+
+    if (!term.trim() || term.length > 50) {
+        resultsContainer.innerHTML = "<p>Invalid search term.</p>";
+        return;
+    }
+
+    loading = true;
+
+    fetch(`/Search/${type === "posts" ? "SearchPosts" : "SearchUsers"}?search=${encodeURIComponent(term)}&pageNumber=${page}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(res => res.text())
+        .then(html => {
+            if (append) {
+                resultsContainer.insertAdjacentHTML("beforeend", html);
+            } else {
+                resultsContainer.innerHTML = html;
+            }
+            loading = false;
+        })
+        .catch(() => {
+            resultsContainer.innerHTML = "<p>Error loading results.</p>";
+            loading = false;
+        });
+}
+
+function debounce(fn, delay) {
+    let timer;
+    return function (...args) {
         clearTimeout(timer);
-
-        // Use a small delay to avoid sending too many requests
-        timer = setTimeout(() => {
-            performSearch(searchInput.value);
-        }, 300);
-    });
+        timer = setTimeout(() => fn(...args), delay);
+    };
 }
 
-function performSearch(term) {
-    // will need to add more validation
-    if (term.length > 50) {
-        resultsContainer.innerHTML = "<p>Search term is too long.</p>";
-        return;
-    }
+searchInput.addEventListener('input', debounce(() => {
+    currentPage = 1;
+    lastSearch = searchInput.value;
+    performSearch(lastSearch);
+}, 300));
 
-    // If term is empty or whitespace, clear the results
-    if (!term.trim()) {
-        resultsContainer.innerHTML = "";
-        return;
-    }
+searchType.addEventListener('change', () => {
+    currentPage = 1;
+    lastSearch = searchInput.value;
+    performSearch(lastSearch);
+});
 
-    // Use fetch to call our controller action
-    fetch(`/Search/SearchUsers?searchTerm=${encodeURIComponent(term)}`, {
-        method: 'GET'
-    })
-    .then(response => {
-        if (!response.ok) {
-            // handle error (e.g., 400 Bad Request)
-            throw new Error('Network response was not ok');
-        }
-        return response.text(); // we’re returning a partial view (HTML)
-    })
-    .then(html => {
-        resultsContainer.innerHTML = html;
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        resultsContainer.innerHTML = "<p>Error fetching search results.</p>";
-    });
-}
+window.addEventListener('scroll', () => {
+    if (loading) return;
+
+    const scrollPos = window.innerHeight + window.scrollY;
+    if (scrollPos >= document.body.offsetHeight - 300) {
+        currentPage++;
+        performSearch(lastSearch, currentPage, true);
+    }
+});
