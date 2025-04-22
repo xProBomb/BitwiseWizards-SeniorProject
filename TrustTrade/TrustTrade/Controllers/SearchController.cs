@@ -32,22 +32,22 @@ namespace TrustTrade.Controllers
         }
 
         [HttpGet("Search/Posts")]
-        public async Task<IActionResult> SearchPosts(string search, int pageNumber = 1)
+        public async Task<IActionResult> SearchPosts(string search)
         {
             if (string.IsNullOrWhiteSpace(search))
-                return BadRequest("Missing search term");
+                return PartialView("_PostSearchResultsPartial", new List<PostPreviewVM>());
 
             var searchTerms = search.Split(' ').ToList();
-            var postPreviews = await _postService.SearchPostsAsync(searchTerms, null, pageNumber, "DateDesc");
+            var postPreviews = await _postService.SearchPostsAsync(searchTerms);
 
             return PartialView("_PostSearchResultsPartial", postPreviews);
         }
 
         [HttpGet("Search/SearchUsers")]
-        public async Task<IActionResult> SearchUsers(string search, int pageNumber = 1)
+        public async Task<IActionResult> SearchUsers(string search)
         {
-            if (string.IsNullOrWhiteSpace(search) || search.Length > 50)
-                return BadRequest("Invalid search term");
+            if (string.IsNullOrWhiteSpace(search))
+                return PartialView("_UserSearchResultsPartial", new List<User>());
 
             var users = await _searchuserRepository.SearchUsersAsync(search);
             return PartialView("_UserSearchResultsPartial", users);
