@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using TrustTrade.Data;
-using TrustTrade.Models;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.ViewModels;
+using TrustTrade.DAL.Abstract;
+using TrustTrade.Models;
+using TrustTrade.DAL.Concrete;
+using TrustTrade.Data;
+
 
 namespace TrustTrade.Controllers
 {
@@ -14,14 +18,13 @@ namespace TrustTrade.Controllers
         private readonly IPostService _postService;
 
         public SearchController(
-            ISearchUserRepository searchuserRepository, 
+            ISearchUserRepository searchuserRepository,
             IPostService postService)
         {
             _searchuserRepository = searchuserRepository;
             _postService = postService;
         }
 
-        // Renders the main Search page
         [HttpGet("/Search")]
         public IActionResult Search()
         {
@@ -29,43 +32,24 @@ namespace TrustTrade.Controllers
         }
 
         [HttpGet("Search/Posts")]
-        public async Task<IActionResult> SearchPosts(string search, string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> SearchPosts(string search, int pageNumber = 1)
         {
             if (string.IsNullOrWhiteSpace(search))
-            {
-                return RedirectToAction("Search");
-            }
+                return BadRequest("Missing search term");
 
-            List<string> searchTerms = search.Split(' ').ToList();
-            List<PostPreviewVM> postPreviews = await _postService.SearchPostsAsync(searchTerms, categoryFilter, pageNumber, sortOrder);
+            var searchTerms = search.Split(' ').ToList();
+            var postPreviews = await _postService.SearchPostsAsync(searchTerms, null, pageNumber, "DateDesc");
 
-            PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder, search);
-            PaginationPartialVM paginationVM = await _postService.BuildSearchPaginationAsync(search, searchTerms, categoryFilter, pageNumber);
-
-            var vm = new SearchPostResultsVM
-            {
-                Posts = postPreviews,
-                Pagination = paginationVM,
-                PostFilters = postFiltersVM,
-                SearchQuery = search,
-            };
-
-            return View("SearchPostResults", vm);
+            return PartialView("_PostSearchResultsPartial", postPreviews);
         }
 
-        // This action is called asynchronously to search for users in real time
-        [HttpGet]
-        public async Task<IActionResult> SearchUsers(string searchTerm)
+        [HttpGet("Search/SearchUsers")]
+        public async Task<IActionResult> SearchUsers(string search, int pageNumber = 1)
         {
-            // some validation, prob want to add more?
-            if (searchTerm?.Length > 50)
-            {
-                return BadRequest("Search term is too long.");
-            }
+            if (string.IsNullOrWhiteSpace(search) || search.Length > 50)
+                return BadRequest("Invalid search term");
 
-            var users = await _searchuserRepository.SearchUsersAsync(searchTerm);
-
-            
+            var users = await _searchuserRepository.SearchUsersAsync(search);
             return PartialView("_UserSearchResultsPartial", users);
         }
 
