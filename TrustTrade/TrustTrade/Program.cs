@@ -32,6 +32,7 @@ builder.Services.AddScoped<ISearchUserRepository, SearchUserRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
@@ -79,6 +80,7 @@ builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
 
