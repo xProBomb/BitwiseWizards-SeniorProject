@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.Models.ViewModels;
+using TrustTrade.Services;
 using TrustTrade.ViewModels;
 using TrustTrade.Services.Web.Interfaces;
 
@@ -20,6 +21,7 @@ namespace TrustTrade.Controllers
         private readonly IProfileService _profileService;
         private readonly IUserService _userService;
         private readonly IPerformanceScoreRepository _performanceScoreRepository;
+        private readonly INotificationService _notificationService;
 
         public ProfileController(
             TrustTradeDbContext context,
@@ -28,7 +30,8 @@ namespace TrustTrade.Controllers
             IPostService postService,
             IProfileService profileService,
             IUserService userService,
-            IPerformanceScoreRepository performanceScoreRepository)
+            IPerformanceScoreRepository performanceScoreRepository,
+            INotificationService notificationService)
         {
             _context = context;
             _holdingsRepository = holdingsRepository;
@@ -37,6 +40,7 @@ namespace TrustTrade.Controllers
             _profileService = profileService;
             _userService = userService;
             _performanceScoreRepository = performanceScoreRepository;
+            _notificationService = notificationService;
         }
 
         // route to get to logged in users profile "/Profile"
@@ -492,6 +496,9 @@ namespace TrustTrade.Controllers
 
             _context.Followers.Add(follower);
             await _context.SaveChangesAsync();
+            
+            // Create notification for the followed user
+            await _notificationService.CreateFollowNotificationAsync(currentUser.Id, userToFollow.Id);
 
             return Json(new { success = true });
         }

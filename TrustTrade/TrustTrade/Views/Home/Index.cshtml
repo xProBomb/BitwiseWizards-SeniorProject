@@ -5,12 +5,12 @@
 <link rel="stylesheet" href="~/css/index.css" />
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = Model.IsFollowing ? "Following" : "Home Page";
 }
 
 <div class="container">
     <div class="row">
-        <!-- Main content column - takes full width on small devices, 8 columns on medium+ -->
+        <!-- Main content column -->
         <div class="col-12 col-md-8">
             <!-- Post Filters -->
             <div>
@@ -27,20 +27,24 @@
                 <partial name="../Posts/_Pagination" model="Model.Pagination" />
             </div>
         </div>
-        <!-- Financial News sidebar - hidden on small devices, 4 columns on medium+ -->
-        <div class="col-md-4 d-none d-md-block">
-            <div class="sidebar-widget">
-                <div id="financialNewsWidget">
-                    <!-- Initial Loading Spinner -->
-                    <div class="loading-spinner text-center p-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+
+        <!-- Financial News sidebar -->
+        @if (!Model.IsFollowing)
+        {
+            <div class="col-md-4 d-none d-md-block">
+                <div class="sidebar-widget">
+                    <div id="financialNewsWidget">
+                        <!-- Initial Loading Spinner -->
+                        <div class="loading-spinner text-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading financial news...</p>
                         </div>
-                        <p class="mt-2">Loading financial news...</p>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </div>
 

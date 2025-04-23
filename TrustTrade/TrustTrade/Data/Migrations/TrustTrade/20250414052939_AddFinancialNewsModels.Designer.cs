@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrustTrade.Models;
 
@@ -11,9 +12,11 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    partial class TrustTradeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250414052939_AddFinancialNewsModels")]
+    partial class AddFinancialNewsModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,16 +56,12 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
-
-                    b.Property<decimal?>("PortfolioValueAtPosting")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("PostId")
                         .HasColumnType("int")
@@ -79,7 +78,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.FinancialNewsItem", b =>
@@ -138,7 +137,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex("Url")
                         .IsUnique();
 
-                    b.ToTable("FinancialNewsItems", (string)null);
+                    b.ToTable("FinancialNewsItems");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.FinancialNewsTickerSentiment", b =>
@@ -171,7 +170,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("NewsItemId");
 
-                    b.ToTable("FinancialNewsTickerSentiments", (string)null);
+                    b.ToTable("FinancialNewsTickerSentiments");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.FinancialNewsTopic", b =>
@@ -197,7 +196,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("NewsItemId");
 
-                    b.ToTable("FinancialNewsTopics", (string)null);
+                    b.ToTable("FinancialNewsTopics");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Follower", b =>
@@ -229,7 +228,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("FollowingUserId");
 
-                    b.ToTable("Followers", (string)null);
+                    b.ToTable("Followers");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.InvestmentPosition", b =>
@@ -284,7 +283,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("PlaidConnectionId");
 
-                    b.ToTable("InvestmentPositions", (string)null);
+                    b.ToTable("InvestmentPositions");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Like", b =>
@@ -316,59 +315,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Likes", (string)null);
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ActorId")
-                        .HasColumnType("int")
-                        .HasColumnName("ActorID");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<int?>("EntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("UserID");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Notifications__3214EC27");
-
-                    b.HasIndex("ActorId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.PlaidConnection", b =>
@@ -418,7 +365,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex(new[] { "ItemId" }, "UQ__PlaidCon__727E83EAA3D35DB3")
                         .IsUnique();
 
-                    b.ToTable("PlaidConnections", (string)null);
+                    b.ToTable("PlaidConnections");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.PortfolioVisibilitySettings", b =>
@@ -448,7 +395,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("PortfolioVisibilitySettings", (string)null);
+                    b.ToTable("PortfolioVisibilitySettings");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Post", b =>
@@ -491,7 +438,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Stock", b =>
@@ -502,9 +449,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("ID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("DailyChange")
-                        .HasColumnType("decimal(13, 2)");
 
                     b.Property<DateTime?>("LastUpdated")
                         .ValueGeneratedOnAdd()
@@ -551,7 +495,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex(new[] { "TagName" }, "UQ__Tags__A2F1B0E1A3A3D3A4")
                         .IsUnique();
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Trade", b =>
@@ -694,7 +638,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex(new[] { "Email" }, "UQ__Users__A9D10534AB940664")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.VerificationHistory", b =>
@@ -731,7 +675,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VerificationHistory", (string)null);
+                    b.ToTable("VerificationHistory");
                 });
 
             modelBuilder.Entity("PostTags", b =>
@@ -841,25 +785,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasConstraintName("FK_Likes_User");
 
                     b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.Notification", b =>
-                {
-                    b.HasOne("TrustTrade.Models.User", "Actor")
-                        .WithMany()
-                        .HasForeignKey("ActorId")
-                        .HasConstraintName("FK_Notifications_Actor");
-
-                    b.HasOne("TrustTrade.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Notifications_User");
-
-                    b.Navigation("Actor");
 
                     b.Navigation("User");
                 });

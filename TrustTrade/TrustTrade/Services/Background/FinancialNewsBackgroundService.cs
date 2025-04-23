@@ -36,14 +36,14 @@ namespace TrustTrade.Services.Background
             string intervalStr = _configuration["FinancialNewsSettings:RefreshIntervalHours"];
             if (!double.TryParse(intervalStr, out double intervalHours) || intervalHours < 1)
             {
-                intervalHours = 24; // Default to daily
+                intervalHours = .5; // Default to daily
             }
-            else if (intervalHours < 4)
+            else if (intervalHours < 24)
             {
                 // If the interval is set to less than 4 hours, force it to 4 hours
                 // to avoid hitting Alpha Vantage API limits (25 calls per day with free API)
                 _logger.LogWarning($"RefreshIntervalHours was set to {intervalHours} which is too frequent for Alpha Vantage free API. Setting to 4 hours minimum.");
-                intervalHours = 4;
+                intervalHours = .5;
             }
             _refreshInterval = TimeSpan.FromHours(intervalHours);
             _logger.LogInformation($"Financial news will refresh every {intervalHours} hours");
