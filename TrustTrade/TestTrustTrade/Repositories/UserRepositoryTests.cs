@@ -4,7 +4,7 @@ using TrustTrade.DAL.Concrete;
 using TrustTrade.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TestTrustTrade;
+namespace TestTrustTrade.Repositories;
 
 [TestFixture]
 public class UserRepositoryTests
