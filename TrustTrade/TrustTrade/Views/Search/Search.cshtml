@@ -1,30 +1,33 @@
 @{
-    ViewData["Title"] = "Search Users";
+    ViewData["Title"] = "Search";
 }
 
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="fw-bold display-6">Search</h1>
-        <p class="text-muted">Discover the TrustTrade community</p>
+        <p class="text-muted">Find users or posts in the TrustTrade community</p>
     </div>
 
-    <div class="search-bar-wrapper mx-auto mb-4" style="max-width: 600px;">
-        <form asp-controller="Search" asp-action="SearchPosts" method="get" class="input-group input-group-lg shadow rounded-pill overflow-hidden">
-            <input type="text" class="form-control border-0 ps-4" id="searchTerm" name="search" placeholder="Search..." aria-label="Search">
-            <button type="submit" class="input-group-text bg-white border-0 pe-4">
+    <div class="search-bar-wrapper mx-auto mb-4" style="max-width: 700px;">
+        <div class="input-group input-group-lg shadow rounded-pill overflow-hidden">
+            <input type="text" class="form-control border-0 ps-4" id="searchTerm" placeholder="Search..." />
+            <select id="searchType" class="form-select border-0" style="max-width: 150px;">
+                <option value="users">Users</option>
+                <option value="posts">Posts</option>
+            </select>
+            <button type="button" class="input-group-text bg-white border-0 pe-4">
                 <i class="bi bi-search"></i>
             </button>
-        </form>
+        </div>
     </div>
 
-    <div id="searchResults">
-        
-    </div>
+    <div id="searchResults" class="mt-4"></div>
 </div>
 
 @section Scripts {
     <script src="~/js/searchuser.js"></script>
 }
+
 
 <style>
     .search-bar-wrapper input:focus {

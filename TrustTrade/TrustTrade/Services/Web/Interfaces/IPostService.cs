@@ -47,7 +47,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, string? categoryFilter, int pageNumber, string sortOrder);
+    Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms);
 
     /// <summary>
     /// Build the post filters for the view model.
