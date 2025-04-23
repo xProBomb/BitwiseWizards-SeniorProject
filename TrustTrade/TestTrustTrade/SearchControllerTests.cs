@@ -72,7 +72,7 @@ namespace TrustTrade.Tests.Controllers
             var result = await _controller.SearchUsers(longSearchTerm);
 
             // Assert
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<PartialViewResult>());
         }
 
         [Test]
@@ -179,7 +179,7 @@ namespace TrustTrade.Tests.Controllers
         public async Task SearchPosts_ReturnsAViewResult()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>()))
                 .ReturnsAsync(_postPreviews);
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
@@ -190,30 +190,24 @@ namespace TrustTrade.Tests.Controllers
             var result = await _controller.SearchPosts("test search");
 
             // Assert
-            Assert.That(result, Is.Not.Null.And.InstanceOf<ViewResult>());
+            Assert.That(result, Is.Not.Null.And.InstanceOf<PartialViewResult>());
         }
 
         [Test]
-        public async Task SearchPosts_ReturnsSearchPostResultsVM()
+        public async Task SearchPosts_ReturnsPostPreviewList()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>()))
                 .ReturnsAsync(_postPreviews);
-            _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(_postFiltersPartialVM);
-            _postServiceMock.Setup(s => s.BuildSearchPaginationAsync(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<string>(), It.IsAny<int>()))
-                .ReturnsAsync(_paginationPartialVM);
 
             // Act
-            var result = await _controller.SearchPosts("test search") as ViewResult;
+            var result = await _controller.SearchPosts("test search") as PartialViewResult;
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Model, Is.Not.Null);
-            Assert.That(result.Model, Is.InstanceOf<SearchPostResultsVM>());
-            Assert.That(((SearchPostResultsVM)result.Model).Posts, Is.EqualTo(_postPreviews));
-            Assert.That(((SearchPostResultsVM)result.Model).PostFilters, Is.EqualTo(_postFiltersPartialVM));
-            Assert.That(((SearchPostResultsVM)result.Model).Pagination, Is.EqualTo(_paginationPartialVM));
+            Assert.That(result.ViewName, Is.EqualTo("_PostSearchResultsPartial"));
+            Assert.That(result.Model, Is.InstanceOf<IEnumerable<PostPreviewVM>>());
+            Assert.That(((IEnumerable<PostPreviewVM>)result.Model).Count(), Is.EqualTo(_postPreviews.Count));
         }
 
         [Test]
@@ -227,11 +221,13 @@ namespace TrustTrade.Tests.Controllers
                 .ReturnsAsync(emptyUsers);
 
             // Act
-            var result = await _controller.SearchPosts(searchTerm) as RedirectToActionResult;
+            var result = await _controller.SearchPosts(string.Empty) as PartialViewResult;
 
-            // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.ActionName, Is.EqualTo("Search"));
+            Assert.That(result.ViewName, Is.EqualTo("_PostSearchResultsPartial"));
+            Assert.That(result.Model, Is.InstanceOf<IEnumerable<PostPreviewVM>>());
+            Assert.That(((IEnumerable<PostPreviewVM>)result.Model).Any(), Is.False);
+
         }
     }
 }

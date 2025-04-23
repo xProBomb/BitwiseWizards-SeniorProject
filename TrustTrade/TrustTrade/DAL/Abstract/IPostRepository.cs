@@ -48,7 +48,7 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="pageSize">Number of posts per page.</param>
     /// <param name="sortOrder">Sorting order (e.g., "DateDesc", "DateAsc").</param>
     /// <returns>A list of posts that match the search criteria.</returns>
-    Task<List<Post>> SearchPostsAsync(List<string> searchTerms, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc");
+    Task<List<Post>> SearchPostsAsync(List<string> searchTerms);
 
     /// <summary>
     /// Get the total number of posts, optionally filtered by category.
