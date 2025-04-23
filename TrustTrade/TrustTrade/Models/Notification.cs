@@ -37,5 +37,7 @@ namespace TrustTrade.Models
         
         [ForeignKey("ActorId")]
         public virtual User Actor { get; set; }
+        
+        public bool IsArchived { get; set; } = false;
     }
 }

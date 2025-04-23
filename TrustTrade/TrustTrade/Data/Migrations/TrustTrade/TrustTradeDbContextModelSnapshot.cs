@@ -79,7 +79,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.FinancialNewsItem", b =>
@@ -138,7 +138,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex("Url")
                         .IsUnique();
 
-                    b.ToTable("FinancialNewsItems");
+                    b.ToTable("FinancialNewsItems", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.FinancialNewsTickerSentiment", b =>
@@ -171,7 +171,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("NewsItemId");
 
-                    b.ToTable("FinancialNewsTickerSentiments");
+                    b.ToTable("FinancialNewsTickerSentiments", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.FinancialNewsTopic", b =>
@@ -197,7 +197,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("NewsItemId");
 
-                    b.ToTable("FinancialNewsTopics");
+                    b.ToTable("FinancialNewsTopics", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Follower", b =>
@@ -229,7 +229,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("FollowingUserId");
 
-                    b.ToTable("Followers");
+                    b.ToTable("Followers", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.InvestmentPosition", b =>
@@ -284,7 +284,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("PlaidConnectionId");
 
-                    b.ToTable("InvestmentPositions");
+                    b.ToTable("InvestmentPositions", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Like", b =>
@@ -316,7 +316,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Likes");
+                    b.ToTable("Likes", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Notification", b =>
@@ -368,7 +368,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.PlaidConnection", b =>
@@ -418,7 +418,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex(new[] { "ItemId" }, "UQ__PlaidCon__727E83EAA3D35DB3")
                         .IsUnique();
 
-                    b.ToTable("PlaidConnections");
+                    b.ToTable("PlaidConnections", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.PortfolioVisibilitySettings", b =>
@@ -448,7 +448,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("PortfolioVisibilitySettings");
+                    b.ToTable("PortfolioVisibilitySettings", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Post", b =>
@@ -491,7 +491,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Stock", b =>
@@ -551,7 +551,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex(new[] { "TagName" }, "UQ__Tags__A2F1B0E1A3A3D3A4")
                         .IsUnique();
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Trade", b =>
@@ -694,7 +694,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex(new[] { "Email" }, "UQ__Users__A9D10534AB940664")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.VerificationHistory", b =>
@@ -731,7 +731,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VerificationHistory");
+                    b.ToTable("VerificationHistory", (string)null);
                 });
 
             modelBuilder.Entity("PostTags", b =>

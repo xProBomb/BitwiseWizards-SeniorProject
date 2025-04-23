@@ -207,8 +207,28 @@ namespace TrustTrade.Services
                 _logger.LogError(ex, $"Error creating mention notification for user {mentionedUserId}");
             }
         }
+        
+        public async Task<List<Notification>> GetAllNotificationsAsync(int userId, int page = 1, int pageSize = 20)
+        {
+            return await _notificationRepository.GetAllNotificationsForUserAsync(userId, page, pageSize);
+        }
 
-// Helper to truncate long post titles for notification messages
+        public async Task<bool> ArchiveNotificationAsync(int notificationId, int currentUserId)
+        {
+            // Verify the notification belongs to the current user
+            var notification = await _notificationRepository.FindByIdAsync(notificationId);
+            if (notification == null || notification.UserId != currentUserId)
+                return false;
+        
+            return await _notificationRepository.ArchiveNotificationAsync(notificationId);
+        }
+
+        public async Task<bool> ArchiveAllNotificationsAsync(int userId)
+        {
+            return await _notificationRepository.ArchiveAllNotificationsForUserAsync(userId);
+        }
+
+        // Helper to truncate long post titles for notification messages
         private string TruncateTitle(string title, int maxLength = 50)
         {
             if (string.IsNullOrEmpty(title))

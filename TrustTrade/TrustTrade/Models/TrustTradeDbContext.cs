@@ -362,6 +362,7 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.ActorId).HasColumnName("ActorID");
+            entity.Property(e => e.IsArchived).HasColumnName("IsArchived");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

@@ -33,6 +33,11 @@ builder.Services.AddScoped<ISearchUserRepository, SearchUserRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
+builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
+builder.Services.AddScoped<IMarketRepository, MarketRepository>();
+builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
@@ -79,7 +84,9 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 // Add services to the container.
+builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
 
@@ -94,11 +101,8 @@ builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 // Add HttpClient factory
 builder.Services.AddHttpClient();
 
-// Register DAL services
+// Register DAL services for fin news
 builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
-
-// Register application services
-builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
 
 // Register notifications repositories
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -110,7 +114,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSignalR();
 
 // Register background service - only in production environments
-if (builder.Environment.IsDevelopment())
+if (!builder.Environment.IsDevelopment())
 {
     builder.Services.AddHostedService<FinancialNewsBackgroundService>();
 }

@@ -44,7 +44,8 @@
         }
     </div>
     
-    <div class="notification-footer p-2 text-center border-top">
-        <a asp-controller="Notifications" asp-action="Index" class="btn btn-sm btn-link">View all notifications</a>
+    <div class="notification-footer p-2 d-flex justify-content-between border-top">
+        <a asp-controller="Notifications" asp-action="Index" class="btn btn-sm btn-link">View Unread</a>
+        <a asp-controller="Notifications" asp-action="History" class="btn btn-sm btn-link">View History</a>
     </div>
 </div>

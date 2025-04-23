@@ -102,5 +102,43 @@ namespace TrustTrade.DAL.Concrete
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<List<Notification>> GetAllNotificationsForUserAsync(int userId, int page = 1, int pageSize = 20)
+        {
+            return await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsArchived)
+                .OrderByDescending(n => n.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(n => n.Actor)
+                .ToListAsync();
+        }
+        public async Task<bool> ArchiveNotificationAsync(int notificationId)
+        {
+            var notification = await _context.Notifications.FindAsync(notificationId);
+            if (notification == null)
+                return false;
+    
+            notification.IsArchived = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ArchiveAllNotificationsForUserAsync(int userId)
+        {
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsArchived)
+                .ToListAsync();
+        
+            if (!notifications.Any())
+                return true;
+        
+            foreach (var notification in notifications)
+            {
+                notification.IsArchived = true;
+            }
+    
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

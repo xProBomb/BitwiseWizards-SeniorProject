@@ -159,3 +159,83 @@ function markAllAsRead(event) {
         })
         .catch(error => console.error('Error marking all notifications as read:', error));
 }
+
+// Handle archive button clicks
+document.addEventListener('click', function (event) {
+    if (event.target.closest('.archive-btn')) {
+        const button = event.target.closest('.archive-btn');
+        const notificationId = button.dataset.id;
+        archiveNotification(notificationId);
+    }
+});
+
+// Function to archive a notification
+function archiveNotification(notificationId) {
+    if (!confirm('Are you sure you want to remove this notification?')) {
+        return;
+    }
+
+    fetch('/Notifications/Archive', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({id: notificationId})
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the notification from the UI
+                const notification = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+                if (notification) {
+                    notification.remove();
+
+                    // Check if any notifications remain
+                    const remainingNotifications = document.querySelectorAll('.notification-item');
+                    if (remainingNotifications.length === 0) {
+                        // Show "no notifications" message
+                        const notificationList = document.querySelector('.notification-list');
+                        if (notificationList) {
+                            notificationList.innerHTML = `
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> You don't have any notifications in your history.
+                            </div>
+                        `;
+                        }
+                    }
+                }
+
+                // Update notification count
+                updateNotificationCount();
+            } else {
+                alert('Failed to remove notification. Please try again.');
+            }
+        })
+        .catch(error => console.error('Error archiving notification:', error));
+}
+
+// Handle "Archive All" button click
+document.getElementById('archiveAllBtn')?.addEventListener('click', function () {
+    if (!confirm('Are you sure you want to clear all notifications? This cannot be undone.')) {
+        return;
+    }
+
+    fetch('/Notifications/ArchiveAll', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show the empty state
+                window.location.reload();
+            } else {
+                alert('Failed to clear notifications. Please try again.');
+            }
+        })
+        .catch(error => console.error('Error clearing all notifications:', error));
+});
