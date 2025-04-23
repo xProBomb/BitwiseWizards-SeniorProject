@@ -22,7 +22,12 @@ public class PostsControllerTests
 
     private User _user1;
     private User _user2;
+    private User _plaidEnabledUser;
+    private List<Comment> _comments;
+    private List<Comment> _commentsWithPlaidEnabledUser;
     private Post _postByUser1;
+    private Post _postWithComments;
+    private Post _postWithPlaidEnabledComments;
     private CreatePostVM _validCreatePostVM;
     private CreatePostVM _invalidCreatePostVM;
     private PostEditVM _validPostEditVM;
@@ -67,6 +72,44 @@ public class PostsControllerTests
             PasswordHash = "dummyHash"
         };
 
+        _plaidEnabledUser = new User
+        {
+            Id = 3,
+            IdentityId = "test-identity-3",
+            ProfileName = "janeDoe",
+            Username = "janeDoe",
+            Email = "janedoe@example.com",
+            PasswordHash = "dummyHash",
+            PlaidEnabled = true
+        };
+
+
+        // Test comments
+        _comments = new List<Comment>
+        {
+            new Comment
+            {
+                Id = 1,
+                PostId = 1,
+                Content = "Test comment",
+                User = _user1,
+                CreatedAt = DateTime.Now,
+            }
+        };
+
+        _commentsWithPlaidEnabledUser = new List<Comment>
+        {
+            new Comment
+            {
+                Id = 2,
+                PostId = 1,
+                Content = "Test comment",
+                User = _plaidEnabledUser,
+                CreatedAt = DateTime.Now,
+                PortfolioValueAtPosting = 1000
+            }
+        };
+
         // Test posts
         _postByUser1 = new Post
         {
@@ -77,6 +120,30 @@ public class PostsControllerTests
             CreatedAt = DateTime.Now,
             IsPublic = true,
             User = _user1,
+        };
+
+        _postWithComments = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = _user1,
+            Comments = _comments
+        };
+
+        _postWithPlaidEnabledComments = new Post
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Test Post",
+            Content = "Test Content",
+            CreatedAt = DateTime.Now,
+            IsPublic = true,
+            User = _user1,
+            Comments = _commentsWithPlaidEnabledUser
         };
 
         // Test view models
@@ -425,6 +492,42 @@ public class PostsControllerTests
         // Assert
         Assert.That(model, Is.Not.Null);
         Assert.That(model.IsOwnedByCurrentUser, Is.True);
+    }
+
+    public async Task Details_WhenPostHasComments_ReturnsViewModelWithComment()
+    {
+        // Arrange
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(1)).ReturnsAsync(_postWithComments);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
+
+        // Act
+        var result = await _controller.Details(1) as ViewResult;
+        var model = result?.Model as PostDetailsVM;
+
+        // Assert
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model.Comments.Count, Is.EqualTo(1));
+        Assert.That(model.Comments[0].Id, Is.EqualTo(1));
+        Assert.That(model.Comments[0].Username, Is.EqualTo("johnDoe"));
+    }
+
+    public async Task Details_WhenPostHasCommentsWithPlaidEnabledUser_ReturnsViewModelWithPlaidInfo()
+    {
+        // Arrange
+        _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postWithPlaidEnabledComments);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
+
+        // Act
+        var result = await _controller.Details(1) as ViewResult;
+        var model = result?.Model as PostDetailsVM;
+
+        // Assert
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model.Comments.Count, Is.EqualTo(1));
+        Assert.That(model.Comments[0].Id, Is.EqualTo(2));
+        Assert.That(model.Comments[0].Username, Is.EqualTo("janeDoe"));
+        Assert.That(model.Comments[0].IsPlaidEnabled, Is.True);
+        Assert.That(model.Comments[0].PortfolioValueAtPosting, Is.EqualTo("$1K"));
     }
 
     [Test]

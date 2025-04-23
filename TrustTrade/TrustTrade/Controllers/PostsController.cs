@@ -166,6 +166,30 @@ namespace TrustTrade.Controllers
                 isLikedByCurrentUser = post.Likes.Any(l => l.UserId == user.Id);
             }
 
+            List<CommentVM> comments = post.Comments.Select(comment =>
+            {
+
+                string? portfolioValue = null;
+
+                if (comment.User.PlaidEnabled == true)
+                {
+                    portfolioValue = comment.PortfolioValueAtPosting.HasValue
+                        ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(comment.PortfolioValueAtPosting.Value)
+                        : "$0";
+                }
+
+                return new CommentVM
+                {
+                    Id = comment.Id,
+                    Username = comment.User.Username ?? string.Empty,
+                    Content = comment.Content,
+                    TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
+                    IsPlaidEnabled = comment.User.PlaidEnabled,
+                    PortfolioValueAtPosting = portfolioValue,
+                    ProfilePicture = comment.User.ProfilePicture,
+                };
+            }).ToList();
+
             // Map the post to the view model
             var vm = new PostDetailsVM
             {
@@ -181,7 +205,8 @@ namespace TrustTrade.Controllers
                 IsPlaidEnabled = isPlaidEnabled,
                 PortfolioValueAtPosting = portfolioValue,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
-                ProfilePicture = post.User.ProfilePicture
+                ProfilePicture = post.User.ProfilePicture,
+                Comments = comments
             };
 
             return View(vm);
