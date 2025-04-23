@@ -1,0 +1,56 @@
+@model IEnumerable<TrustTrade.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Notifications</h1>
+        <button id="markAllAsReadBtn" class="btn btn-outline-primary">
+            <i class="bi bi-check-all"></i> Mark All as Read
+        </button>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-bell"></i> You don't have any notifications yet.
+        </div>
+    }
+    else
+    {
+        <div class="notification-list">
+            @foreach (var notification in Model)
+            {
+                <div class="card mb-3 notification-item @(notification.IsRead ? "read" : "unread")" data-id="@notification.Id">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            @if (notification.Actor != null && notification.Actor.ProfilePicture != null)
+                            {
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(notification.Actor.ProfilePicture)" 
+                                     class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
+                            }
+                            else
+                            {
+                                <img src="/icons/defpfp.png" class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
+                            }
+                            
+                            <div class="notification-content">
+                                <p class="mb-1">@Html.Raw(notification.Message)</p>
+                                <small class="text-muted">@TrustTrade.Helpers.TimeAgoHelper.GetTimeAgo(notification.CreatedAt)</small>
+                            </div>
+                            
+                            @if (!notification.IsRead)
+                            {
+                                <div class="ms-auto">
+                                    <span class="badge bg-primary rounded-pill">New</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

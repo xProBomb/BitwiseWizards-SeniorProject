@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="~/css/themeSwitcher.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/search.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/financial-news.css" asp-append-version="true" />
-    <script src="~/js/ThemeSwitcher.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/ThemeSwitcher.js" asp-append-version="true"></script>
 </head>
 <body>
     @functions {
@@ -128,12 +129,35 @@
                 </a>
             </div>
             
-            <div class="navbar-right">
-                <!-- Profile dropdown -->
+            <div class="navbar-right" style="gap: 1rem">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <!-- Notification dropdown -->
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell-fill"></i>
+                        <span id="notificationBadge" class="position-absolute top-0 right-1 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                            <span id="notificationCount">0</span>
+                            <span class="visually-hidden">unread notifications</span>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown-container" aria-labelledby="notificationDropdown">
+                        <div id="notificationsContent">
+                            <!-- Notifications will be loaded here -->
+                            <div class="d-flex justify-content-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <!-- Profile dropdown -->
                 <div class="dropdown">
                     <img src="/icons/ProfileLogo.webp" class="nav-profile dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                        <partial name="_LoginPartial" />
+                        <partial name="_LoginPartial"/>
                     </ul>
                 </div>
             </div>

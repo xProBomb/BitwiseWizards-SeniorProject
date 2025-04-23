@@ -6,6 +6,7 @@ using TrustTrade.DAL.Concrete;
 using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using TrustTrade.Hubs;
 using TrustTrade.Services;
 using TrustTrade.Services.Background;
 using TrustTrade.Services.Web.Interfaces;
@@ -99,8 +100,17 @@ builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 // Register application services
 builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
 
+// Register notifications repositories
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+// Register notifications services
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Add support for real-time updates
+builder.Services.AddSignalR();
+
 // Register background service - only in production environments
-if (!builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddHostedService<FinancialNewsBackgroundService>();
 }
@@ -131,6 +141,8 @@ app.UseRouting();
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllerRoute(
     name: "default",
