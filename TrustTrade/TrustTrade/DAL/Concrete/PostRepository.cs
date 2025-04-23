@@ -59,7 +59,7 @@ public class PostRepository : Repository<Post>, IPostRepository
         return await query.ToListAsync();
     }
 
-    public async Task<List<Post>> SearchPostsAsync(List<string> searchTerms, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc")
+    public async Task<List<Post>> SearchPostsAsync(List<string> searchTerms)
     {
         // Start with a query that includes related entities.
         IQueryable<Post> query = _posts
@@ -67,9 +67,6 @@ public class PostRepository : Repository<Post>, IPostRepository
             .Include(p => p.Tags);
 
         query = ApplySearchTerms(query, searchTerms);
-        query = ApplyCategoryFilter(query, categoryFilter);
-        query = ApplySorting(query, sortOrder);
-        query = ApplyPagination(query, pageNumber, pageSize);
 
         return await query.ToListAsync();
     }
