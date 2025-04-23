@@ -35,13 +35,13 @@
 
                     <div class="mb-3">
                         <label asp-for="Name" class="form-label fw-semibold">Your Name</label>
-                        <input asp-for="Name" class="form-control rounded-3" />
+                        <input asp-for="Name" class="form-control rounded-3" required/>
                         <span asp-validation-for="Name" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Message" class="form-label fw-semibold">Message</label>
-                        <textarea asp-for="Message" rows="5" class="form-control rounded-3"></textarea>
+                        <textarea asp-for="Message" rows="5" class="form-control rounded-3" required></textarea>
                         <span asp-validation-for="Message" class="text-danger small"></span>
                     </div>
 
