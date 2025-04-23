@@ -38,6 +38,8 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
+    public virtual DbSet<Notification> Notifications { get; set; }
+
 
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
     public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
@@ -352,6 +354,31 @@ public partial class TrustTradeDbContext : DbContext
             .WithMany(n => n.TickerSentiments)
             .HasForeignKey(ts => ts.NewsItemId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Notifications__3214EC27");
+        
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.ActorId).HasColumnName("ActorID");
+            entity.Property(e => e.IsArchived).HasColumnName("IsArchived");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Notifications_User");
+            
+            entity.HasOne(d => d.Actor)
+                .WithMany()
+                .HasForeignKey(d => d.ActorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)  // Don't cascade delete the actor
+                .HasConstraintName("FK_Notifications_Actor");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

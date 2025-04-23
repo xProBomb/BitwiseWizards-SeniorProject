@@ -1,0 +1,83 @@
+/* Notification Badge */
+#notificationBadge {
+    font-size: 0.65rem;
+    transform: translate(-50%, -30%) !important;
+}
+
+/* Notification Dropdown */
+.notification-dropdown-container {
+    width: 350px;
+    padding: 0;
+    overflow: hidden;
+    max-height: 500px;
+}
+
+.notification-dropdown {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    border-left: 3px solid transparent;
+}
+
+.notification-item.unread {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-left-color: #0d6efd;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.notification-mini-avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.notification-avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+/* Main Notification Page */
+.notification-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Smaller profile pictures for notification dropdown */
+.notification-dropdown .notification-mini-avatar {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Keep the regular size for the notification page */
+.notification-list .notification-avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Make notification items more compact in the dropdown */
+.notification-dropdown .notification-item {
+    padding: 0.5rem 1rem;
+}
+
+/* Adjust text size in notification dropdown */
+.notification-dropdown .notification-content p {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.notification-dropdown .notification-content small {
+    font-size: 0.75rem;
+}
