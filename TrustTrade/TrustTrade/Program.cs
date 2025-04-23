@@ -121,6 +121,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.MapControllerRoute(
+    name: "following",
+    pattern: "Home/Following",
+    defaults: new { controller = "Home", action = "Following", isFollowing = true});
+
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();

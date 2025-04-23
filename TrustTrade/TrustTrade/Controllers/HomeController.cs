@@ -23,48 +23,98 @@ namespace TrustTrade.Controllers
             _userService = userService;
         }
 
-        public async Task<IActionResult> Index(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Index(
+            string? categoryFilter = null,
+            int pageNumber = 1,
+            string sortOrder = "DateDesc",
+            bool isFollowing = false)
         {
-            // Retrieve posts
-            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
-    
-            // Build filters and pagination
-            PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
+            List<PostPreviewVM> postPreviews;
+            PostFiltersPartialVM postFiltersVM;
+            PaginationPartialVM paginationVM;
+
+            if (isFollowing)
+            {
+                // Ensure the user is authorized
+                if (User.Identity == null || !User.Identity.IsAuthenticated)
+                {
+                    return Challenge(); // Redirect to login if not authenticated
+                }
+
+                User? user = await _userService.GetCurrentUserAsync(User);
+                if (user == null) return Unauthorized();
+
+                int currentUserId = user.Id;
+
+                // Retrieve posts for the "following" feed
+                postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
+                postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+                paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
+            }
+            else
+            {
+                // Retrieve posts for the general feed
+                postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
+                postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+                paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
+            }
 
             var vm = new IndexVM
             {
                 Posts = postPreviews,
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
+                IsFollowing = isFollowing
             };
 
             return View(vm);
         }
 
-        [Authorize]
-        public async Task<IActionResult> Following(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Following(
+            string? categoryFilter = null,
+            int pageNumber = 1,
+            string sortOrder = "DateDesc",
+            bool isFollowing = false)
         {
-            User? user = await _userService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized();            
+            List<PostPreviewVM> postPreviews;
+            PostFiltersPartialVM postFiltersVM;
+            PaginationPartialVM paginationVM;
 
-            int currentUserId = user.Id;
+            if (isFollowing)
+            {
+                // Ensure the user is authorized
+                if (User.Identity == null || !User.Identity.IsAuthenticated)
+                {
+                    return Challenge(); // Redirect to login if not authenticated
+                }
 
-            // Retrieve posts
-            List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
+                User? user = await _userService.GetCurrentUserAsync(User);
+                if (user == null) return Unauthorized();
 
-            // Build filters and pagination
-            PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
+                int currentUserId = user.Id;
+
+                // Retrieve posts for the "following" feed
+                postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
+                postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+                paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
+            }
+            else
+            {
+                // Retrieve posts for the general feed
+                postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
+                postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+                paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
+            }
 
             var vm = new IndexVM
             {
                 Posts = postPreviews,
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
+                IsFollowing = isFollowing
             };
 
-            return View(vm);
+            return View("Index", vm);
         }
 
         public IActionResult Privacy()

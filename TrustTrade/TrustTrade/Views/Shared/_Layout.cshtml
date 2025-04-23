@@ -58,19 +58,18 @@
         <div class="sidebar-content">
             <ul class="sidebar-nav">
                 <li class="sidebar-nav-item">
-                    <!-- Home Link: Checks both Controller and Action -->
-                    <a class="sidebar-nav-link @IsActive("Home", "Index")" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house-fill sidebar-icon"></i>
+                    <a id="home-link" class="sidebar-nav-link @IsActive("Home", "Index")" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-people-fill sidebar-icon"></i>
                         Home
                     </a>
                 </li>
                 <!-- Following page -->
                 <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link @IsActive("Home", "Following")" asp-controller="Home" asp-action="Following">
+                    <a id="following-link" class="sidebar-nav-link @IsActive("Home", "Following")" asp-controller="Home" asp-action="Following">
                         <i class="bi bi-people-fill sidebar-icon"></i>
                         Following
                     </a>
-                <div class="sidebar-divider"></div>
+                </li>
                 <li class="sidebar-nav-item">
                     <!-- Search Link: Checks only the Controller -->
                     <a class="sidebar-nav-link @IsActive("Search")" asp-controller="Search" asp-action="Search">
