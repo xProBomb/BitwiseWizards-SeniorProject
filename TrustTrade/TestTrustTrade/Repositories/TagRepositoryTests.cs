@@ -5,7 +5,7 @@ using TrustTrade.Models;
 using Microsoft.EntityFrameworkCore;
 using Moq.EntityFrameworkCore;
 
-namespace TestTrustTrade;
+namespace TestTrustTrade.Repositories;
 
 [TestFixture]
 public class TagRepositoryTests

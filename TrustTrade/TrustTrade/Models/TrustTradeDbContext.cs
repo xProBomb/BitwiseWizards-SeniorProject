@@ -56,6 +56,9 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.PostId).HasColumnName("PostID");
             entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.PortfolioValueAtPosting)
+                .HasColumnType("decimal(18, 2)")
+                .IsRequired(false);
 
             entity.HasOne(d => d.Post).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.PostId)
