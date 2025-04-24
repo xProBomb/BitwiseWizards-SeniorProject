@@ -37,11 +37,11 @@
                             @if (notification.Actor != null && notification.Actor.ProfilePicture != null)
                             {
                                 <img src="data:image/jpeg;base64,@Convert.ToBase64String(notification.Actor.ProfilePicture)" 
-                                     class="notification-avatar rounded-circle me-3" alt="Profile Picture">
+                                     class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
                             }
                             else
                             {
-                                <img src="/icons/defpfp.png" class="notification-avatar rounded-circle me-3" alt="Profile Picture">
+                                <img src="/icons/defpfp.png" class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
                             }
                             
                             <!-- Notification content -->
