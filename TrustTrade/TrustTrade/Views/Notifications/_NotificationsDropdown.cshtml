@@ -18,7 +18,8 @@
         {
             @foreach (var notification in Model)
             {
-                <a href="#" class="notification-item p-3 border-bottom d-flex align-items-center @(notification.IsRead ? "read" : "unread")"
+                <a href="@Url.Action("RedirectToContent", "Notifications", new { id = notification.Id })" 
+                   class="notification-item p-3 border-bottom d-flex align-items-center @(notification.IsRead ? "read" : "unread")"
                    data-id="@notification.Id">
                     @if (notification.Actor != null && notification.Actor.ProfilePicture != null)
                     {

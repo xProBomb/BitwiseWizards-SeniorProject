@@ -140,5 +140,11 @@ namespace TrustTrade.DAL.Concrete
             await _context.SaveChangesAsync();
             return true;
         }
+        
+        public async Task<int> GetTotalNotificationsCountForUserAsync(int userId)
+        {
+            return await _context.Notifications
+                .CountAsync(n => n.UserId == userId && !n.IsArchived);
+        }
     }
 }

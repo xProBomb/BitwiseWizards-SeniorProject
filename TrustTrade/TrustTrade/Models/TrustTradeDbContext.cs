@@ -39,6 +39,7 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<NotificationSettings> NotificationSettings { get; set; }
 
 
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
@@ -378,6 +379,16 @@ public partial class TrustTradeDbContext : DbContext
                 .HasForeignKey(d => d.ActorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)  // Don't cascade delete the actor
                 .HasConstraintName("FK_Notifications_Actor");
+        });
+        
+        modelBuilder.Entity<NotificationSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        
+            entity.HasOne(d => d.User)
+                .WithOne()
+                .HasForeignKey<NotificationSettings>(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

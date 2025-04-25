@@ -1,27 +1,35 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize notification system if logged in(notification menu displays)
+    // Initialize notification system if logged in (notification menu displays)
     const notificationDropdown = document.getElementById('notificationDropdown');
     if (notificationDropdown) {
         initNotifications();
 
-        // Handle mark all as read button
-        const markAllReadBtn = document.getElementById('markAllReadBtn');
-        if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', markAllAsRead);
+        // Handle mark all as read button on main page
+        const markAllAsReadBtn = document.getElementById('markAllAsReadBtn');
+        if (markAllAsReadBtn) {
+            markAllAsReadBtn.addEventListener('click', markAllAsRead);
         }
+    }
 
-        // Handle notification item clicks
-        document.addEventListener('click', function (event) {
-            const notificationItem = event.target.closest('.notification-item');
-            if (notificationItem) {
-                event.preventDefault();
-                const notificationId = notificationItem.dataset.id;
-                markAsRead(notificationId);
+    // Handle archive button clicks on history page
+    const archiveButtons = document.querySelectorAll('.archive-btn');
+    if (archiveButtons.length > 0) {
+        archiveButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const notificationId = this.dataset.id;
+                archiveNotification(notificationId);
+            });
+        });
+    }
 
-                // Handle navigation based on notification type
-                // For now, just redirect to notifications page
-                window.location.href = '/Notifications';
-            }
+    // Handle "Archive All" button on history page
+    const archiveAllBtn = document.getElementById('archiveAllBtn');
+    if (archiveAllBtn) {
+        archiveAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            archiveAllNotifications();
         });
     }
 });
@@ -82,6 +90,16 @@ function fetchNotificationsDropdown() {
                     markAllAsRead();
                 });
             }
+
+            // Add click handlers to notification items in dropdown
+            document.querySelectorAll('#notificationsContent .notification-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Don't prevent default here to allow navigation to the target
+                    const notificationId = this.dataset.id;
+                    markAsRead(notificationId);
+                    // Let the native navigation happen via the href
+                });
+            });
         })
         .catch(error => {
             console.error('Error fetching notifications:', error);
@@ -151,23 +169,11 @@ function markAllAsRead(event) {
                 });
 
                 // Update notification count (should be 0)
-                const badge = document.getElementById('notificationBadge');
-                if (badge) {
-                    badge.classList.add('d-none');
-                }
+                updateNotificationCount();
             }
         })
         .catch(error => console.error('Error marking all notifications as read:', error));
 }
-
-// Handle archive button clicks
-document.addEventListener('click', function (event) {
-    if (event.target.closest('.archive-btn')) {
-        const button = event.target.closest('.archive-btn');
-        const notificationId = button.dataset.id;
-        archiveNotification(notificationId);
-    }
-});
 
 // Function to archive a notification
 function archiveNotification(notificationId) {
@@ -205,9 +211,6 @@ function archiveNotification(notificationId) {
                         }
                     }
                 }
-
-                // Update notification count
-                updateNotificationCount();
             } else {
                 alert('Failed to remove notification. Please try again.');
             }
@@ -215,8 +218,8 @@ function archiveNotification(notificationId) {
         .catch(error => console.error('Error archiving notification:', error));
 }
 
-// Handle "Archive All" button click
-document.getElementById('archiveAllBtn')?.addEventListener('click', function () {
+// Function to archive all notifications
+function archiveAllNotifications() {
     if (!confirm('Are you sure you want to clear all notifications? This cannot be undone.')) {
         return;
     }
@@ -238,4 +241,4 @@ document.getElementById('archiveAllBtn')?.addEventListener('click', function () 
             }
         })
         .catch(error => console.error('Error clearing all notifications:', error));
-});
+}

@@ -11,6 +11,9 @@
             <a asp-action="History" class="btn btn-outline-primary me-2">
                 <i class="bi bi-bell"></i> View History
             </a>
+            <a asp-action="Settings" class="btn btn-outline-primary me-2">
+                <i class="bi bi-gear"></i> Settings
+            </a>
             <button id="markAllAsReadBtn" class="btn btn-outline-primary">
                 <i class="bi bi-check-all"></i> Mark All as Read
             </button>
@@ -28,32 +31,40 @@
         <div class="notification-list">
             @foreach (var notification in Model)
             {
-                <div class="card mb-3 notification-item @(notification.IsRead ? "read" : "unread")" data-id="@notification.Id">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            @if (notification.Actor != null && notification.Actor.ProfilePicture != null)
-                            {
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(notification.Actor.ProfilePicture)" 
-                                     class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
-                            }
-                            else
-                            {
-                                <img src="/icons/defpfp.png" class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
-                            }
-                            
-                            <div class="notification-content">
-                                <p class="mb-1">@Html.Raw(notification.Message)</p>
-                                <small class="text-muted">@TrustTrade.Helpers.TimeAgoHelper.GetTimeAgo(notification.CreatedAt)</small>
-                            </div>
-                            
-                            @if (!notification.IsRead)
-                            {
-                                <div class="ms-auto">
-                                    <span class="badge bg-primary rounded-pill">New</span>
+                <div class="card mb-3 notification-item @(notification.IsRead ? "read" : "unread")"
+                     data-id="@notification.Id">
+                    <a href="@Url.Action("RedirectToContent", "Notifications", new { id = notification.Id })"
+                       class="text-decoration-none text-body">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                @if (notification.Actor != null && notification.Actor.ProfilePicture != null)
+                                {
+                                    <img
+                                        src="data:image/jpeg;base64,@Convert.ToBase64String(notification.Actor.ProfilePicture)"
+                                        class="notification-avatar rounded-circle me-3" style="width: 3rem"
+                                        alt="Profile Picture">
+                                }
+                                else
+                                {
+                                    <img src="/icons/defpfp.png" class="notification-avatar rounded-circle me-3"
+                                         style="width: 3rem" alt="Profile Picture">
+                                }
+
+                                <div class="notification-content">
+                                    <p class="mb-1">@Html.Raw(notification.Message)</p>
+                                    <small
+                                        class="text-muted">@TrustTrade.Helpers.TimeAgoHelper.GetTimeAgo(notification.CreatedAt)</small>
                                 </div>
-                            }
+
+                                @if (!notification.IsRead)
+                                {
+                                    <div class="ms-auto">
+                                        <span class="badge bg-primary rounded-pill">New</span>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             }
         </div>
