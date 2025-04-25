@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
@@ -114,31 +115,55 @@ namespace TrustTrade.DAL.Concrete
         }
         public async Task<bool> ArchiveNotificationAsync(int notificationId)
         {
-            var notification = await _context.Notifications.FindAsync(notificationId);
-            if (notification == null)
-                return false;
+            try
+            {
+                var notification = await _context.Notifications.FindAsync(notificationId);
+                if (notification == null)
+                    return false;
     
-            notification.IsArchived = true;
-            await _context.SaveChangesAsync();
-            return true;
+                notification.IsArchived = true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception at the repository level
+                Debug.WriteLine($"Error archiving notification: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<bool> ArchiveAllNotificationsForUserAsync(int userId)
         {
-            var notifications = await _context.Notifications
-                .Where(n => n.UserId == userId && !n.IsArchived)
-                .ToListAsync();
-        
-            if (!notifications.Any())
-                return true;
-        
-            foreach (var notification in notifications)
+            try
             {
-                notification.IsArchived = true;
-            }
+                var notifications = await _context.Notifications
+                    .Where(n => n.UserId == userId && !n.IsArchived)
+                    .ToListAsync();
+        
+                if (!notifications.Any())
+                    return true;
+        
+                foreach (var notification in notifications)
+                {
+                    notification.IsArchived = true;
+                }
     
-            await _context.SaveChangesAsync();
-            return true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception at the repository level
+                Debug.WriteLine($"Error archiving all notifications: {ex.Message}");
+                return false;
+            }
+        }
+        
+        public async Task<int> GetTotalNotificationsCountForUserAsync(int userId)
+        {
+            return await _context.Notifications
+                .CountAsync(n => n.UserId == userId && !n.IsArchived);
         }
     }
 }

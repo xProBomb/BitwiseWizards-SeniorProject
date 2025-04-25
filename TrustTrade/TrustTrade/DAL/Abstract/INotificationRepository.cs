@@ -12,6 +12,6 @@ namespace TrustTrade.DAL.Abstract
         Task<List<Notification>> GetAllNotificationsForUserAsync(int userId, int page = 1, int pageSize = 20);
         Task<bool> ArchiveNotificationAsync(int notificationId);
         Task<bool> ArchiveAllNotificationsForUserAsync(int userId);
-
+        Task<int> GetTotalNotificationsCountForUserAsync(int userId);
     }
 }

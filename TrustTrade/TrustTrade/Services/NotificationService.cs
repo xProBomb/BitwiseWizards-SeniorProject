@@ -1,5 +1,6 @@
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrustTrade.Services
 {
@@ -8,8 +9,9 @@ namespace TrustTrade.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly IUserRepository _userRepository;
         private readonly IPostRepository _postRepository;
+        private readonly TrustTradeDbContext _context;
         private readonly ILogger<NotificationService> _logger;
-        
+
         private readonly Dictionary<string, DateTime> _lastNotificationTimes = new();
         private readonly TimeSpan _minimumInterval = TimeSpan.FromMinutes(5);
 
@@ -17,11 +19,13 @@ namespace TrustTrade.Services
             INotificationRepository notificationRepository,
             IUserRepository userRepository,
             IPostRepository postRepository,
+            TrustTradeDbContext context,
             ILogger<NotificationService> logger)
         {
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _postRepository = postRepository;
+            _context = context;
             _logger = logger;
         }
 
@@ -50,10 +54,40 @@ namespace TrustTrade.Services
             return await _notificationRepository.MarkAllAsReadForUserAsync(userId);
         }
 
+        // New method to get user notification settings
+        private async Task<NotificationSettings> GetUserSettingsAsync(int userId)
+        {
+            var settings = await _context.NotificationSettings
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (settings == null)
+            {
+                // Create default settings if none exist
+                settings = new NotificationSettings
+                {
+                    UserId = userId,
+                    EnableFollowNotifications = true,
+                    EnableLikeNotifications = true,
+                    EnableCommentNotifications = true,
+                    EnableMentionNotifications = true,
+                    EnableMessageNotifications = true
+                };
+                _context.NotificationSettings.Add(settings);
+                await _context.SaveChangesAsync();
+            }
+
+            return settings;
+        }
+
         public async Task CreateFollowNotificationAsync(int followerId, int followingUserId)
         {
             try
             {
+                // Check if the user wants follow notifications
+                var settings = await GetUserSettingsAsync(followingUserId);
+                if (!settings.EnableFollowNotifications)
+                    return;
+
                 var follower = await _userRepository.FindByIdAsync(followerId);
                 if (follower == null)
                 {
@@ -85,7 +119,12 @@ namespace TrustTrade.Services
                 // Don't notify users about their own actions
                 if (actorId == postOwnerId)
                     return;
-                
+
+                // Check if the user wants like notifications
+                var settings = await GetUserSettingsAsync(postOwnerId);
+                if (!settings.EnableLikeNotifications)
+                    return;
+
                 // Rate limiting check
                 string notificationKey = $"like:{actorId}:{postId}";
                 if (_lastNotificationTimes.TryGetValue(notificationKey, out DateTime lastTime))
@@ -96,7 +135,7 @@ namespace TrustTrade.Services
                         return; // Skip creating notification due to rate limit
                     }
                 }
-        
+
                 // Update the last notification time
                 _lastNotificationTimes[notificationKey] = DateTime.UtcNow;
 
@@ -134,6 +173,11 @@ namespace TrustTrade.Services
                 if (actorId == postOwnerId)
                     return;
 
+                // Check if the user wants comment notifications
+                var settings = await GetUserSettingsAsync(postOwnerId);
+                if (!settings.EnableCommentNotifications)
+                    return;
+
                 var actor = await _userRepository.FindByIdAsync(actorId);
                 var post = await _postRepository.FindByIdAsync(postId);
 
@@ -167,6 +211,11 @@ namespace TrustTrade.Services
             {
                 // Don't notify users about their own actions
                 if (actorId == mentionedUserId)
+                    return;
+
+                // Check if the user wants mention notifications
+                var settings = await GetUserSettingsAsync(mentionedUserId);
+                if (!settings.EnableMentionNotifications)
                     return;
 
                 var actor = await _userRepository.FindByIdAsync(actorId);
@@ -207,25 +256,73 @@ namespace TrustTrade.Services
                 _logger.LogError(ex, $"Error creating mention notification for user {mentionedUserId}");
             }
         }
-        
+
         public async Task<List<Notification>> GetAllNotificationsAsync(int userId, int page = 1, int pageSize = 20)
         {
             return await _notificationRepository.GetAllNotificationsForUserAsync(userId, page, pageSize);
         }
 
+        public async Task<int> GetTotalNotificationsCountAsync(int userId)
+        {
+            return await _notificationRepository.GetTotalNotificationsCountForUserAsync(userId);
+        }
+
         public async Task<bool> ArchiveNotificationAsync(int notificationId, int currentUserId)
         {
-            // Verify the notification belongs to the current user
-            var notification = await _notificationRepository.FindByIdAsync(notificationId);
-            if (notification == null || notification.UserId != currentUserId)
-                return false;
+            try
+            {
+                // Verify the notification belongs to the current user
+                var notification = await _notificationRepository.FindByIdAsync(notificationId);
+                if (notification == null || notification.UserId != currentUserId)
+                {
+                    _logger.LogWarning($"User {currentUserId} attempted to archive notification {notificationId} which does not exist or does not belong to them");
+                    return false;
+                }
+
+                // Call the repository method to archive the notification
+                bool result = await _notificationRepository.ArchiveNotificationAsync(notificationId);
         
-            return await _notificationRepository.ArchiveNotificationAsync(notificationId);
+                if (result)
+                {
+                    _logger.LogInformation($"User {currentUserId} successfully archived notification {notificationId}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to archive notification {notificationId} for user {currentUserId}");
+                }
+        
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error archiving notification {notificationId} for user {currentUserId}");
+                return false;
+            }
         }
 
         public async Task<bool> ArchiveAllNotificationsAsync(int userId)
         {
-            return await _notificationRepository.ArchiveAllNotificationsForUserAsync(userId);
+            try
+            {
+                // Call the repository method to archive all notifications for the user
+                bool result = await _notificationRepository.ArchiveAllNotificationsForUserAsync(userId);
+
+                if (result)
+                {
+                    _logger.LogInformation($"User {userId} successfully archived all notifications");
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to archive all notifications for user {userId}");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error archiving all notifications for user {userId}");
+                return false;
+            }
         }
 
         // Helper to truncate long post titles for notification messages

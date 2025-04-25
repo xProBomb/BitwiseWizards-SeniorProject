@@ -13,6 +13,7 @@ namespace TrustTrade.Services
         Task CreateCommentNotificationAsync(int actorId, int postId, int postOwnerId, int commentId);
         Task CreateMentionNotificationAsync(int actorId, int entityId, string entityType, int mentionedUserId);
         Task<List<Notification>> GetAllNotificationsAsync(int userId, int page = 1, int pageSize = 20);
+        Task<int> GetTotalNotificationsCountAsync(int userId);
         Task<bool> ArchiveNotificationAsync(int notificationId, int currentUserId);
         Task<bool> ArchiveAllNotificationsAsync(int userId);
     }
