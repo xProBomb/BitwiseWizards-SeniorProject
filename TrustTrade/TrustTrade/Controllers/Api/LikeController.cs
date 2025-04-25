@@ -21,7 +21,7 @@ namespace TrustTrade.Controllers
         
         // rate limit like spammers
         private static readonly Dictionary<string, DateTime> _lastActionTimes = new();
-        private static readonly TimeSpan _actionCooldown = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan _actionCooldown = TimeSpan.FromSeconds(1);
 
         public LikeController(
             ILikeRepository likeRepository,

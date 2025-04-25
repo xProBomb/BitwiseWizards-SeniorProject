@@ -49,8 +49,8 @@ namespace TrustTrade.Controllers
 
                 var notifications = await _notificationService.GetUnreadNotificationsAsync(currentUser.Id, 50);
 
-                // Mark all as read when viewing the full page
-                await _notificationService.MarkAllAsReadAsync(currentUser.Id);
+                // Mark all as read when viewing the full page (maybe not wanted?)
+                // await _notificationService.MarkAllAsReadAsync(currentUser.Id);
 
                 return View(notifications);
             }
@@ -313,7 +313,7 @@ namespace TrustTrade.Controllers
             }
         }
 
-        [HttpPost("Archive")]
+        [HttpPost]
         public async Task<IActionResult> ArchiveNotification(int id)
         {
             try
@@ -324,7 +324,7 @@ namespace TrustTrade.Controllers
 
                 bool success = await _notificationService.ArchiveNotificationAsync(id, currentUser.Id);
 
-                // If request
+                // If AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success });
@@ -351,11 +351,18 @@ namespace TrustTrade.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error archiving notification");
+
+                // Handle AJAX errors differently
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false });
+                }
+
                 return Json(new { success = false });
             }
         }
 
-        [HttpPost("ArchiveAll")]
+        [HttpPost]
         public async Task<IActionResult> ArchiveAllNotifications()
         {
             try
@@ -393,78 +400,124 @@ namespace TrustTrade.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error archiving all notifications");
+
+                // Handle AJAX errors differently
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false });
+                }
+
                 return Json(new { success = false });
             }
         }
 
         /// <summary>
-/// Redirects to the appropriate content based on notification type
-/// </summary>
-[HttpGet]
-public async Task<IActionResult> RedirectToContent(int id)
-{
-    try
-    {
-        var currentUser = await _userService.GetCurrentUserAsync(User);
-        if (currentUser == null)
-            return Unauthorized();
-
-        var notification = await _notificationRepository.FindByIdAsync(id);
-        if (notification == null || notification.UserId != currentUser.Id)
-            return NotFound();
-
-        // Mark the notification as read
-        await _notificationService.MarkAsReadAsync(id, currentUser.Id);
-
-        // Redirect based on notification type and entity
-        switch (notification.Type)
+        /// Redirects to the appropriate content based on notification type
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> RedirectToContent(int id)
         {
-            case "Follow":
-                if (notification.ActorId.HasValue)
-                {
-                    var actor = await _userRepository.FindByIdAsync(notification.ActorId.Value);
-                    if (actor != null)
-                    {
-                        return RedirectToAction("UserProfile", "Profile", new { username = actor.Username });
-                    }
-                }
-                break;
-            case "Like":
-            case "Comment":
-                if (notification.EntityId.HasValue && notification.EntityType == "Post")
-                {
-                    return RedirectToAction("Details", "Posts", new { id = notification.EntityId.Value });
-                }
-                break;
-            // TODO
-            /*case "Mention":
-                if (notification.EntityId.HasValue)
-                {
-                    if (notification.EntityType == "Post")
-                    {
-                        return RedirectToAction("Details", "Posts", new { id = notification.EntityId.Value });
-                    }
-                    else if (notification.EntityType == "Comment")
-                    {
-                        // Get the post ID from the comment
-                        var comment = await _commentRepository.FindByIdAsync(notification.EntityId.Value);
-                        if (comment != null)
-                        {
-                            return RedirectToAction("Details", "Posts", new { id = comment.PostId });
-                        }
-                    }
-                }
-                break;*/
-        }
+            try
+            {
+                var currentUser = await _userService.GetCurrentUserAsync(User);
+                if (currentUser == null)
+                    return Unauthorized();
 
-        // If we couldn't determine a specific redirection, go to notifications page
-        return RedirectToAction("Index");
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error redirecting from notification");
-        return RedirectToAction("Index");
-    }
-}
+                var notification = await _notificationRepository.FindByIdAsync(id);
+                if (notification == null || notification.UserId != currentUser.Id)
+                    return NotFound();
+
+                // Mark the notification as read
+                await _notificationService.MarkAsReadAsync(id, currentUser.Id);
+
+                // Redirect based on notification type and entity
+                switch (notification.Type)
+                {
+                    case "Follow":
+                        if (notification.ActorId.HasValue)
+                        {
+                            var actor = await _userRepository.FindByIdAsync(notification.ActorId.Value);
+                            if (actor != null)
+                            {
+                                return RedirectToAction("UserProfile", "Profile", new { username = actor.Username });
+                            }
+                        }
+
+                        break;
+
+                    case "Like":
+                        if (notification.EntityId.HasValue && notification.EntityType == "Post")
+                        {
+                            return RedirectToAction("Details", "Posts", new { id = notification.EntityId.Value });
+                        }
+
+                        break;
+
+                    case "Comment":
+                        if (notification.EntityId.HasValue)
+                        {
+                            if (notification.EntityType == "Post")
+                            {
+                                return RedirectToAction("Details", "Posts", new { id = notification.EntityId.Value });
+                            }
+                            else if (notification.EntityType == "Comment")
+                            {
+                                // Get the related post for this comment
+                                var comment = await _context.Comments.FindAsync(notification.EntityId.Value);
+                                if (comment != null)
+                                {
+                                    return RedirectToAction("Details", "Posts", new { id = comment.PostId });
+                                }
+                            }
+                        }
+
+                        break;
+
+                    // TODO: When we create mentioning with @
+                    /*case "Mention":
+                        if (notification.EntityId.HasValue)
+                        {
+                            if (notification.EntityType == "Post")
+                            {
+                                return RedirectToAction("Details", "Posts", new { id = notification.EntityId.Value });
+                            }
+                            else if (notification.EntityType == "Comment")
+                            {
+                                // Get the post ID from the comment
+                                var comment = await _context.Comments.FindAsync(notification.EntityId.Value);
+                                if (comment != null)
+                                {
+                                    return RedirectToAction("Details", "Posts", new { id = comment.PostId });
+                                }
+                            }
+                        }
+
+                        break;*/
+
+                    case "Message":
+                        if (notification.ActorId.HasValue)
+                        {
+                            var actor = await _userRepository.FindByIdAsync(notification.ActorId.Value);
+                            if (actor != null)
+                            {
+                                // When you implement messaging, redirect to conversation with this user
+                                return RedirectToAction("UserProfile", "Profile", new { username = actor.Username });
+                            }
+                        }
+
+                        break;
+                }
+
+                // If we couldn't determine a specific redirection, go to notifications page
+                _logger.LogWarning(
+                    $"Could not determine redirection for notification type: {notification.Type}, ID: {id}");
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error redirecting from notification");
+                return RedirectToAction("Index");
+            }
+        }
     }
 }

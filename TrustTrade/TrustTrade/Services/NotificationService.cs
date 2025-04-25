@@ -269,17 +269,60 @@ namespace TrustTrade.Services
 
         public async Task<bool> ArchiveNotificationAsync(int notificationId, int currentUserId)
         {
-            // Verify the notification belongs to the current user
-            var notification = await _notificationRepository.FindByIdAsync(notificationId);
-            if (notification == null || notification.UserId != currentUserId)
-                return false;
+            try
+            {
+                // Verify the notification belongs to the current user
+                var notification = await _notificationRepository.FindByIdAsync(notificationId);
+                if (notification == null || notification.UserId != currentUserId)
+                {
+                    _logger.LogWarning($"User {currentUserId} attempted to archive notification {notificationId} which does not exist or does not belong to them");
+                    return false;
+                }
 
-            return await _notificationRepository.ArchiveNotificationAsync(notificationId);
+                // Call the repository method to archive the notification
+                bool result = await _notificationRepository.ArchiveNotificationAsync(notificationId);
+        
+                if (result)
+                {
+                    _logger.LogInformation($"User {currentUserId} successfully archived notification {notificationId}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to archive notification {notificationId} for user {currentUserId}");
+                }
+        
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error archiving notification {notificationId} for user {currentUserId}");
+                return false;
+            }
         }
 
         public async Task<bool> ArchiveAllNotificationsAsync(int userId)
         {
-            return await _notificationRepository.ArchiveAllNotificationsForUserAsync(userId);
+            try
+            {
+                // Call the repository method to archive all notifications for the user
+                bool result = await _notificationRepository.ArchiveAllNotificationsForUserAsync(userId);
+
+                if (result)
+                {
+                    _logger.LogInformation($"User {userId} successfully archived all notifications");
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to archive all notifications for user {userId}");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error archiving all notifications for user {userId}");
+                return false;
+            }
         }
 
         // Helper to truncate long post titles for notification messages
