@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrustTrade.Models;
 
@@ -11,9 +12,11 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    partial class TrustTradeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250414052939_AddFinancialNewsModels")]
+    partial class AddFinancialNewsModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,16 +56,12 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
-
-                    b.Property<decimal?>("PortfolioValueAtPosting")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("PostId")
                         .HasColumnType("int")
@@ -319,96 +318,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.ToTable("Likes");
                 });
 
-            modelBuilder.Entity("TrustTrade.Models.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ActorId")
-                        .HasColumnType("int")
-                        .HasColumnName("ActorID");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<int?>("EntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsArchived");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("UserID");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Notifications__3214EC27");
-
-                    b.HasIndex("ActorId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.NotificationSettings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("EnableCommentNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableFollowNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableLikeNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableMentionNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableMessageNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("NotificationSettings");
-                });
-
             modelBuilder.Entity("TrustTrade.Models.PlaidConnection", b =>
                 {
                     b.Property<int>("Id")
@@ -540,9 +449,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("ID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("DailyChange")
-                        .HasColumnType("decimal(13, 2)");
 
                     b.Property<DateTime?>("LastUpdated")
                         .ValueGeneratedOnAdd()
@@ -879,36 +785,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasConstraintName("FK_Likes_User");
 
                     b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.Notification", b =>
-                {
-                    b.HasOne("TrustTrade.Models.User", "Actor")
-                        .WithMany()
-                        .HasForeignKey("ActorId")
-                        .HasConstraintName("FK_Notifications_Actor");
-
-                    b.HasOne("TrustTrade.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Notifications_User");
-
-                    b.Navigation("Actor");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.NotificationSettings", b =>
-                {
-                    b.HasOne("TrustTrade.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("TrustTrade.Models.NotificationSettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

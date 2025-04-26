@@ -45,9 +45,9 @@ public class PostService : IPostService
         return MapPostsToPostPreviewVM(posts);
     }
 
-    public async Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, string? categoryFilter, int pageNumber, string sortOrder)
+    public async Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms)
     {
-        List<Post> posts = await _postRepository.SearchPostsAsync(searchTerms, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+        List<Post> posts = await _postRepository.SearchPostsAsync(searchTerms);
 
         return MapPostsToPostPreviewVM(posts);
     }

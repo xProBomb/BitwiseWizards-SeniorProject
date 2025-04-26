@@ -32,7 +32,7 @@ namespace TestTrustTrade.Reqnroll.Features
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Reqnroll/Features", "Market Modal Expansion", "  As a user on the market page\r\n  I want to click a stock card\r\n  So that the mod" +
                 "al with stock details appears", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "MarketModal.Feature"
+#line 1 "MarketModal.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]

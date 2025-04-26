@@ -1,0 +1,77 @@
+@model TrustTrade.Models.ViewModels.NotificationSettingsViewModel
+
+@{
+    ViewData["Title"] = "Notification Settings";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Notification Settings</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    <form asp-action="Settings" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="EnableFollowNotifications" class="form-check-input" type="checkbox" />
+                                <label asp-for="EnableFollowNotifications" class="form-check-label"></label>
+                            </div>
+                            <small class="form-text text-muted">Receive notifications when someone follows you.</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="EnableLikeNotifications" class="form-check-input" type="checkbox" />
+                                <label asp-for="EnableLikeNotifications" class="form-check-label"></label>
+                            </div>
+                            <small class="form-text text-muted">Receive notifications when someone likes your posts.</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="EnableCommentNotifications" class="form-check-input" type="checkbox" />
+                                <label asp-for="EnableCommentNotifications" class="form-check-label"></label>
+                            </div>
+                            <small class="form-text text-muted">Receive notifications when someone comments on your posts.</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="EnableMentionNotifications" class="form-check-input" type="checkbox" />
+                                <label asp-for="EnableMentionNotifications" class="form-check-label"></label>
+                            </div>
+                            <small class="form-text text-muted">Receive notifications when someone mentions you.</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="EnableMessageNotifications" class="form-check-input" type="checkbox" />
+                                <label asp-for="EnableMessageNotifications" class="form-check-label"></label>
+                            </div>
+                            <small class="form-text text-muted">Receive notifications for new messages.</small>
+                        </div>
+                        
+                        <div class="text-end">
+                            <a asp-controller="Notifications" asp-action="Index" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-arrow-return-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

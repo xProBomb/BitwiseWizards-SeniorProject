@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
+using TrustTrade.Services;
 using TrustTrade.ViewModels;
 using TrustTrade.Services.Web.Interfaces;
 
@@ -33,6 +34,7 @@ namespace TestTrustTrade
         private List<PostPreviewVM> _postPreviews;
         private PostFiltersPartialVM _postFiltersPartialVM;
         private PaginationPartialVM _paginationPartialVM;
+        private Mock<INotificationService> _notificationServiceMock;
         
         [TearDown]
         public void TearDown()
@@ -51,6 +53,7 @@ namespace TestTrustTrade
             _profileServiceMock = new Mock<IProfileService>();
             _userServiceMock = new Mock<IUserService>();
             _performanceScoreRepository = new Mock<IPerformanceScoreRepository>();
+            _notificationServiceMock = new Mock<INotificationService>();
 
             _controller = new ProfileController(
                 _contextMock.Object,
@@ -59,7 +62,8 @@ namespace TestTrustTrade
                 _postServiceMock.Object,
                 _profileServiceMock.Object,
                 _userServiceMock.Object,
-                _performanceScoreRepository.Object
+                _performanceScoreRepository.Object,
+                _notificationServiceMock.Object
             );
 
             // Mock users

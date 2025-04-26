@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrustTrade.Models;
 
@@ -11,9 +12,11 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    partial class TrustTradeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250423022525_Notifications")]
+    partial class Notifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,16 +56,12 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
-
-                    b.Property<decimal?>("PortfolioValueAtPosting")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("PostId")
                         .HasColumnType("int")
@@ -345,10 +344,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsArchived");
-
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
@@ -373,40 +368,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.NotificationSettings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("EnableCommentNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableFollowNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableLikeNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableMentionNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableMessageNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("NotificationSettings");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.PlaidConnection", b =>
@@ -898,17 +859,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasConstraintName("FK_Notifications_User");
 
                     b.Navigation("Actor");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TrustTrade.Models.NotificationSettings", b =>
-                {
-                    b.HasOne("TrustTrade.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("TrustTrade.Models.NotificationSettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });
