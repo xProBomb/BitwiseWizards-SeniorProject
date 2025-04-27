@@ -61,9 +61,9 @@
                                 <img src="/icons/defpfp.png" class="notification-avatar rounded-circle me-3" style="width: 3rem" alt="Profile Picture">
                             }
                             
-                            <!-- Notification content - Make it clickable -->
+                            <!-- Notification content -->
                             <a href="@Url.Action("RedirectToContent", "Notifications", new { id = notification.Id })" 
-                               class="notification-content-link" style="flex-grow: 1; text-decoration: none; color: inherit;">
+                               style="flex-grow: 1; text-decoration: none; color: inherit;">
                                 <div class="notification-content">
                                     <p class="mb-1">@Html.Raw(notification.Message)</p>
                                     <small class="text-muted">@TrustTrade.Helpers.TimeAgoHelper.GetTimeAgo(notification.CreatedAt)</small>
