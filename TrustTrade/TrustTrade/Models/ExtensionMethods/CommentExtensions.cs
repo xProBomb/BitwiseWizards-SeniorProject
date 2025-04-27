@@ -5,7 +5,7 @@ namespace TrustTrade.Models.ExtensionMethods
 {
     /// <summary>
     /// Extension methods for the Comment class.
-    /// /summary>
+    /// </summary>
     public static class CommentExtensions
     {
         public static CommentResponseDTO ToResponseDTO(this Comment comment)
