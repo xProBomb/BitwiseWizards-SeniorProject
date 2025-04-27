@@ -10,7 +10,7 @@ public class CommentVM
     
     public string TimeAgo { get; set; } = string.Empty;
 
-    public bool? IsPlaidEnabled { get; set; }
+    public bool IsPlaidEnabled { get; set; }
 
     public string? PortfolioValueAtPosting { get; set; }
 
