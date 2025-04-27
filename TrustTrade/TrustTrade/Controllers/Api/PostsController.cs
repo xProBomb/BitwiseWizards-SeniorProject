@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using TrustTrade.Models;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.Models.DTO;
-using TrustTrade.Helpers;
 using TrustTrade.Models.ExtensionMethods;
 
 namespace TrustTrade.Controllers.Api
 {
+    [Route("api/posts")]
+    [ApiController]
     public class PostsController : ControllerBase
     {
         private readonly ICommentService _commentService;
