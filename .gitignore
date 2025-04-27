@@ -482,5 +482,5 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
+*.Feature.cs
 *.feature.cs
