@@ -3,32 +3,31 @@ using Microsoft.AspNetCore.Mvc;
 using TrustTrade.Models;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.Models.DTO;
-using TrustTrade.Models.ExtensionMethods;
 
 namespace TrustTrade.Controllers.Api
 {
-    [Route("api/posts")]
+    [Route("api/comments")]
     [ApiController]
-    public class PostsController : ControllerBase
+    public class CommentsController : ControllerBase
     {
         private readonly ICommentService _commentService;
         private readonly IUserService _userService;
-        private readonly ILogger<PostsController> _logger;
+        private readonly ILogger<CommentsController> _logger;
 
-        public PostsController(
+        public CommentsController(
             ICommentService commentService, 
             IUserService userService, 
-            ILogger<PostsController> logger)
+            ILogger<CommentsController> logger)
         {
             _commentService = commentService;
             _userService = userService;
             _logger = logger;
         }
 
-        // POST: api/posts/{postId}/comments
-        [HttpPost("{postId}/comments")]
+        // POST: api/comments
+        [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateComment(int postId, [FromBody] CommentCreateDTO commentCreateDTO)
+        public async Task<IActionResult> CreateComment([FromBody] CommentCreateDTO commentCreateDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -40,7 +39,7 @@ namespace TrustTrade.Controllers.Api
                 User? user = await _userService.GetCurrentUserAsync(User);
                 if (user == null) return Unauthorized();
 
-                Comment comment = await _commentService.CreateCommentAsync(postId, user, commentCreateDTO);
+                Comment comment = await _commentService.CreateCommentAsync(user, commentCreateDTO);
 
                 return Ok(new { commentId = comment.Id });
             }
@@ -50,7 +49,7 @@ namespace TrustTrade.Controllers.Api
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating comment for post {PostId}", postId);
+                _logger.LogError(ex, "Error creating comment.");
                 return StatusCode(500, "An error occurred while creating the comment.");
             }
         }

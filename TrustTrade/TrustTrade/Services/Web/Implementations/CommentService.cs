@@ -70,18 +70,18 @@ public class CommentService : ICommentService
         return comment;
     }
 
-    public async Task<Comment> CreateCommentAsync(int postId, User user, CommentCreateDTO commentCreateDTO)
+    public async Task<Comment> CreateCommentAsync(User user, CommentCreateDTO commentCreateDTO)
     {
-        Post? post = await _postRepository.FindByIdAsync(postId);
+        Post? post = await _postRepository.FindByIdAsync(commentCreateDTO.PostId);
         if (post == null)
         {
-            _logger.LogWarning($"Post with ID {postId} not found.");
-            throw new KeyNotFoundException($"Post with ID {postId} not found.");
+            _logger.LogWarning($"Post with ID {commentCreateDTO.PostId} not found.");
+            throw new KeyNotFoundException($"Post with ID {commentCreateDTO.PostId} not found.");
         }
 
         var comment = new Comment
         {
-            PostId = postId,
+            PostId = commentCreateDTO.PostId,
             UserId = user.Id,
             Content = commentCreateDTO.Content,
             CreatedAt = DateTime.UtcNow
@@ -130,7 +130,7 @@ public class CommentService : ICommentService
         }
 
         await _commentRepository.AddOrUpdateAsync(comment);
-        _logger.LogInformation($"Comment created by user {user.Id} on post {postId}.");
+        _logger.LogInformation($"Comment created by user {user.Id} on post {commentCreateDTO.PostId}.");
 
         return comment;
     }

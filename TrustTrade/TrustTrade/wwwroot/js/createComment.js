@@ -26,11 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const comment = {
+            PostId: postId,
             Content: content
         };
 
         try {
-            const response = await fetch(`/api/posts/${postId}/comments`, {
+            const response = await fetch(`/api/comments`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/problem+json; charset=utf-8',
@@ -59,12 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const { commentId } = await response.json();
 
-                console.log("Comment ID:", commentId);
-
                 // Get the new comment HTML from the server
-                const htmlResponse = await fetch(`/comments/rendercommentpartial/${commentId}`, {
-                    method: 'GET'
-                });
+                const htmlResponse = await fetch(`/comments/rendercommentpartial/${commentId}`);
 
                 if (!htmlResponse.ok) {
                     // TODO: Display error message to the user
