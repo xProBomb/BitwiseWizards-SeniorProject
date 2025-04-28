@@ -58,6 +58,18 @@ public class CommentService : ICommentService
         }).ToList();
     }
 
+    public async Task<Comment?> GetCommentByIdAsync(int commentId)
+    {
+        Comment? comment = await _commentRepository.FindByIdAsync(commentId);
+        if (comment == null)
+        {
+            _logger.LogWarning($"Comment with ID {commentId} not found.");
+            return null;
+        }
+
+        return comment;
+    }
+
     public async Task<Comment> CreateCommentAsync(int postId, User user, CommentCreateDTO commentCreateDTO)
     {
         Post? post = await _postRepository.FindByIdAsync(postId);

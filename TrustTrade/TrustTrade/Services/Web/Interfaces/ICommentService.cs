@@ -17,6 +17,13 @@ public interface ICommentService
     Task<List<CommentVM>> GetPostCommentsAsync(int postId);
 
     /// <summary>
+    /// Retrieves a comment by its ID.
+    /// </summary>
+    /// <param name="commentId">The ID of the comment.</param>
+    /// <returns>The comment with the specified ID, or null if not found.</returns>
+    Task<Comment?> GetCommentByIdAsync(int commentId);
+
+    /// <summary>
     /// Creates a new comment for a specific post.
     /// </summary>
     /// <param name="postId">The ID of the post.</param>
