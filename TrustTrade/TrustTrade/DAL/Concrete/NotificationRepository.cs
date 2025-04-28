@@ -106,7 +106,7 @@ namespace TrustTrade.DAL.Concrete
         public async Task<List<Notification>> GetAllNotificationsForUserAsync(int userId, int page = 1, int pageSize = 20)
         {
             return await _context.Notifications
-                .Where(n => n.UserId == userId && !n.IsArchived)
+                .Where(n => n.UserId == userId && !n.IsArchived && n.IsRead)
                 .OrderByDescending(n => n.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

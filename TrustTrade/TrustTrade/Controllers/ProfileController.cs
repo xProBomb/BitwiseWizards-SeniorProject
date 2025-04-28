@@ -500,7 +500,7 @@ namespace TrustTrade.Controllers
             // Create notification for the followed user
             await _notificationService.CreateFollowNotificationAsync(currentUser.Id, userToFollow.Id);
 
-            return Json(new { success = true });
+            return RedirectToAction("UserProfile", new { username = userToFollow.Username });
         }
 
 
@@ -535,7 +535,7 @@ namespace TrustTrade.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Json(new { success = true });
+            return RedirectToAction("UserProfile", new { username = userToUnfollow.Username });
         }
 
         [AllowAnonymous]
