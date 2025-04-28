@@ -25,14 +25,6 @@ namespace TrustTrade.Controllers.Api
             _logger = logger;
         }
 
-        // GET: api/posts/{postId}/comments/{commentId}
-        [HttpGet("{postId}/comments/{commentId}")]
-        public async Task<IActionResult> GetComment(int postId, int commentId)
-        {
-            // TODO: Implement fetching the comment by postId and commentId if needed in the future
-            return Ok(); // Temporary response so the API doesn't break
-        }
-
         // POST: api/posts/{postId}/comments
         [HttpPost("{postId}/comments")]
         [Authorize]
@@ -50,9 +42,7 @@ namespace TrustTrade.Controllers.Api
 
                 Comment comment = await _commentService.CreateCommentAsync(postId, user, commentCreateDTO);
 
-                var responseDTO = comment.ToResponseDTO();
-
-                return CreatedAtAction(nameof(GetComment), new { postId, commentId = comment.Id }, responseDTO);
+                return Ok(new { commentId = comment.Id });
             }
             catch (KeyNotFoundException ex)
             {
