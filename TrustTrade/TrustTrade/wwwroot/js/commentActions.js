@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitButtonWrapper = document.getElementById('submitButtonWrapper');
     const submitCommentButton = document.getElementById('submitCommentButton');
     const commentsList = document.querySelector('.list-group');
+    const commentCount = document.getElementById('commentCount');
 
     contentInput.addEventListener('focus', () => {
         submitButtonWrapper.style.display = 'block';
@@ -15,6 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 submitButtonWrapper.style.display = 'none';
             }, 100);
         }
+    });
+
+    // Attach click event listener to all delete buttons
+    document.querySelectorAll(".delete-comment-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            setupDeleteCommentButton(button);
+        });
     });
 
     submitCommentButton.addEventListener('click', async () => {
@@ -73,6 +81,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Insert the new comment HTML into the comments list
                 commentsList.insertAdjacentHTML('beforeend', commentHtml);
 
+                // Update the comment count
+                const currentCount = parseInt(commentCount.textContent, 10);
+                commentCount.textContent = currentCount + 1;
+
+                // Attach the delete event listener to the new comment's delete button
+                const newComment = commentsList.lastElementChild; // Get the newly added comment
+                const deleteButton = newComment.querySelector(".delete-comment-button");
+                if (deleteButton) {
+                    deleteButton.addEventListener("click", async () => {
+                        setupDeleteCommentButton(deleteButton);
+                    });
+                }
             } else {
                 alert("Failed to post comment.");
             }
@@ -82,3 +102,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+async function setupDeleteCommentButton(button) {
+    const commentId = button.getAttribute("data-comment-id");
+
+    if (confirm("Are you sure you want to delete this comment?")) {
+        fetch(`/api/comments/${commentId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "same-origin"
+        })
+        .then(response => {
+            if (response.ok) {
+                // Remove the comment from the DOM
+                const commentItem = button.closest(".list-group-item");
+                commentItem.remove();
+
+                // Update the comment count
+                const currentCount = parseInt(commentCount.textContent, 10);
+                commentCount.textContent = currentCount - 1;
+
+            } else {
+                alert("Failed to delete the comment. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error("Error deleting comment:", error);
+            alert("An error occurred. Please try again.");
+        });
+    }
+}

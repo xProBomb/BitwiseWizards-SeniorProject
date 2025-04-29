@@ -15,4 +15,6 @@ public class CommentVM
     public string? PortfolioValueAtPosting { get; set; }
 
     public byte[]? ProfilePicture { get; set; }
+
+    public bool IsOwnedByCurrentUser { get; set; }
 }
