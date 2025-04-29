@@ -63,6 +63,18 @@ public class MarketRepository : IMarketRepository
             .ToListAsync();
     }
 
+    public async Task<List<(DateTime Date, decimal High, decimal Low)>> GetHighLowHistoryAsync(string ticker, int days = 30)
+    {
+        return await _context.StockHistories
+            .Where(h => h.TickerSymbol == ticker)
+            .OrderByDescending(h => h.Date)
+            .Take(days)
+            .OrderBy(h => h.Date)
+            .Select(h => new ValueTuple<DateTime, decimal, decimal>(h.Date, h.HighPrice, h.LowPrice))
+            .ToListAsync();
+    }
+
+
     private static readonly List<StockViewModel> _mockCryptoData = new()
     {
         new StockViewModel { Ticker = "BTC", Name = "Bitcoin", Price = 62205.43m, Change = -432.12m },

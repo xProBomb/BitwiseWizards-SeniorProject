@@ -32,4 +32,18 @@ public class MarketController : Controller
         return PartialView("_MarketCardsPartial", results); 
     }
 
+    [HttpGet]
+    [Route("api/market/highlow")]
+    public async Task<IActionResult> GetHighLowChart(string ticker)
+    {
+        var data = await _marketRepo.GetHighLowHistoryAsync(ticker);
+        return Json(data.Select(d => new
+        {
+            date = d.Date.ToString("yyyy-MM-dd"),
+            high = d.High,
+            low = d.Low
+        }));
+    }
+
+
 }
