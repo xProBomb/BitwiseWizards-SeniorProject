@@ -184,7 +184,7 @@ namespace TrustTrade.Controllers
                     Username = comment.User.Username ?? string.Empty,
                     Content = comment.Content,
                     TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
-                    IsPlaidEnabled = comment.User.PlaidEnabled,
+                    IsPlaidEnabled = comment.User.PlaidEnabled ?? false,
                     PortfolioValueAtPosting = portfolioValue,
                     ProfilePicture = comment.User.ProfilePicture,
                 };
