@@ -51,49 +51,49 @@ window.openStockModal = async function (ticker) {
     document.getElementById("modalTicker").innerText = ticker;
 
     try {
-        const data = Array.from({ length: 30 }, (_, i) => ({
-            time: `T-${30 - i}`,
-            price: (100 + Math.sin(i / 3) * 10 + Math.random() * 5).toFixed(2)
-        }));
+        const response = await fetch(`/api/market/highlow?ticker=${ticker}`);
+        const data = await response.json();
 
-        waitForChartCanvas(() => {
-            const canvas = document.getElementById('stockChart');
-            if (!canvas) {
-                console.error("Canvas not found in modal.");
-                return;
-            }
+        const highs = data.map(d => d.high);
+        const lows = data.map(d => d.low);
+        const labels = data.map(d => d.date);
 
-            const ctx = canvas.getContext('2d');
-            if (stockChart) stockChart.destroy();
+        const canvas = document.getElementById("stockChart");
+        const ctx = canvas.getContext("2d");
+        if (stockChart) stockChart.destroy();
 
-            stockChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map(p => p.time),
-                    datasets: [{
-                        label: `${ticker} Price`,
-                        data: data.map(p => p.price),
-                        borderColor: '#32cd32',
-                        tension: 0.3,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: true },
-                        y: { display: true }
+        stockChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: "High",
+                        data: highs,
+                        borderColor: "green",
+                        fill: false,
+                        tension: 0.3
+                    },
+                    {
+                        label: "Low",
+                        data: lows,
+                        borderColor: "red",
+                        fill: false,
+                        tension: 0.3
                     }
-                }
-            });
-
-            const modal = new bootstrap.Modal(document.getElementById("stockModal"));
-            modal.show();
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: { x: { display: true }, y: { display: true } }
+            }
         });
 
-    } catch (error) {
-        console.error("Error loading chart data:", error);
+        const modal = new bootstrap.Modal(document.getElementById("stockModal"));
+        modal.show();
+    } catch (err) {
+        console.error("Chart load failed", err);
     }
 };
 
