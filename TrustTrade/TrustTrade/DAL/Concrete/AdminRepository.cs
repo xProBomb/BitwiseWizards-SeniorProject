@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TrustTrade.Models;
 
-public class AdminRepository : IAdkijRepository
+public class AdminRepository : IAdminRepository
 {
     private readonly TrustTradeDbContext _context;
     public AdminRepository(TrustTradeDbContext context)
