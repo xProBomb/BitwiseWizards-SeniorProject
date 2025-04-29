@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TrustTrade.Controllers
 {
@@ -63,10 +64,15 @@ namespace TrustTrade.Controllers
 
             return RedirectToAction("Index", "Home");
         }
-
-        [HttpPost]
-        public async Task<IActionResult> SuspendUser(int userId)
+        public class UserActionDto
         {
+            public int userId { get; set; }
+        }
+        [HttpPost("/Admin/SuspendUser")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> SuspendUser([FromBody] UserActionDto dto)
+        {
+            var userId = dto.userId;
             var currentUser = await _adminService.GetCurrentUserAsync(User);
             if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
 
@@ -74,7 +80,7 @@ namespace TrustTrade.Controllers
             if (user == null) return NotFound();
 
             await _adminService.SuspendUserAsync(userId);
-
+            var email = user.Email;
             var subject = "Account Suspension Notice - TrustTrade";
             var body = $@"
             <html>
@@ -86,11 +92,13 @@ namespace TrustTrade.Controllers
                 <p style='color: gray;'>- TrustTrade Support Team</p>
             </body>
             </html>";
-
-            await _emailSender.SendEmailAsync(user.Email, subject, body);
+            _logger.LogInformation($"Suspending user {user.Username} with ID {userId}.");
+            _logger.LogInformation($"Sending email to {email} with {subject} and {body}.");
+            await _emailSender.SendEmailAsync(email, subject, body);
 
             return Ok();
         }
+    
 
         [HttpGet]
         public async Task<IActionResult> ManageUsers()
@@ -102,9 +110,11 @@ namespace TrustTrade.Controllers
             return View(users);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UnsuspendUser(int userId)
+        [HttpPost("/Admin/UnsuspendUser")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> UnsuspendUser([FromBody] UserActionDto dto)
         {
+            var userId = dto.userId;
             var currentUser = await _adminService.GetCurrentUserAsync(User);
             if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
 

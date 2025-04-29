@@ -32,7 +32,7 @@ public partial class User
 
     public bool? IsVerified { get; set; }
 
-    public bool? IsSuspended { get; set; }
+    public bool? Is_Suspended { get; set; }
 
     public byte[]? EncryptedApikey { get; set; }
 

@@ -7,8 +7,11 @@ public class AdminService : IAdminService
 {
     private readonly IAdminRepository _adminRepository;
 
-    public AdminService(IAdminRepository adminRepository)
+    private readonly ILogger<AdminService> _logger;
+
+    public AdminService(IAdminRepository adminRepository, ILogger<AdminService> logger)
     {
+        _logger = logger;
         _adminRepository = adminRepository;
     }
 
@@ -38,9 +41,11 @@ public class AdminService : IAdminService
     public async Task SuspendUserAsync(int userId)
     {
         var user = await _adminRepository.FindByIdAsync(userId);
+        _logger.LogInformation($"Suspending user with ID: {userId}\n\n\n\n\n");
+
         if (user == null) return;
-        user.Username = "suspended_" + user.Username;
-        user.IsSuspended = true;
+        user.Username = "suspendedUser_" + user.Username;
+        user.Is_Suspended = true;
         await _adminRepository.UpdateAsync(user);
     }
 
@@ -52,7 +57,7 @@ public class AdminService : IAdminService
         {
             user.Username = user.Username.Substring("suspendedUser_".Length);
         }
-        user.IsSuspended = false;
+        user.Is_Suspended = false;
         await _adminRepository.UpdateAsync(user);
     }
 

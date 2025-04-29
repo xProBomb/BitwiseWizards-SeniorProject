@@ -25,7 +25,7 @@ public class SuspensionMiddleware
         {
             var user = await userService.GetCurrentUserAsync(context.User);
 
-            if (user != null && user.IsSuspended == true)
+            if (user != null && user.Is_Suspended == true)
             {
                 context.Response.Redirect("/support/contactsupport?suspended=true");
                 return;
