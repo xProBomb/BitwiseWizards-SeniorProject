@@ -90,6 +90,7 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
@@ -103,6 +104,18 @@ builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 
 // Add HttpClient factory
 builder.Services.AddHttpClient();
+
+// Register DAL services for fin news
+builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
+
+// Register notifications repositories
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+// Register admin repositories
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+
+// Register notifications services
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Add support for real-time updates
 builder.Services.AddSignalR();
@@ -144,6 +157,7 @@ app.MapControllerRoute(
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<SuspensionMiddleware>();
 
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<ChatHub>("/chatHub");

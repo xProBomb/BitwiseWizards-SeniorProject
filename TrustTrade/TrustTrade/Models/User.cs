@@ -28,9 +28,11 @@ public partial class User
     [StringLength(256, ErrorMessage = "Bio cannot exceed 128 characters")]
     public string? Bio { get; set; }
 
-    public bool? IsAdmin { get; set; }
+    public bool IsAdmin { get; set; }
 
     public bool? IsVerified { get; set; }
+
+    public bool? IsSuspended { get; set; }
 
     public byte[]? EncryptedApikey { get; set; }
 
