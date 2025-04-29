@@ -3,39 +3,56 @@
 
 <!-- This is for displaying a new comment in the post details page  -->
 <li class="list-group-item">
-    <div class="d-flex align-items-center">
-        <!-- Profile Links -->
-        <a asp-controller="Profile" 
-            asp-action="UserProfile" 
-            asp-route-username="@Model.Username"
-            class="image-profile-link">
-            <img src="@(Model.ProfilePicture != null 
-                    ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.ProfilePicture)}"
-                    : "/icons/defpfp.png")"
-                    alt="Profile Picture"
-                    class="rounded-circle"
-                    style="width: 50px; height: 50px;" />
-        </a>
-        <a asp-controller="Profile" 
-            asp-action="UserProfile" 
-            asp-route-username="@Model.Username"
-            class="username-profile-link ms-2">
-            @Model.Username
-        </a>
-        <!-- Display Plaid Info If Enabled-->
-        @if (Model.IsPlaidEnabled)
-        {
-            <span class="text-success ms-2">
-                @if (!string.IsNullOrEmpty(Model.PortfolioValueAtPosting))
-                {
-                    @Model.PortfolioValueAtPosting
-                }
-                <i class="bi bi-patch-check-fill"></i>
-            </span>
-        }
-        <!-- Display Time Ago -->
-        <span class="ms-2">@Model.TimeAgo</span>
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <!-- Profile Links -->
+            <a asp-controller="Profile" 
+                asp-action="UserProfile" 
+                asp-route-username="@Model.Username"
+                class="image-profile-link">
+                <img src="@(Model.ProfilePicture != null 
+                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.ProfilePicture)}"
+                        : "/icons/defpfp.png")"
+                        alt="Profile Picture"
+                        class="rounded-circle"
+                        style="width: 50px; height: 50px;" />
+            </a>
+            <a asp-controller="Profile" 
+                asp-action="UserProfile" 
+                asp-route-username="@Model.Username"
+                class="username-profile-link ms-2">
+                @Model.Username
+            </a>
+            <!-- Display Plaid Info If Enabled-->
+            @if (Model.IsPlaidEnabled)
+            {
+                <span class="text-success ms-2">
+                    @if (!string.IsNullOrEmpty(Model.PortfolioValueAtPosting))
+                    {
+                        @Model.PortfolioValueAtPosting
+                    }
+                    <i class="bi bi-patch-check-fill"></i>
+                </span>
+            }
+            <!-- Display Time Ago -->
+            <span class="ms-2">@Model.TimeAgo</span>
+        </div>
+
+        <!-- Display Comment Options Dropdown for the Owner -->
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="commentActionsMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="commentActionsMenu">
+                <li>
+                    <button class="dropdown-item text-danger delete-comment-button" data-comment-id="@Model.Id">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </li>
+            </ul>
+        </div>
     </div>
+
     <!-- Display Main Comment Content -->
     <p class="mt-3 mb-3 ps-5">@Model.Content</p>
 </li>
