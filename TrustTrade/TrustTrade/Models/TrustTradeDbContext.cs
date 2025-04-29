@@ -302,6 +302,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.ProfileName)
                 .HasMaxLength(50)
                 .HasColumnName("Profile_Name");
+            entity.Property(e => e.PastUsername)
+                .HasMaxLength(50)
+                .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
         });

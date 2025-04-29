@@ -34,6 +34,8 @@ public partial class User
 
     public bool? Is_Suspended { get; set; }
 
+    public string? PastUsername { get; set; }
+
     public byte[]? EncryptedApikey { get; set; }
 
     public bool? PlaidEnabled { get; set; }

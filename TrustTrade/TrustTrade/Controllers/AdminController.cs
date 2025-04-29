@@ -78,8 +78,6 @@ namespace TrustTrade.Controllers
 
             var user = await _adminService.FindUserByIdAsync(userId);
             if (user == null) return NotFound();
-
-            await _adminService.SuspendUserAsync(userId);
             var email = user.Email;
             var subject = "Account Suspension Notice - TrustTrade";
             var body = $@"
@@ -88,13 +86,14 @@ namespace TrustTrade.Controllers
                 <h2>Account Suspended</h2>
                 <p>Hello {user.Username},</p>
                 <p>Your account has been suspended due to a violation of our platform policies.</p>
-                <p>If you believe this suspension is in error, you may <a href='https://trusttrade.support/contact'>contact support</a> to appeal.</p>
+                <p>If you believe this suspension is in error, you may <a href='https://trusttrademedia.azurewebsites.net'>contact support</a> to appeal.</p>
                 <p style='color: gray;'>- TrustTrade Support Team</p>
             </body>
             </html>";
             _logger.LogInformation($"Suspending user {user.Username} with ID {userId}.");
             _logger.LogInformation($"Sending email to {email} with {subject} and {body}.");
             await _emailSender.SendEmailAsync(email, subject, body);
+            await _adminService.SuspendUserAsync(userId);
 
             return Ok();
         }
