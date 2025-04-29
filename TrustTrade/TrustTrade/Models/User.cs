@@ -32,6 +32,8 @@ public partial class User
 
     public bool? IsVerified { get; set; }
 
+    public bool? IsSuspended { get; set; }
+
     public byte[]? EncryptedApikey { get; set; }
 
     public bool? PlaidEnabled { get; set; }

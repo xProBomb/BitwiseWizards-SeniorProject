@@ -287,6 +287,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.IsAdmin)
                 .HasDefaultValue(false)
                 .HasColumnName("Is_Admin");
+            entity.Property(e => e.IsSuspended)
+                .HasDefaultValue(false)
+                .HasColumnName("Is_Suspended");
             entity.Property(e => e.IsVerified)
                 .HasDefaultValue(false)
                 .HasColumnName("Is_Verified");
