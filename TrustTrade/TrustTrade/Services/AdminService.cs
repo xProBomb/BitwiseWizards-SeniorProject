@@ -44,7 +44,8 @@ public class AdminService : IAdminService
         _logger.LogInformation($"Suspending user with ID: {userId}\n\n\n\n\n");
 
         if (user == null) return;
-        user.Username = "suspendedUser_" + user.Username;
+        user.PastUsername = user.Username;
+        user.Username = "SuspendedUser";
         user.Is_Suspended = true;
         await _adminRepository.UpdateAsync(user);
     }
@@ -53,10 +54,7 @@ public class AdminService : IAdminService
     {
         var user = await _adminRepository.FindByIdAsync(userId);
         if (user == null) return;
-        if (user.Username.StartsWith("suspendedUser_"))
-        {
-            user.Username = user.Username.Substring("suspendedUser_".Length);
-        }
+        user.Username = user.PastUsername ?? "DefaultUser"; // Fallback to a default name if PastUsername is null
         user.Is_Suspended = false;
         await _adminRepository.UpdateAsync(user);
     }
