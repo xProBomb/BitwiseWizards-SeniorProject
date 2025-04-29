@@ -38,7 +38,8 @@ builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRe
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
 builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -89,6 +90,8 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
@@ -100,15 +103,6 @@ builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 
 // Add HttpClient factory
 builder.Services.AddHttpClient();
-
-// Register DAL services for fin news
-builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
-
-// Register notifications repositories
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
-// Register notifications services
-builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Add support for real-time updates
 builder.Services.AddSignalR();
@@ -152,6 +146,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<ChatHub>("/chatHub");
 
 app.MapControllerRoute(
     name: "default",
