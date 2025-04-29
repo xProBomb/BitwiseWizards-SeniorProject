@@ -39,6 +39,9 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+
+    public virtual DbSet<StockHistory> StockHistories { get; set; }
+
     public virtual DbSet<NotificationSettings> NotificationSettings { get; set; }
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
     public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
