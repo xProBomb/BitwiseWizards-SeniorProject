@@ -495,16 +495,19 @@ namespace TrustTrade.Controllers
                         break;*/
 
                     case "Message":
-                        if (notification.ActorId.HasValue)
+                        if (notification.EntityId.HasValue && notification.EntityType == "Conversation")
+                        {
+                            return RedirectToAction("Conversation", "Chat", new { id = notification.EntityId.Value });
+                        }
+                        else if (notification.ActorId.HasValue)
                         {
                             var actor = await _userRepository.FindByIdAsync(notification.ActorId.Value);
                             if (actor != null)
                             {
-                                // When you implement messaging, redirect to conversation with this user
-                                return RedirectToAction("UserProfile", "Profile", new { username = actor.Username });
+                                // Start a new conversation with this user
+                                return RedirectToAction("StartConversation", "Chat", new { userId = actor.Id });
                             }
                         }
-
                         break;
                 }
 

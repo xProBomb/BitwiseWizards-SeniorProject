@@ -185,9 +185,10 @@ namespace TrustTrade.Controllers
                     Username = comment.User?.Username ?? "Unknown",
                     Content = comment.Content,
                     TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
-                    IsPlaidEnabled = comment.User?.PlaidEnabled ?? false,
-                    PortfolioValueAtPosting = commentPortfolioValue,
-                    ProfilePicture = comment.User?.ProfilePicture,
+                    IsPlaidEnabled = comment.User.PlaidEnabled ?? false,
+                    PortfolioValueAtPosting = portfolioValue,
+                    ProfilePicture = comment.User.ProfilePicture,
+                    IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
                 };
             }).ToList();
 

@@ -257,6 +257,43 @@ namespace TrustTrade.Services
             }
         }
 
+        public async Task CreateMessageNotificationAsync(int senderId, int recipientId, int conversationId)
+        {
+            try
+            {
+                // Don't notify users about their own actions
+                if (senderId == recipientId)
+                    return;
+
+                // Check if the user wants message notifications
+                var settings = await GetUserSettingsAsync(recipientId);
+                if (!settings.EnableMessageNotifications)
+                    return;
+
+                var sender = await _userRepository.FindByIdAsync(senderId);
+                if (sender == null)
+                {
+                    _logger.LogWarning(
+                        $"Failed to create message notification: Sender with ID {senderId} not found");
+                    return;
+                }
+
+                string message = $"{sender.Username} sent you a message";
+
+                await _notificationRepository.CreateNotificationAsync(
+                    recipientId,
+                    "Message",
+                    message,
+                    conversationId,
+                    "Conversation",
+                    senderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating message notification for user {recipientId}");
+            }
+        }
+
         public async Task<List<Notification>> GetAllNotificationsAsync(int userId, int page = 1, int pageSize = 20)
         {
             return await _notificationRepository.GetAllNotificationsForUserAsync(userId, page, pageSize);

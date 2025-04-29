@@ -40,12 +40,12 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<NotificationSettings> NotificationSettings { get; set; }
-
-
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
     public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
     public virtual DbSet<FinancialNewsTickerSentiment> FinancialNewsTickerSentiments { get; set; }
 
+    public virtual DbSet<Conversation> Conversations { get; set; }
+    public virtual DbSet<Message> Messages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -392,6 +392,62 @@ public partial class TrustTradeDbContext : DbContext
                 .WithOne()
                 .HasForeignKey<NotificationSettings>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+    
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.HasOne(d => d.User1)
+                .WithMany()
+                .HasForeignKey(d => d.User1Id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Conversations_User1");
+        
+            entity.HasOne(d => d.User2)
+                .WithMany()
+                .HasForeignKey(d => d.User2Id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Conversations_User2");
+        
+            // Create a unique index to prevent duplicate conversations between the same users
+            entity.HasIndex(e => new { e.User1Id, e.User2Id }).IsUnique();
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+    
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.Property(e => e.Content).IsRequired();
+    
+            entity.HasOne(d => d.Conversation)
+                .WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConversationId)
+                .HasConstraintName("FK_Messages_Conversation");
+        
+            entity.HasOne(d => d.Sender)
+                .WithMany()
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Messages_Sender");
+        
+            entity.HasOne(d => d.Recipient)
+                .WithMany()
+                .HasForeignKey(d => d.RecipientId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Messages_Recipient");
         });
 
         OnModelCreatingPartial(modelBuilder);
