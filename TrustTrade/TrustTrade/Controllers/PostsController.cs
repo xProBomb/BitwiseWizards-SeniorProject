@@ -187,6 +187,7 @@ namespace TrustTrade.Controllers
                     IsPlaidEnabled = comment.User.PlaidEnabled ?? false,
                     PortfolioValueAtPosting = portfolioValue,
                     ProfilePicture = comment.User.ProfilePicture,
+                    IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
                 };
             }).ToList();
 

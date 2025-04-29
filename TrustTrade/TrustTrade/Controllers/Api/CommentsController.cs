@@ -53,5 +53,31 @@ namespace TrustTrade.Controllers.Api
                 return StatusCode(500, "An error occurred while creating the comment.");
             }
         }
+
+        // DELETE: api/comments/{commentId}
+        [HttpDelete("{commentId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            try
+            {
+                User? user = await _userService.GetCurrentUserAsync(User);
+                if (user == null) return Unauthorized();
+
+                bool result = await _commentService.DeleteCommentAsync(commentId, user.Id);
+
+                if (!result)
+                {
+                    return NotFound("Comment not found or you do not have permission to delete it.");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting comment.");
+                return StatusCode(500, "An error occurred while deleting the comment.");
+            }
+        }
     }
 }
