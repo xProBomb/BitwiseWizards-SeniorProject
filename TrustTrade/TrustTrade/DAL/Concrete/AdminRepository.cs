@@ -37,4 +37,11 @@ public class AdminRepository : IAdminRepository
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<User?> GetByIdentityIdAsync(string identityId)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.IdentityId == identityId);
+    }
+
 }

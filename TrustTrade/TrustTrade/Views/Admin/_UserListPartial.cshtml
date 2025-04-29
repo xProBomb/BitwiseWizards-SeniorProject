@@ -1,35 +1,14 @@
-@using TrustTrade.Models
 @model List<User>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="list-group">
 @foreach (var user in Model)
 {
-    <tr>
-        <td>@user.Username</td>
-        <td class="text-end">
-            @if (user.IsSuspended.GetValueOrDefault())
-            {
-                <form asp-controller="Admin" asp-action="UnsuspendUser" method="post">
-                    <input type="hidden" name="userId" value="@user.Id" />
-                    <button type="submit" class="btn btn-success btn-sm">Reactivate</button>
-                </form>
-            }
-            else
-            {
-                <form asp-controller="Admin" asp-action="SuspendUser" method="post">
-                    <input type="hidden" name="userId" value="@user.Id" />
-                    <button type="submit" class="btn btn-warning btn-sm">Suspend</button>
-                </form>
-            }
-        </td>
-    </tr>
+    <div class="list-group-item d-flex justify-content-between align-items-center user-row" data-user-id="@user.Id">
+        <span><strong>@user.Username</strong> (@user.Email)</span>
+        <button class="btn btn-sm @(user.IsSuspended == true ? "btn-danger" : "btn-warning") suspend-btn"
+                data-user-id="@user.Id">
+            @(user.IsSuspended == true ? "Reactivate" : "Suspend")
+        </button>
+    </div>
 }
-    </tbody>
-</table>
+</div>

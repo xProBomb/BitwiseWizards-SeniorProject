@@ -8,4 +8,6 @@ public interface IAdminRepository
     Task<List<User>> SearchByUsernameAsync(string searchTerm);
     Task<User?> FindByIdAsync(int id);
     Task UpdateAsync(User user);
+    Task<User?> GetByIdentityIdAsync(string identityId);
+
 }

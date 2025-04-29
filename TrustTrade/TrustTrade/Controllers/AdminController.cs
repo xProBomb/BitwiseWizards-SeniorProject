@@ -10,13 +10,16 @@ namespace TrustTrade.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly ILogger<PostsController> _logger;
+        private readonly ILogger<AdminController> _logger;
         private readonly IPostRepository _postRepository;
         private readonly IUserService _userService;
-
         private readonly IAdminService _adminService;
 
-        public AdminController(ILogger<PostsController> logger, IPostRepository postRepository, IUserService userService, IAdminService adminService)
+        public AdminController(
+            ILogger<AdminController> logger,
+            IPostRepository postRepository,
+            IUserService userService,
+            IAdminService adminService)
         {
             _logger = logger;
             _postRepository = postRepository;
@@ -28,48 +31,67 @@ namespace TrustTrade.Controllers
         [Authorize]
         public async Task<IActionResult> DeletePost(int id)
         {
-            Post? post = await _postRepository.FindByIdAsync(id);
-            if (post == null) return NotFound();
+            var post = await _postRepository.FindByIdAsync(id);
+            if (post == null)
+                return NotFound();
 
-            User? user = await _userService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized();
-
-            // Ensure the user is an admin
-            if (user.IsAdmin != true) return Unauthorized();
+            var user = await _userService.GetCurrentUserAsync(User);
+            if (user == null || !user.IsAdmin)
+                return Unauthorized();
 
             await _postRepository.DeleteAsync(post);
 
+            _logger.LogInformation("Admin {Username} deleted post {PostId}", user.Username, id);
+
             return RedirectToAction("Index", "Home");
         }
+
         public async Task<IActionResult> ManageUsers()
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || currentUser.IsAdmin != true)
+
+            _logger.LogWarning("Admin check: Username={0}, IsAdmin={1}, IdentityId={2}",
+                currentUser?.Username ?? "null",
+                currentUser?.IsAdmin.ToString() ?? "null",
+                currentUser?.IdentityId ?? "null");
+
+            if (currentUser == null || !currentUser.IsAdmin)
                 return Unauthorized();
 
-            var users = await _adminService.GetAllTrustTradeUsersAsync(); // No Identity users
+            var users = await _adminService.GetAllTrustTradeUsersAsync();
             return View(users);
         }
 
+        public class UserIdRequest
+        {
+            public int userId { get; set; }
+        }
+
         [HttpPost]
-        public async Task<IActionResult> SuspendUser(int userId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SuspendUser([FromBody] UserIdRequest request)
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || currentUser.IsAdmin != true)
+            if (currentUser == null || !currentUser.IsAdmin)
                 return Unauthorized();
 
-            await _adminService.SuspendUserAsync(userId);
+            await _adminService.SuspendUserAsync(request.userId);
+
+            _logger.LogInformation("Admin {Username} suspended user {UserId}", currentUser.Username, request.userId);
             return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> UnsuspendUser(int userId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnsuspendUser([FromBody] UserIdRequest request)
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || currentUser.IsAdmin != true)
+            if (currentUser == null || !currentUser.IsAdmin)
                 return Unauthorized();
 
-            await _adminService.UnsuspendUserAsync(userId);
+            await _adminService.UnsuspendUserAsync(request.userId);
+
+            _logger.LogInformation("Admin {Username} unsuspended user {UserId}", currentUser.Username, request.userId);
             return Ok();
         }
 
@@ -77,7 +99,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> SearchUsers(string searchTerm)
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || currentUser.IsAdmin != true)
+            if (currentUser == null || !currentUser.IsAdmin)
                 return Unauthorized();
 
             var users = await _adminService.SearchTrustTradeUsersAsync(searchTerm);

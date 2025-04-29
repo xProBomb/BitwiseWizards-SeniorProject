@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
-using System.Security.Claims;
 
 public class AdminService : IAdminService
 {
@@ -14,11 +14,12 @@ public class AdminService : IAdminService
 
     public async Task<User?> GetCurrentUserAsync(ClaimsPrincipal principal)
     {
-        var username = principal.Identity?.Name;
-        if (string.IsNullOrEmpty(username))
+        // Use the NameIdentifier claim to match IdentityId
+        var identityId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(identityId))
             return null;
 
-        return await _adminRepository.GetByUsernameAsync(username);
+        return await _adminRepository.GetByIdentityIdAsync(identityId);
     }
 
     public async Task<List<User>> GetAllTrustTradeUsersAsync()

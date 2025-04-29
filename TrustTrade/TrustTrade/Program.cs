@@ -108,6 +108,9 @@ builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 // Register notifications repositories
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
+// Register admin repositories
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+
 // Register notifications services
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
