@@ -39,7 +39,7 @@ public class AdminService : IAdminService
     {
         var user = await _adminRepository.FindByIdAsync(userId);
         if (user == null) return;
-
+        user.Username = "suspended_" + user.Username;
         user.IsSuspended = true;
         await _adminRepository.UpdateAsync(user);
     }
@@ -48,7 +48,10 @@ public class AdminService : IAdminService
     {
         var user = await _adminRepository.FindByIdAsync(userId);
         if (user == null) return;
-
+        if (user.Username.StartsWith("suspendedUser_"))
+        {
+            user.Username = user.Username.Substring("suspendedUser_".Length);
+        }
         user.IsSuspended = false;
         await _adminRepository.UpdateAsync(user);
     }
