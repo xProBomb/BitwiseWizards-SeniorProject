@@ -8,4 +8,5 @@ public interface IAdminService
     Task<List<User>> SearchTrustTradeUsersAsync(string searchTerm);
     Task SuspendUserAsync(int userId);
     Task UnsuspendUserAsync(int userId);
+    Task<User?> FindUserByIdAsync(int userId);
 }

@@ -5,26 +5,30 @@ using TrustTrade.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace TrustTrade.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly ILogger<AdminController> _logger;
+        private readonly ILogger<PostsController> _logger;
         private readonly IPostRepository _postRepository;
         private readonly IUserService _userService;
         private readonly IAdminService _adminService;
+        private readonly IEmailSender _emailSender;
 
         public AdminController(
-            ILogger<AdminController> logger,
+            ILogger<PostsController> logger,
             IPostRepository postRepository,
             IUserService userService,
-            IAdminService adminService)
+            IAdminService adminService,
+            IEmailSender emailSender)
         {
             _logger = logger;
             _postRepository = postRepository;
             _userService = userService;
             _adminService = adminService;
+            _emailSender = emailSender;
         }
 
         [HttpPost]
@@ -32,66 +36,97 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             var post = await _postRepository.FindByIdAsync(id);
-            if (post == null)
-                return NotFound();
+            if (post == null) return NotFound();
 
-            var user = await _userService.GetCurrentUserAsync(User);
-            if (user == null || !user.IsAdmin)
-                return Unauthorized();
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
 
+            var postOwner = post.User;
             await _postRepository.DeleteAsync(post);
 
-            _logger.LogInformation("Admin {Username} deleted post {PostId}", user.Username, id);
+            if (postOwner != null)
+            {
+                var subject = "Post Deleted - TrustTrade";
+                var body = $@"
+                <html>
+                <body style='font-family: Arial, sans-serif;'>
+                    <h2>Post Deletion Notice</h2>
+                    <p>Hello {postOwner.Username},</p>
+                    <p>Your post titled <strong>{post.Title}</strong> has been removed by an administrator due to a violation of our platform policies.</p>
+                    <p>If you believe this was a mistake, you can contact support to appeal.</p>
+                    <p style='color: gray;'>- TrustTrade Support Team</p>
+                </body>
+                </html>";
+
+                await _emailSender.SendEmailAsync(postOwner.Email, subject, body);
+            }
 
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SuspendUser(int userId)
+        {
+            var currentUser = await _adminService.GetCurrentUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
+
+            var user = await _adminService.FindUserByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            await _adminService.SuspendUserAsync(userId);
+
+            var subject = "Account Suspension Notice - TrustTrade";
+            var body = $@"
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h2>Account Suspended</h2>
+                <p>Hello {user.Username},</p>
+                <p>Your account has been suspended due to a violation of our platform policies.</p>
+                <p>If you believe this suspension is in error, you may <a href='https://trusttrade.support/contact'>contact support</a> to appeal.</p>
+                <p style='color: gray;'>- TrustTrade Support Team</p>
+            </body>
+            </html>";
+
+            await _emailSender.SendEmailAsync(user.Email, subject, body);
+
+            return Ok();
+        }
+
+        [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-
-            _logger.LogWarning("Admin check: Username={0}, IsAdmin={1}, IdentityId={2}",
-                currentUser?.Username ?? "null",
-                currentUser?.IsAdmin.ToString() ?? "null",
-                currentUser?.IdentityId ?? "null");
-
-            if (currentUser == null || !currentUser.IsAdmin)
-                return Unauthorized();
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
 
             var users = await _adminService.GetAllTrustTradeUsersAsync();
             return View(users);
         }
 
-        public class UserIdRequest
-        {
-            public int userId { get; set; }
-        }
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SuspendUser([FromBody] UserIdRequest request)
+        public async Task<IActionResult> UnsuspendUser(int userId)
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || !currentUser.IsAdmin)
-                return Unauthorized();
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
 
-            await _adminService.SuspendUserAsync(request.userId);
+            var user = await _adminService.FindUserByIdAsync(userId);
+            if (user == null) return NotFound();
 
-            _logger.LogInformation("Admin {Username} suspended user {UserId}", currentUser.Username, request.userId);
-            return Ok();
-        }
+            await _adminService.UnsuspendUserAsync(userId);
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UnsuspendUser([FromBody] UserIdRequest request)
-        {
-            var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || !currentUser.IsAdmin)
-                return Unauthorized();
+            var subject = "Account Reactivation Notice - TrustTrade";
+            var body = $@"
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h2>Account Reactivated</h2>
+                <p>Hello {user.Username},</p>
+                <p>Your TrustTrade account has been reactivated. You can now log in and resume activity on the platform.</p>
+                <p>We appreciate your cooperation and understanding.</p>
+                <p style='color: gray;'>- TrustTrade Support Team</p>
+            </body>
+            </html>";
 
-            await _adminService.UnsuspendUserAsync(request.userId);
+            await _emailSender.SendEmailAsync(user.Email, subject, body);
 
-            _logger.LogInformation("Admin {Username} unsuspended user {UserId}", currentUser.Username, request.userId);
             return Ok();
         }
 
@@ -99,8 +134,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> SearchUsers(string searchTerm)
         {
             var currentUser = await _adminService.GetCurrentUserAsync(User);
-            if (currentUser == null || !currentUser.IsAdmin)
-                return Unauthorized();
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
 
             var users = await _adminService.SearchTrustTradeUsersAsync(searchTerm);
             return PartialView("_UserListPartial", users);

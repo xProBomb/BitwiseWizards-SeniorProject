@@ -52,4 +52,10 @@ public class AdminService : IAdminService
         user.IsSuspended = false;
         await _adminRepository.UpdateAsync(user);
     }
+
+    public async Task<User?> FindUserByIdAsync(int userId)
+    {
+        return await _adminRepository.FindByIdAsync(userId);
+    }
+
 }

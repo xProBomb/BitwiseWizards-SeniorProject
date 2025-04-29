@@ -154,6 +154,7 @@ app.MapControllerRoute(
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<SuspensionMiddleware>();
 
 app.MapHub<NotificationHub>("/notificationHub");
 
