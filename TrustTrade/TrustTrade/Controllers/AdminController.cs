@@ -8,35 +8,33 @@ using TrustTrade.Services.Web.Interfaces;
 
 namespace TrustTrade.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        private readonly ILogger<PostsController> _logger;
+        private readonly ILogger<AdminController> _logger;
         private readonly IPostRepository _postRepository;
         private readonly IUserService _userService;
 
-        public AdminController(ILogger<PostsController> logger, IPostRepository postRepository, IUserService userService)
+        public AdminController(ILogger<AdminController> logger, IPostRepository postRepository, IUserService userService)
         {
-            _userService = userService;
             _logger = logger;
             _postRepository = postRepository;
+            _userService = userService;
         }
 
-
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> DeletePost(int id)
         {
-            Post? post = await _postRepository.FindByIdAsync(id);
-            if (post == null) return NotFound();
+            var post = await _postRepository.FindByIdAsync(id);
+            if (post == null)
+                return NotFound();
 
-            User? user = await _userService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized();
-
-            // Ensure the user is an admin
-            if (user.IsAdmin != true) return Unauthorized();
-
+            var user = await _userService.GetCurrentUserAsync(User);
+            if (user == null)
+                return Unauthorized();
             await _postRepository.DeleteAsync(post);
 
+            TempData["AdminMessage"] = "Post deleted successfully.";
             return RedirectToAction("Index", "Home");
         }
     }
