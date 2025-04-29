@@ -10,7 +10,7 @@
 <!-- Post Actions Row -->
 <div class="d-flex justify-content-between">
     <!-- Admin Delete Button (left side) -->
-    @if (!Model.IsOwnedByCurrentUser && User.IsAdmin)
+    @if (Model.IsUserAdmin && !Model.IsOwnedByCurrentUser)
     {
         <form asp-controller="Admin" asp-action="DeletePost" asp-route-id="@Model.Id" method="post" class="delete-post-form">
             <button type="submit" class="btn btn-outline-danger btn-sm me-2">

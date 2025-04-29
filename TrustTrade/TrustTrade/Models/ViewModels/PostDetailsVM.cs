@@ -26,6 +26,8 @@ public class PostDetailsVM
 
     public bool IsOwnedByCurrentUser { get; set; }
 
+    public bool IsUserAdmin { get; set; }
+
     public byte[]? ProfilePicture { get; set; }
 
     public List<CommentVM> Comments { get; set; } = new List<CommentVM>();
