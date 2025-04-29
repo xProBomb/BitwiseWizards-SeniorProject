@@ -156,6 +156,8 @@ namespace TrustTrade.Controllers
 [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
 public async Task<IActionResult> UserProfile(string username)
 {
+    
+    
     var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
 
@@ -168,11 +170,23 @@ public async Task<IActionResult> UserProfile(string username)
     var currentUserId = currentUser?.Id;
     _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
+
     var user = await _context.Users
         .Include(u => u.FollowerFollowerUsers)
         .Include(u => u.FollowerFollowingUsers)
         .FirstOrDefaultAsync(u => u.Username == username);
 
+    if (user.Is_Suspended == true)
+    { 
+        var suspendedUserModel = new ProfileViewModel
+        {
+            Id = user.Id,
+            IdentityId = user.IdentityId,
+            Username = user.Username,
+        };
+
+        return View("Profile", suspendedUserModel);
+    }
     if (user == null)
     {
         _logger.LogDebug("User not found: {Username}", username);
@@ -209,6 +223,7 @@ public async Task<IActionResult> UserProfile(string username)
     
     var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
 
+    
     var model = new ProfileViewModel
     {
         Id = user.Id,
