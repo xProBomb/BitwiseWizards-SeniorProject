@@ -30,4 +30,6 @@ public interface ICommentService
     /// <param name="commentDTO">The comment data transfer object.</param>
     /// <returns>The created comment.</returns>
     Task<Comment> CreateCommentAsync(User user, CommentCreateDTO commentCreateDTO);
+
+    Task<bool> DeleteCommentAsync(int commentId, int userId);
 }

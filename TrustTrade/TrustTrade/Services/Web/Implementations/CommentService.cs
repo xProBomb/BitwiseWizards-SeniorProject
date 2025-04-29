@@ -134,4 +134,27 @@ public class CommentService : ICommentService
 
         return comment;
     }
+
+    public async Task<bool> DeleteCommentAsync(int commentId, int userId)
+    {
+        Comment? comment = await _commentRepository.FindByIdAsync(commentId);
+        
+        if (comment == null)
+        {
+            _logger.LogWarning($"Comment with ID {commentId} not found.");
+            return false;
+        }
+
+        if (comment.UserId != userId)
+        {
+            _logger.LogWarning($"User {userId} attempted to delete comment {commentId} but does not own it.");
+            return false;
+        }
+
+        await _commentRepository.DeleteAsync(comment);
+        _logger.LogInformation($"Comment with ID {commentId} deleted by user {userId}.");
+
+        return true;
+    }
+
 }
