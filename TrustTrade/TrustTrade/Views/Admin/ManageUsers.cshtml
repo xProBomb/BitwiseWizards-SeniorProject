@@ -1,0 +1,22 @@
+@model List<User>
+
+<h1>Manage TrustTrade Users</h1>
+
+<div class="mb-3">
+    <input type="text" id="userSearchInput" class="form-control" placeholder="Search users...">
+</div>
+
+<div id="userList">
+    @await Html.PartialAsync("_UserListPartial", Model)
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById('userSearchInput');
+        searchInput.addEventListener('input', async function () {
+            const response = await fetch('/Admin/SearchUsers?searchTerm=' + encodeURIComponent(this.value));
+            const html = await response.text();
+            document.getElementById('userList').innerHTML = html;
+        });
+    </script>
+}

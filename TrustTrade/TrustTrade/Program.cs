@@ -89,6 +89,7 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
