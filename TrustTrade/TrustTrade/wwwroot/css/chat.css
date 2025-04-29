@@ -1,0 +1,130 @@
+/* Message List Styles */
+.chat-card {
+    height: calc(80vh - 200px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.message-container {
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: flex-end;
+}
+
+.message-outgoing {
+    justify-content: flex-end;
+}
+
+.message-incoming {
+    justify-content: flex-start;
+}
+
+.message-avatar {
+    margin-right: 0.5rem;
+}
+
+.message-avatar img {
+    width: 2rem;
+    height: 2rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    max-width: 75%;
+    word-break: break-word;
+}
+
+.message-sent {
+    background-color: #0d6efd;
+    color: white;
+    border-top-right-radius: 0.25rem;
+}
+
+.message-received {
+    background-color: #f0f0f0;
+    color: #212529;
+    border-top-left-radius: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    text-align: right;
+}
+
+.message-status {
+    margin-left: 0.25rem;
+}
+
+.message-status.read {
+    color: #0d6efd;
+}
+
+.message-status.sent {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Conversation List Styles */
+.unread-conversation {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-left: 4px solid #0d6efd;
+}
+
+/* Empty State Styles */
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.chat-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #6c757d;
+}
+
+/* Message Input Styles */
+.chat-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.chat-footer .input-group {
+    position: relative;
+}
+
+.chat-footer .form-control {
+    border-radius: 1.5rem;
+    padding-right: 3rem;
+}
+
+.chat-footer .btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0 1.5rem 1.5rem 0;
+    z-index: 4;
+}
+
+/* Chat Badge Styles */
+.chat-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    font-size: 0.75rem;
+}

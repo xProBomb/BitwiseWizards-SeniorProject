@@ -35,14 +35,36 @@ namespace TrustTrade.DAL.Concrete
         public async Task<List<Conversation>> GetUserConversationsAsync(int userId, int skip = 0, int take = 20)
         {
             // Get all conversations where the user is a participant
-            return await _context.Conversations
+            var conversations = await _context.Conversations
                 .Include(c => c.User1)
                 .Include(c => c.User2)
                 .Where(c => c.User1Id == userId || c.User2Id == userId)
                 .OrderByDescending(c => c.UpdatedAt)
+                .ToListAsync();
+    
+            // Filter out conversations where all messages are deleted/archived for this user
+            var filteredConversations = new List<Conversation>();
+    
+            foreach (var conversation in conversations)
+            {
+                // Check if there are any messages that are not deleted for this user
+                var hasVisibleMessages = await _context.Messages
+                    .AnyAsync(m => m.ConversationId == conversation.Id && 
+                                   ((m.SenderId == userId && !m.IsDeletedForSender) || 
+                                    (m.RecipientId == userId && !m.IsDeletedForRecipient)));
+        
+                // Only include conversations with visible messages
+                if (hasVisibleMessages)
+                {
+                    filteredConversations.Add(conversation);
+                }
+            }
+    
+            // Apply pagination after filtering
+            return filteredConversations
                 .Skip(skip)
                 .Take(take)
-                .ToListAsync();
+                .ToList();
         }
         
         public async Task<int> GetUnreadMessagesCountAsync(int userId)
@@ -67,7 +89,8 @@ namespace TrustTrade.DAL.Concrete
                 User1Id = user1Id,
                 User2Id = user2Id,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                LastMessageContent = $"{_context.Users.Find(user1Id).Username} wants to start a conversation."
             };
             
             _context.Conversations.Add(conversation);
