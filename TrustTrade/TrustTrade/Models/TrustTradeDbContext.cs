@@ -39,6 +39,9 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+
+    public virtual DbSet<StockHistory> StockHistories { get; set; }
+
     public virtual DbSet<NotificationSettings> NotificationSettings { get; set; }
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
     public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
@@ -49,6 +52,7 @@ public partial class TrustTradeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StockHistory>().ToTable("StockHistory");
         modelBuilder.Entity<Comment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC27F40245E7");

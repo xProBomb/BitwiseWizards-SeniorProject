@@ -29,11 +29,14 @@ namespace TestTrustTrade.Reqnroll.Services
             Password = "Password123!"
         };
 
+
         public LoginService()
         {
             _driver = WebDriverSingleton.Instance;
             _wait = WebDriverSingleton.GetWait();
         }
+
+    
 
         /// <summary>
         /// Logs in with the specified user credentials
@@ -117,5 +120,6 @@ namespace TestTrustTrade.Reqnroll.Services
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+
     }
 }
