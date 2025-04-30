@@ -1,4 +1,3 @@
-// Render mini sparkline charts using high prices
 function renderSparklineCharts() {
     const cards = document.querySelectorAll('.stock-card');
 
@@ -10,7 +9,7 @@ function renderSparklineCharts() {
         const highsRaw = card.getAttribute('data-highs');
         if (!highsRaw) return;
 
-        const prices = JSON.parse(highsRaw).slice(-3); // Default 3-day preview
+        const prices = JSON.parse(highsRaw).slice(-3);
 
         new Chart(ctx, {
             type: 'line',
@@ -52,11 +51,12 @@ window.openStockModal = async function (ticker) {
         modalHighs = data.map(d => d.high);
         modalDates = data.map(d => d.date);
 
-        renderModalChart(3); // Default 3-day chart
+        renderModalChart(3); // default
 
-        document.querySelectorAll('#historyFilter button').forEach(btn => {
+        document.querySelectorAll('#historyFilter .chart-filter-button').forEach(btn => {
             btn.onclick = () => {
-                document.querySelectorAll('#historyFilter button').forEach(b => b.classList.remove("active"));
+                document.querySelectorAll('#historyFilter .chart-filter-button')
+                    .forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
 
                 const days = parseInt(btn.getAttribute("data-days"));
