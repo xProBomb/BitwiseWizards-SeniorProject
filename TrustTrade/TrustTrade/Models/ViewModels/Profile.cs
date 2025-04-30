@@ -16,6 +16,7 @@ public class ProfileViewModel
     public List<string> Following { get; set; } = new();
     public bool IsFollowing { get; set; }
     public byte[]? ProfilePicture { get; set; }
+    public bool IsBlocked { get; set; }
 
     public bool HideDetailedInformation { get; set; }
     public bool HideAllPositions { get; set; }
