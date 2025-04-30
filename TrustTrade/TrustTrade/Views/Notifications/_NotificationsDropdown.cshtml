@@ -1,0 +1,52 @@
+@model IEnumerable<TrustTrade.Models.Notification>
+
+<div class="notification-dropdown">
+    <div class="notification-header d-flex justify-content-between align-items-center p-3 border-bottom">
+        <h6 class="mb-0">Notifications</h6>
+        <button id="markAllReadBtn" class="btn btn-sm btn-link">Mark all as read</button>
+    </div>
+    
+    <div class="notification-body">
+        @if (!Model.Any())
+        {
+            <div class="notification-empty p-4 text-center text-muted">
+                <i class="bi bi-bell fs-4 mb-2"></i>
+                <p>No new notifications</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var notification in Model)
+            {
+                <a href="@Url.Action("RedirectToContent", "Notifications", new { id = notification.Id })" 
+                   class="notification-item p-3 border-bottom d-flex align-items-center @(notification.IsRead ? "read" : "unread")"
+                   data-id="@notification.Id">
+                    @if (notification.Actor != null && notification.Actor.ProfilePicture != null)
+                    {
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(notification.Actor.ProfilePicture)" 
+                             class="notification-mini-avatar rounded-circle me-2" style="width: 2rem" alt="Profile Picture">
+                    }
+                    else
+                    {
+                        <img src="/icons/defpfp.png" class="notification-mini-avatar rounded-circle me-2" style="width: 2rem" alt="Profile Picture">
+                    }
+                    
+                    <div class="notification-content">
+                        <p class="mb-1 small">@Html.Raw(notification.Message)</p>
+                        <small class="text-muted">@TrustTrade.Helpers.TimeAgoHelper.GetTimeAgo(notification.CreatedAt)</small>
+                    </div>
+                    
+                    @if (!notification.IsRead)
+                    {
+                        <span class="badge bg-primary rounded-pill ms-2"></span>
+                    }
+                </a>
+            }
+        }
+    </div>
+    
+    <div class="notification-footer p-2 d-flex justify-content-between border-top">
+        <a asp-controller="Notifications" asp-action="Index" class="btn btn-sm btn-link">View Unread</a>
+        <a asp-controller="Notifications" asp-action="History" class="btn btn-sm btn-link">View History</a>
+    </div>
+</div>

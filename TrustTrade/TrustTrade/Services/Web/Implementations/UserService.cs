@@ -14,11 +14,13 @@ public class UserService : IUserService
     private readonly ILogger<UserService> _logger;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserRepository _userRepository;
+    private readonly TrustTradeDbContext _context;
 
-    public UserService(ILogger<UserService> logger, UserManager<IdentityUser> userManager, IUserRepository userRepository)
+    public UserService(ILogger<UserService> logger, UserManager<IdentityUser> userManager, IUserRepository userRepository, TrustTradeDbContext context)
     {
         _logger = logger;
         _userManager = userManager;
+        _context = context;
         _userRepository = userRepository;
     }
 
@@ -55,5 +57,20 @@ public class UserService : IUserService
 
         _logger.LogInformation($"Successfully retrieved user '{user.Username}'");
         return user;
+    }
+    
+    public async Task<User> GetUserByIdAsync(int userId)
+    {
+        try
+        {
+            // Assuming you have a DbContext or repository for users
+            var user = await _context.Users.FindAsync(userId);
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving user with ID {userId}");
+            return null;
+        }
     }
 }

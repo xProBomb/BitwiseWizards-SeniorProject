@@ -7,9 +7,21 @@
 }
 
 <!-- Post Actions Dropdown For The Owner -->
-@if (Model.IsOwnedByCurrentUser)
-{
-    <div class="d-flex justify-content-end">
+<!-- Post Actions Row -->
+<div class="d-flex justify-content-between">
+    <!-- Admin Delete Button (left side) -->
+    @if (Model.IsUserAdmin && !Model.IsOwnedByCurrentUser)
+    {
+        <form asp-controller="Admin" asp-action="DeletePost" asp-route-id="@Model.Id" method="post" class="delete-post-form">
+            <button type="submit" class="btn btn-outline-danger btn-sm me-2">
+                <i class="bi bi-x-circle"></i> Delete (Admin)
+            </button>
+        </form>
+    }
+
+    <!-- Owner Actions Dropdown (right side) -->
+    @if (Model.IsOwnedByCurrentUser)
+    {
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="postActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 Actions
@@ -31,11 +43,12 @@
                 </li>
             </ul>
         </div>
-    </div>
-}
+    }
+</div>
 
-<!-- Post Details -->
+
 <div class="container mt-4">
+    <!-- Post Details -->
     <div class="card">
         <div class="card-body">
             <div class="d-flex align-items-center">
@@ -91,41 +104,96 @@
                     <span class="like-count">@Model.LikeCount</span>
                 </button>
                 <button class="btn btn-primary position-relative ms-4" aria-label="Comment">
-                    <i class="bi bi-chat"></i> @Model.CommentCount
+                    <i class="bi bi-chat"></i> <span id="commentCount">@Model.CommentCount</span>
                 </button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Comment Section -->
-<div class="card">
-    <div class="card-header">
-        <h5>Comments (@Model.CommentCount)</h5>
+    <!-- Comment Section -->
+    <div class="mt-4 mb-4">
+        <div class="mb-3">
+            <input type="text" id="content" class="form-control" placeholder="Add a comment..." required />
+            <input type="hidden" id="postId" value="@Model.Id" />
+        </div>
+        <div id="submitButtonWrapper" style="display: none;">
+            <button id="submitCommentButton" class="btn btn-primary btn-sm">Post Comment</button>
+        </div>
     </div>
-    <div class="card-body">
-        @if (!Model.Comments.Any())
-        {
-            <p class="text-muted">No comments yet. Be the first to comment!</p>
-        }
-        else
-        {
-            <ul class="list-group">
-                @foreach (var comment in Model.Comments)
-                {
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <strong>@comment.Username</strong>
-                            <small class="text-muted">@comment.TimeAgo</small>
+
+    <!-- Comments List -->
+    @if (!Model.Comments.Any())
+    {
+        <p class="text-muted">No comments yet. Be the first to comment!</p>
+    }
+    else
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var comment in Model.Comments)
+            {
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <!-- Profile Links -->
+                            <a asp-controller="Profile" 
+                                asp-action="UserProfile" 
+                                asp-route-username="@comment.Username"
+                                class="image-profile-link">
+                                <img src="@(comment.ProfilePicture != null 
+                                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(comment.ProfilePicture)}"
+                                        : "/icons/defpfp.png")"
+                                        alt="Profile Picture"
+                                        class="rounded-circle"
+                                        style="width: 50px; height: 50px;" />
+                            </a>
+                            <a asp-controller="Profile" 
+                                asp-action="UserProfile" 
+                                asp-route-username="@comment.Username"
+                                class="username-profile-link ms-2">
+                                @comment.Username
+                            </a>
+                            <!-- Display Plaid Info If Enabled-->
+                            @if (comment.IsPlaidEnabled)
+                            {
+                                <span class="text-success ms-2">
+                                    @if (!string.IsNullOrEmpty(comment.PortfolioValueAtPosting))
+                                    {
+                                        @comment.PortfolioValueAtPosting
+                                    }
+                                    <i class="bi bi-patch-check-fill"></i>
+                                </span>
+                            }
+                            <!-- Display Time Ago -->
+                            <span class="ms-2">@comment.TimeAgo</span>
                         </div>
-                        <p>@comment.Content</p>
-                    </li>
-                }
-            </ul>
-        }
-    </div>
+        
+                        <!-- Display Comment Options Dropdown for the Owner -->
+                        @if (comment.IsOwnedByCurrentUser)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="commentActionsMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="commentActionsMenu">
+                                    <li>
+                                        <button class="dropdown-item text-danger delete-comment-button" data-comment-id="@comment.Id">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Display Main Comment Content -->
+                    <p class="mt-3 mb-3 ps-5">@comment.Content</p>
+                </li>
+            }
+        </ul>
+    }
 </div>
 
 @section Scripts {
     <script src="~/js/postActions.js"></script>
+    <script src="~/js/commentActions.js"></script>
 }

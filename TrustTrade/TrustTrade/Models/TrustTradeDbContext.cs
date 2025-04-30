@@ -38,11 +38,14 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
-
+    public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<NotificationSettings> NotificationSettings { get; set; }
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
     public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
     public virtual DbSet<FinancialNewsTickerSentiment> FinancialNewsTickerSentiments { get; set; }
 
+    public virtual DbSet<Conversation> Conversations { get; set; }
+    public virtual DbSet<Message> Messages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -284,6 +287,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.IsAdmin)
                 .HasDefaultValue(false)
                 .HasColumnName("Is_Admin");
+            entity.Property(e => e.Is_Suspended)
+                .HasDefaultValue(false)
+                .HasColumnName("Is_Suspended");
             entity.Property(e => e.IsVerified)
                 .HasDefaultValue(false)
                 .HasColumnName("Is_Verified");
@@ -296,6 +302,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.ProfileName)
                 .HasMaxLength(50)
                 .HasColumnName("Profile_Name");
+            entity.Property(e => e.PastUsername)
+                .HasMaxLength(50)
+                .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
         });
@@ -352,6 +361,97 @@ public partial class TrustTradeDbContext : DbContext
             .WithMany(n => n.TickerSentiments)
             .HasForeignKey(ts => ts.NewsItemId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Notifications__3214EC27");
+        
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.ActorId).HasColumnName("ActorID");
+            entity.Property(e => e.IsArchived).HasColumnName("IsArchived");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Notifications_User");
+            
+            entity.HasOne(d => d.Actor)
+                .WithMany()
+                .HasForeignKey(d => d.ActorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)  // Don't cascade delete the actor
+                .HasConstraintName("FK_Notifications_Actor");
+        });
+        
+        modelBuilder.Entity<NotificationSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        
+            entity.HasOne(d => d.User)
+                .WithOne()
+                .HasForeignKey<NotificationSettings>(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+    
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.HasOne(d => d.User1)
+                .WithMany()
+                .HasForeignKey(d => d.User1Id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Conversations_User1");
+        
+            entity.HasOne(d => d.User2)
+                .WithMany()
+                .HasForeignKey(d => d.User2Id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Conversations_User2");
+        
+            // Create a unique index to prevent duplicate conversations between the same users
+            entity.HasIndex(e => new { e.User1Id, e.User2Id }).IsUnique();
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+    
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.Property(e => e.Content).IsRequired();
+    
+            entity.HasOne(d => d.Conversation)
+                .WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConversationId)
+                .HasConstraintName("FK_Messages_Conversation");
+        
+            entity.HasOne(d => d.Sender)
+                .WithMany()
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Messages_Sender");
+        
+            entity.HasOne(d => d.Recipient)
+                .WithMany()
+                .HasForeignKey(d => d.RecipientId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Messages_Recipient");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }
