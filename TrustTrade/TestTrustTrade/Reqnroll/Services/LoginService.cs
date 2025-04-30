@@ -29,11 +29,21 @@ namespace TestTrustTrade.Reqnroll.Services
             Password = "Password123!"
         };
 
+        public static readonly TestUser AdminUser = new TestUser
+        {
+            Username = "admin",
+            Email = "adminuser@example.com",
+            Password = "AdminPassword123!",
+            IsAdmin = true
+        };
+
         public LoginService()
         {
             _driver = WebDriverSingleton.Instance;
             _wait = WebDriverSingleton.GetWait();
         }
+
+    
 
         /// <summary>
         /// Logs in with the specified user credentials
@@ -117,5 +127,6 @@ namespace TestTrustTrade.Reqnroll.Services
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+        public bool IsAdmin { get; set; } = false; // Default to false
     }
 }

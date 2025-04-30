@@ -27,7 +27,7 @@ namespace TestTrustTrade.Reqnroll.StepDefinitions
         public void GivenIAmOnTheSearchPage()
         {
             _searchPage.NavigateTo();
-            Assert.That(_searchPage.IsLoaded(), Is.True, "Search page failed to load");
+            Assert.That(_searchPage.IsPageLoaded(), Is.True, "Search page failed to load");
         }
 
         [When(@"I select ""(.*)"" from the dropdown")]
