@@ -15,13 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
         followingModal.style.display = 'none';
     }
 
-    if (closeModal) {
-        closeModal.addEventListener('click', function () {
-            followersModal.style.display = 'none';
-            followingModal.style.display = 'none';
-        });
-    }
-
     document.querySelectorAll('form.follow-unfollow-form').forEach(function (form) {
         let isSubmitting = false; // Flag to prevent multiple submissions
 

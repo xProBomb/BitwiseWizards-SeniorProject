@@ -28,12 +28,12 @@
         <h2 id="profile-container">
             @if (Model.ProfilePicture != null)
             {
-                <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ProfilePicture)" alt="Profile Picture"
+                <img id="profile-image" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ProfilePicture)" alt="Profile Picture"
                      class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
             }
             else
             {
-                <img src="/icons/defpfp.png" alt="Profile Picture"
+                <img id="profile-image" src="/icons/defpfp.png" alt="Profile Picture"
                      class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
             }
             <b id="profile-username" style="font-weight: normal">@Model.Username</b>
@@ -100,14 +100,23 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form asp-action="UpdateProfilePicture" method="post" enctype="multipart/form-data">
+                        @if (TempData["ProfilePictureError"] != null)
+                        {
+                            <div class="alert alert-danger">
+                                @TempData["ProfilePictureError"]
+                            </div>
+                        }
+                        <form id="profilePictureForm" asp-action="UpdateProfilePicture" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label for="profilePicture" class="form-label">Choose a new profile picture</label>
-                                <input type="file" class="form-control" id="profilePicture" name="ProfilePicture" accept="image/*" required>
+                                <label for="profilePictureInput" class="form-label">Choose a new profile picture</label>
+                                <input type="file" class="form-control" id="profilePictureInput" name="ProfilePicture" accept="image/*" required>
+                            </div>
+                            <div class="crop-container mt-3" style="display: none;">
+                                <img id="cropperImage" style="max-width: 100%; display: block;">
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Upload</button>
+                                <button type="submit" id="cropAndUploadButton" class="btn btn-primary" style="display: none;">Crop & Upload</button>
                             </div>
                         </form>
                     </div>
@@ -827,5 +836,67 @@
                 }
             });
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const profilePictureInput = document.getElementById('profilePictureInput');
+        const cropperImage = document.getElementById('cropperImage');
+        const cropContainer = document.querySelector('.crop-container');
+        const cropAndUploadButton = document.getElementById('cropAndUploadButton');
+        let cropper;
+
+        profilePictureInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    cropperImage.src = e.target.result;
+                    cropContainer.style.display = 'block';
+                    cropAndUploadButton.style.display = 'inline-block';
+
+                    // Initialize Cropper.js
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(cropperImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        cropAndUploadButton.addEventListener('click', function () {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 150,
+                    height: 150,
+                });
+
+                canvas.toBlob(function (blob) {
+                    const formData = new FormData();
+                    formData.append('ProfilePicture', blob, 'cropped.jpg');
+
+                    // Submit the form via AJAX
+                    fetch('/Profile/UpdateProfilePicture', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Failed to upload the image.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+            }
+        });
     });
     </script>
