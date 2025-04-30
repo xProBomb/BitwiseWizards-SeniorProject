@@ -86,16 +86,15 @@
                                         <div class="message-content">@message.Content</div>
                                         <div class="message-time">
                                             <small class="@(message.IsOwnMessage ? "text-white-50" : "text-muted")">
-                                                @message.CreatedAt.ToString("g")
+                                                @TimeZoneInfo.ConvertTimeFromUtc(message.CreatedAt, 
+                                                    TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")).ToString("g")
                                                 @if (message.IsOwnMessage && message.IsRead)
                                                 {
-                                                    <span class="message-status read"><i
-                                                            class="bi bi-check2-all"></i></span>
+                                                    <span class="message-status read"><i class="bi bi-check2-all"></i></span>
                                                 }
                                                 else if (message.IsOwnMessage)
                                                 {
-                                                    <span class="message-status sent"><i
-                                                            class="bi bi-check2"></i></span>
+                                                    <span class="message-status sent"><i class="bi bi-check2"></i></span>
                                                 }
                                             </small>
                                         </div>
@@ -219,7 +218,8 @@
                 <div class="message-content">${message.content}</div>
                 <div class="message-time">
                     <small class="${isOwnMessage ? 'text-white-50' : 'text-muted'}">
-                        ${new Date(message.createdAt).toLocaleString()}
+                        ${new Date(message.createdAt).toLocaleString('en-US', {
+                    timeZone: 'America/Los_Angeles'})}
                         ${isOwnMessage ? '<span class="message-status sent"><i class="bi bi-check2"></i></span>' : ''}
                     </small>
                 </div>
