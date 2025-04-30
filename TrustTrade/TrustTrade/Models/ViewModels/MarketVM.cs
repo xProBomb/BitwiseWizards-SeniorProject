@@ -8,5 +8,7 @@ namespace TrustTrade.ViewModels
         public decimal Change { get; set; }
 
         public DateTime? LastUpdated { get; set; }
+
+        public List<decimal> Highs { get; set; } = new();
     }
 }

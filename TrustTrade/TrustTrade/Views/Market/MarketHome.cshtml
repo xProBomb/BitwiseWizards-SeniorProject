@@ -32,13 +32,18 @@
       </div>
       <div class="modal-body">
         <p><strong>Ticker:</strong> <span id="modalTicker"></span></p>
+
+        <div id="historyFilter" class="btn-group mb-3" role="group">
+            <button type="button" class="btn btn-outline-primary active" data-days="3">3D</button>
+            <button type="button" class="btn btn-outline-primary" data-days="5">5D</button>
+            <button type="button" class="btn btn-outline-primary" data-days="7">7D</button>
+        </div>
+
         <div class="mb-3">
             <canvas id="stockChart" height="200"></canvas>
         </div>
+
         <p class="text-muted">Last Updated: @Model.FirstOrDefault()?.LastUpdated?.ToString("g")</p>
-        
-
-
       </div>
     </div>
   </div>

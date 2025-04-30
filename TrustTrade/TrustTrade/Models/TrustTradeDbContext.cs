@@ -52,6 +52,7 @@ public partial class TrustTradeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StockHistory>().ToTable("StockHistory");
         modelBuilder.Entity<Comment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC27F40245E7");

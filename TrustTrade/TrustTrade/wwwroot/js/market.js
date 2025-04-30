@@ -1,4 +1,4 @@
-// Render mini chart on each card (mocked data)
+// Render mini sparkline charts using high prices
 function renderSparklineCharts() {
     const cards = document.querySelectorAll('.stock-card');
 
@@ -7,25 +7,20 @@ function renderSparklineCharts() {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        const ticker = card.querySelector('.card-title').textContent.trim();
+        const highsRaw = card.getAttribute('data-highs');
+        if (!highsRaw) return;
 
-        // Generate mock data
-        let base = 100 + Math.random() * 50;
-        const prices = [];
-        for (let i = 0; i < 20; i++) {
-            base += (Math.random() - 0.5) * 2;
-            prices.push(Number(base.toFixed(2)));
-        }
+        const prices = JSON.parse(highsRaw).slice(-3); // Default 3-day preview
 
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: prices.map((_, i) => i),
+                labels: prices.map((_, i) => `Day ${i + 1}`),
                 datasets: [{
                     data: prices,
-                    borderColor: '#888',
-                    backgroundColor: 'transparent',
-                    borderWidth: 1,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.2)',
+                    borderWidth: 1.5,
                     pointRadius: 0,
                     tension: 0.4
                 }]
@@ -43,10 +38,10 @@ function renderSparklineCharts() {
     });
 }
 
-// Global modal chart instance
 let stockChart;
+let modalHighs = [];
+let modalDates = [];
 
-// Expose function globally for Razor onclick
 window.openStockModal = async function (ticker) {
     document.getElementById("modalTicker").innerText = ticker;
 
@@ -54,65 +49,71 @@ window.openStockModal = async function (ticker) {
         const response = await fetch(`/api/market/highlow?ticker=${ticker}`);
         const data = await response.json();
 
-        const highs = data.map(d => d.high);
-        const lows = data.map(d => d.low);
-        const labels = data.map(d => d.date);
+        modalHighs = data.map(d => d.high);
+        modalDates = data.map(d => d.date);
 
-        const canvas = document.getElementById("stockChart");
-        const ctx = canvas.getContext("2d");
-        if (stockChart) stockChart.destroy();
+        renderModalChart(3); // Default 3-day chart
 
-        stockChart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels,
-                datasets: [
-                    {
-                        label: "High",
-                        data: highs,
-                        borderColor: "green",
-                        fill: false,
-                        tension: 0.3
-                    },
-                    {
-                        label: "Low",
-                        data: lows,
-                        borderColor: "red",
-                        fill: false,
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: true } },
-                scales: { x: { display: true }, y: { display: true } }
-            }
+        document.querySelectorAll('#historyFilter button').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('#historyFilter button').forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                const days = parseInt(btn.getAttribute("data-days"));
+                renderModalChart(days);
+            };
         });
 
-        const modal = new bootstrap.Modal(document.getElementById("stockModal"));
-        modal.show();
+        new bootstrap.Modal(document.getElementById("stockModal")).show();
     } catch (err) {
         console.error("Chart load failed", err);
     }
 };
 
-// Wait for canvas to be in the DOM before rendering the chart
-function waitForChartCanvas(callback, tries = 10) {
-    const interval = setInterval(() => {
-        const canvas = document.getElementById('stockChart');
-        if (canvas || tries <= 0) {
-            clearInterval(interval);
-            callback();
-        } else {
-            tries--;
+function renderModalChart(days) {
+    const labels = modalDates.slice(-days);
+    const points = modalHighs.slice(-days);
+
+    const canvas = document.getElementById("stockChart");
+    const ctx = canvas.getContext("2d");
+
+    if (stockChart) stockChart.destroy();
+
+    const minPrice = Math.min(...points);
+    const maxPrice = Math.max(...points);
+    const padding = (maxPrice - minPrice) * 0.15;
+
+    stockChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: `High Price (Last ${days} Days)`,
+                data: points,
+                borderColor: "lime",
+                backgroundColor: "rgba(0,255,0,0.1)",
+                tension: 0.4,
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                x: { display: true },
+                y: {
+                    min: minPrice - padding,
+                    max: maxPrice + padding,
+                    ticks: {
+                        callback: val => `$${val.toFixed(2)}`
+                    }
+                }
+            }
         }
-    }, 100);
+    });
 }
-
-// Render sparklines on page load
-document.addEventListener('DOMContentLoaded', renderSparklineCharts);
-
 
 document.getElementById("stockBtn").addEventListener("click", () => loadMarketData("stock"));
 document.getElementById("cryptoBtn").addEventListener("click", () => loadMarketData("crypto"));
@@ -141,7 +142,7 @@ document.getElementById("stockSearchInput").addEventListener("input", async func
     const type = isCrypto ? "crypto" : "stock";
 
     if (term.length < 1) {
-        loadMarketData(type); // fallback to default top 6
+        loadMarketData(type);
         return;
     }
 
@@ -150,8 +151,10 @@ document.getElementById("stockSearchInput").addEventListener("input", async func
         const html = await response.text();
         document.getElementById("marketCards").innerHTML = html;
 
-        renderSparklineCharts?.(); 
+        renderSparklineCharts();
     } catch (error) {
         console.error("Search failed:", error);
     }
 });
+
+document.addEventListener('DOMContentLoaded', renderSparklineCharts);
