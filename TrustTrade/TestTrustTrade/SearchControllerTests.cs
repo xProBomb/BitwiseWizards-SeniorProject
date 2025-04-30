@@ -16,6 +16,7 @@ namespace TrustTrade.Tests.Controllers
     public class SearchControllerTests
     {
         private Mock<ISearchUserRepository> _userRepoMock;
+        private Mock<IUserService> _userServiceMock;
         private Mock<IPostService> _postServiceMock;
         private SearchController _controller;
         private List<PostPreviewVM> _postPreviews;
@@ -26,9 +27,11 @@ namespace TrustTrade.Tests.Controllers
         public void SetUp()
         {
             _userRepoMock = new Mock<ISearchUserRepository>();
+            _userServiceMock = new Mock<IUserService>();
             _postServiceMock = new Mock<IPostService>();
             _controller = new SearchController(
                 _userRepoMock.Object, 
+                _userServiceMock.Object,
                 _postServiceMock.Object);
 
             _postPreviews = new List<PostPreviewVM>
@@ -179,7 +182,7 @@ namespace TrustTrade.Tests.Controllers
         public async Task SearchPosts_ReturnsAViewResult()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>()))
+            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), It.IsAny<int>()))
                 .ReturnsAsync(_postPreviews);
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
@@ -197,7 +200,7 @@ namespace TrustTrade.Tests.Controllers
         public async Task SearchPosts_ReturnsPostPreviewList()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>()))
+            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), null))
                 .ReturnsAsync(_postPreviews);
 
             // Act

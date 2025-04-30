@@ -28,10 +28,12 @@ namespace TrustTrade.Controllers
             int pageNumber = 1,
             string sortOrder = "DateDesc")
         {
+            User? user = await _userService.GetCurrentUserAsync(User);
+
             // Retrieve posts for the general feed
-            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
+            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder, user?.Id);
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, user?.Id);
 
             var vm = new IndexVM
             {

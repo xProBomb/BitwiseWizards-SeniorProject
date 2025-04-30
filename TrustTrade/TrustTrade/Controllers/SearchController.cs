@@ -15,13 +15,16 @@ namespace TrustTrade.Controllers
     public class SearchController : Controller
     {
         private readonly ISearchUserRepository _searchuserRepository;
+        private readonly IUserService _userService;
         private readonly IPostService _postService;
 
         public SearchController(
             ISearchUserRepository searchuserRepository,
+            IUserService userService,
             IPostService postService)
         {
             _searchuserRepository = searchuserRepository;
+            _userService = userService;
             _postService = postService;
         }
 
@@ -37,8 +40,10 @@ namespace TrustTrade.Controllers
             if (string.IsNullOrWhiteSpace(search))
                 return PartialView("_PostSearchResultsPartial", new List<PostPreviewVM>());
 
+            User? user = await _userService.GetCurrentUserAsync(User);
+
             var searchTerms = search.Split(' ').ToList();
-            var postPreviews = await _postService.SearchPostsAsync(searchTerms);
+            var postPreviews = await _postService.SearchPostsAsync(searchTerms, user?.Id);
 
             return PartialView("_PostSearchResultsPartial", postPreviews);
         }
