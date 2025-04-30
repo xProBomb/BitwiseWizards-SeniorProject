@@ -17,7 +17,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder);
+    Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId);
 
     /// <summary>
     /// Get a list of post previews for posts from users that the current user follows.
@@ -47,7 +47,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms);
+    Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, int? currentUserId);
 
     /// <summary>
     /// Build the post filters for the view model.
@@ -64,7 +64,7 @@ public interface IPostService
     /// <param name="categoryFilter">The category filter to apply.</param>
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <returns>A PaginationPartialVM object containing pagination information.</returns>
-    Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber);
+    Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber, int? currentUserId);
 
     /// <summary>
     /// Build the pagination for the view model based on the current user's followed posts.
@@ -93,6 +93,5 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <returns>A PaginationPartialVM object containing pagination information.</returns>
     Task<PaginationPartialVM> BuildSearchPaginationAsync(string search, List<string> searchTerms, string? categoryFilter, int pageNumber);
-    Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int currentUserId);
 
 }
