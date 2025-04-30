@@ -19,6 +19,7 @@ namespace TrustTrade.Controllers
         private readonly ILogger<ProfileController> _logger;
         private readonly IPostService _postService;
         private readonly IProfileService _profileService;
+        private readonly IUserBlockRepository _userBlockRepository;
         private readonly IUserService _userService;
         private readonly IPerformanceScoreRepository _performanceScoreRepository;
         private readonly INotificationService _notificationService;
@@ -29,6 +30,7 @@ namespace TrustTrade.Controllers
             ILogger<ProfileController> logger,
             IPostService postService,
             IProfileService profileService,
+            IUserBlockRepository userBlockRepository,
             IUserService userService,
             IPerformanceScoreRepository performanceScoreRepository,
             INotificationService notificationService)
@@ -38,6 +40,7 @@ namespace TrustTrade.Controllers
             _logger = logger;
             _postService = postService;
             _profileService = profileService;
+            _userBlockRepository = userBlockRepository;
             _userService = userService;
             _performanceScoreRepository = performanceScoreRepository;
             _notificationService = notificationService;
@@ -223,7 +226,9 @@ public async Task<IActionResult> UserProfile(string username)
     
     var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
 
-    
+    var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
+    var isBlocked = blockedUserIds.Contains(user.Id);
+
     var model = new ProfileViewModel
     {
         Id = user.Id,
@@ -248,6 +253,7 @@ public async Task<IActionResult> UserProfile(string username)
         HasRatedScore = isRated,
         ScoreBreakdown = breakdown,
         ProfilePicture = user.ProfilePicture,
+        IsBlocked = isBlocked,
         // property so we know whether to show the message button
         CanMessage = currentUserId.HasValue && currentUserId != user.Id
     };
@@ -552,6 +558,62 @@ public async Task<IActionResult> UserProfile(string username)
             }
 
             return RedirectToAction("UserProfile", new { username = userToUnfollow.Username });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Block(string profileId)
+        {
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var userToBlock = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToBlock == null)
+            {
+                return NotFound();
+            }
+
+            var block = new UserBlock
+            {
+                BlockedId = userToBlock.Id,
+                BlockerId = currentUser.Id,
+                BlockedAt = DateTime.UtcNow
+            };
+
+            _context.UserBlocks.Add(block);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("UserProfile", new { username = userToBlock.Username });
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Unblock(string profileId)
+        {
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var userToUnblock = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToUnblock == null)
+            {
+                return NotFound();
+            }
+
+            var block = await _context.UserBlocks
+                .FirstOrDefaultAsync(b => b.BlockerId == currentUser.Id && b.BlockedId == userToUnblock.Id);
+
+            if (block != null)
+            {
+                _context.UserBlocks.Remove(block);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("UserProfile", new { username = userToUnblock.Username });
         }
 
         [AllowAnonymous]
