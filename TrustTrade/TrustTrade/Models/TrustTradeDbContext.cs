@@ -39,6 +39,9 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+
+    public virtual DbSet<StockHistory> StockHistories { get; set; }
+
     public virtual DbSet<NotificationSettings> NotificationSettings { get; set; }
     public virtual DbSet<FinancialNewsItem> FinancialNewsItems { get; set; }
     public virtual DbSet<FinancialNewsTopic> FinancialNewsTopics { get; set; }
@@ -49,6 +52,7 @@ public partial class TrustTradeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StockHistory>().ToTable("StockHistory");
         modelBuilder.Entity<Comment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC27F40245E7");
@@ -287,6 +291,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.IsAdmin)
                 .HasDefaultValue(false)
                 .HasColumnName("Is_Admin");
+            entity.Property(e => e.Is_Suspended)
+                .HasDefaultValue(false)
+                .HasColumnName("Is_Suspended");
             entity.Property(e => e.IsVerified)
                 .HasDefaultValue(false)
                 .HasColumnName("Is_Verified");
@@ -299,6 +306,9 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.ProfileName)
                 .HasMaxLength(50)
                 .HasColumnName("Profile_Name");
+            entity.Property(e => e.PastUsername)
+                .HasMaxLength(50)
+                .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
         });
