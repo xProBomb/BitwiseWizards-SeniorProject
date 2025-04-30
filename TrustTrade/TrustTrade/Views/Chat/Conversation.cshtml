@@ -132,8 +132,11 @@
 </div>
 
 <style>
+    body{
+        min-height: 50vh;
+    }
+    
     .chat-card {
-        height: calc(100vh - 200px);
         display: flex;
         flex-direction: column;
     }
@@ -213,7 +216,7 @@
             const conversationId = @Model.Conversation.Id;
             const currentUserId = @Model.CurrentUserId;
             const messagesContainer = document.getElementById('chatMessages');
-            const messagesList = document.getElementById('messagesList');
+            let messagesList = document.getElementById('messagesList');
             const messageForm = document.getElementById('messageForm');
             const messageInput = document.getElementById('messageInput');
 
@@ -237,7 +240,7 @@
             <div class="message ${isOwnMessage ? 'message-sent' : 'message-received'}">
                 <div class="message-content">${message.content}</div>
                 <div class="message-time">
-                    <small class="text-muted">
+                    <small class="text-info">
                         ${new Date(message.createdAt).toLocaleString()}
                         ${isOwnMessage ? '<span class="message-status sent"><i class="bi bi-check2"></i></span>' : ''}
                     </small>
@@ -247,10 +250,10 @@
     `;
 
                 if (!messagesList) {
-                    // If there are no messages yet, remove the empty state and create a messages list
                     messagesContainer.innerHTML = '<div id="messagesList">' + messageHtml + '</div>';
+                    // Add this line to update the reference:
+                    messagesList = document.getElementById('messagesList');
                 } else {
-                    // Append to the existing messages list rather than replacing content
                     messagesList.insertAdjacentHTML('beforeend', messageHtml);
                 }
 

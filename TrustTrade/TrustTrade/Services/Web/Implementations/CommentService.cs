@@ -15,17 +15,20 @@ public class CommentService : ICommentService
     private readonly ILogger<CommentService> _logger;
     private readonly ICommentRepository _commentRepository;
     private readonly IHoldingsRepository _holdingsRepository;
+    private readonly INotificationService _notificationService;
     private readonly IPostRepository _postRepository;
 
     public CommentService(
         ILogger<CommentService> logger, 
         ICommentRepository commentRepository, 
-        IHoldingsRepository holdingsRepository, 
+        IHoldingsRepository holdingsRepository,
+        INotificationService notificationService,
         IPostRepository postRepository)
     {
         _logger = logger;
         _commentRepository = commentRepository;
         _holdingsRepository = holdingsRepository;
+        _notificationService = notificationService;
         _postRepository = postRepository;
     }
 
@@ -130,6 +133,7 @@ public class CommentService : ICommentService
         }
 
         await _commentRepository.AddOrUpdateAsync(comment);
+        await _notificationService.CreateCommentNotificationAsync(user.Id, post.Id ,post.UserId, comment.Id);
         _logger.LogInformation($"Comment created by user {user.Id} on post {commentCreateDTO.PostId}.");
 
         return comment;
