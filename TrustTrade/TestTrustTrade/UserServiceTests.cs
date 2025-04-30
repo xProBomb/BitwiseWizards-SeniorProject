@@ -33,7 +33,8 @@ public class UserServiceTests
             _loggerMock.Object,
             _userManagerMock.Object,
             _userRepositoryMock.Object,
-            null 
+            null!
+
         );
 
         // Test users

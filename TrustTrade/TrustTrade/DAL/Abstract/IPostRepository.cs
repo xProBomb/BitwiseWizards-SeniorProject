@@ -15,7 +15,7 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="pageSize">Number of posts per page.</param>
     /// <param name="sortOrder">Sorting order (e.g., "DateDesc", "DateAsc").</param>
     /// <returns>A list of posts.</returns>
-    Task<List<Post>> GetPagedPostsAsync(string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc");
+    Task<List<Post>> GetPagedPostsAsync(string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Get a paginated list of posts that the specified user is following, optionally filtered by category and sorted by specified order.
@@ -26,7 +26,7 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="pageSize">Number of posts per page.</param>
     /// <param name="sortOrder">Sorting order (e.g., "DateDesc", "DateAsc").</param>
     /// <returns>A list of posts that the user is following.</returns>
-    Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc");
+    Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Get a paginated list of posts by a specific user, optionally filtered by category and sorted by specified order.
@@ -37,7 +37,7 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="pageSize">Number of posts per page.</param>
     /// <param name="sortOrder">Sorting order (e.g., "DateDesc", "DateAsc").</param>
     /// <returns>A list of posts by the specified user.</returns>
-    Task<List<Post>> GetPagedPostsByUserAsync(int userId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc");
+    Task<List<Post>> GetPagedPostsByUserAsync(int userId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Search for posts based on a list of search terms, optionally filtered by category and sorted by specified order.
@@ -48,14 +48,14 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="pageSize">Number of posts per page.</param>
     /// <param name="sortOrder">Sorting order (e.g., "DateDesc", "DateAsc").</param>
     /// <returns>A list of posts that match the search criteria.</returns>
-    Task<List<Post>> SearchPostsAsync(List<string> searchTerms);
+    Task<List<Post>> SearchPostsAsync(List<string> searchTerms, List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Get the total number of posts, optionally filtered by category.
     /// </summary>
     /// <param name="categoryFilter">Optional category filter.</param>
     /// <returns>The total number of posts.</returns>
-    Task<int> GetTotalPostsAsync(string? categoryFilter = null);
+    Task<int> GetTotalPostsAsync(string? categoryFilter = null, List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Get the total number of posts that the specified user is following, optionally filtered by category.
@@ -63,7 +63,7 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="currentUserId">The ID of the current user.</param>
     /// <param name="categoryFilter">Optional category filter.</param>
     /// <returns>The total number of posts that the user is following.</returns>
-    Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null);
+    Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Get the total number of posts by a specific user, optionally filtered by category.
@@ -71,7 +71,7 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="userId">The ID of the user whose posts to count.</param>
     /// <param name="categoryFilter">Optional category filter.</param>
     /// <returns>The total number of posts by the specified user.</returns>
-    Task<int> GetTotalPostsByUserAsync(int userId, string? categoryFilter = null);
+    Task<int> GetTotalPostsByUserAsync(int userId, string? categoryFilter = null, List<int>? blockedUserIds = null);
 
     /// <summary>
     /// Get the total number of posts that match a list of search terms, optionally filtered by category.
@@ -79,5 +79,5 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="searchTerms">List of search terms to filter posts.</param>
     /// <param name="categoryFilter">Optional category filter.</param>
     /// <returns>The total number of posts that match the search criteria.</returns>
-    Task<int> GetTotalPostsBySearchAsync(List<string> searchTerms, string? categoryFilter = null);
+    Task<int> GetTotalPostsBySearchAsync(List<string> searchTerms, string? categoryFilter = null, List<int>? blockedUserIds = null);
 }

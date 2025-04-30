@@ -38,6 +38,7 @@ builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRe
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
 builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
+builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 

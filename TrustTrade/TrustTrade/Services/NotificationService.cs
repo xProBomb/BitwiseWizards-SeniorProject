@@ -9,6 +9,7 @@ namespace TrustTrade.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly IUserRepository _userRepository;
         private readonly IPostRepository _postRepository;
+        private readonly ICommentRepository _commentRepository;
         private readonly TrustTradeDbContext _context;
         private readonly ILogger<NotificationService> _logger;
 
@@ -19,12 +20,14 @@ namespace TrustTrade.Services
             INotificationRepository notificationRepository,
             IUserRepository userRepository,
             IPostRepository postRepository,
+            ICommentRepository commentRepository,
             TrustTradeDbContext context,
             ILogger<NotificationService> logger)
         {
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _postRepository = postRepository;
+            _commentRepository = commentRepository;
             _context = context;
             _logger = logger;
         }
@@ -165,33 +168,33 @@ namespace TrustTrade.Services
             }
         }
 
-        public async Task CreateCommentNotificationAsync(int actorId, int postId, int postOwnerId, int commentId)
+        public async Task CreateCommentNotificationAsync(int actorId, int postId, int postUserId, int commentId)
         {
             try
             {
                 // Don't notify users about their own actions
-                if (actorId == postOwnerId)
-                    return;
-
+                if (actorId == postUserId) {return;}
+                
                 // Check if the user wants comment notifications
-                var settings = await GetUserSettingsAsync(postOwnerId);
+                var settings = await GetUserSettingsAsync(postUserId);
                 if (!settings.EnableCommentNotifications)
                     return;
-
+                
                 var actor = await _userRepository.FindByIdAsync(actorId);
                 var post = await _postRepository.FindByIdAsync(postId);
-
-                if (actor == null || post == null)
+                var comment = await _commentRepository.FindByIdAsync(commentId);
+                var postOwner = await _userRepository.FindByIdAsync(postUserId);
+                
+                if (actor == null || post == null || comment == null || postOwner == null)
                 {
                     _logger.LogWarning(
-                        $"Failed to create comment notification: Actor or Post not found. ActorId: {actorId}, PostId: {postId}");
+                        $"Failed to create comment notification: Actor, Post, Comment or Post Owner not found. ActorId: {actorId}, PostId: {postId}, CommentId: {commentId}, PostOwnerId: {postUserId}");
                     return;
                 }
-
-                string message = $"{actor.Username} commented on your post \"{TruncateTitle(post.Title)}\"";
-
+                string message = $"{actor.Username} commented on your post saying\"{TruncateTitle(post.Title)}\"";
+                
                 await _notificationRepository.CreateNotificationAsync(
-                    postOwnerId,
+                    postUserId,
                     "Comment",
                     message,
                     commentId,
@@ -200,7 +203,7 @@ namespace TrustTrade.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error creating comment notification for post {postId}");
+                _logger.LogError(ex, $"Error creating comment notification for user {postUserId}");
             }
         }
 

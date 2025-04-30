@@ -14,26 +14,32 @@ public class PostService : IPostService
     private readonly ILogger<PostService> _logger;
     private readonly IPostRepository _postRepository;
     private readonly ITagRepository _tagRepository;
+    private readonly IUserBlockRepository _userBlockRepository;
     private const int PAGE_SIZE = 10;
     private const int MAX_PAGES_TO_SHOW = 7;
 
-    public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository)
+    public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository, IUserBlockRepository userBlockRepository)
     {
         _logger = logger;
         _postRepository = postRepository;
         _tagRepository = tagRepository;
+        _userBlockRepository = userBlockRepository;
     }
 
-    public async Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder)
+    public async Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId)
     {
-        List<Post> posts = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+        List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
+
+        List<Post> posts = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
 
         return MapPostsToPostPreviewVM(posts);
     }
 
     public async Task<List<PostPreviewVM>> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder)
     {
-        List<Post> posts = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUserId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+        List<int> blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId);
+
+        List<Post> posts = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUserId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
 
         return MapPostsToPostPreviewVM(posts);
     }
@@ -45,9 +51,11 @@ public class PostService : IPostService
         return MapPostsToPostPreviewVM(posts);
     }
 
-    public async Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms)
+    public async Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, int? currentUserId)
     {
-        List<Post> posts = await _postRepository.SearchPostsAsync(searchTerms);
+        List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
+
+        List<Post> posts = await _postRepository.SearchPostsAsync(searchTerms, blockedUserIds);
 
         return MapPostsToPostPreviewVM(posts);
     }
@@ -65,16 +73,20 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber)
+    public async Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber, int? currentUserId)
     {
-        int totalPosts = await _postRepository.GetTotalPostsAsync(categoryFilter);
+        List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
+
+        int totalPosts = await _postRepository.GetTotalPostsAsync(categoryFilter, blockedUserIds);
 
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
     }
 
     public async Task<PaginationPartialVM> BuildFollowingPaginationAsync(int currentUserId, string? categoryFilter, int pageNumber)
     {
-        int totalPosts = await _postRepository.GetTotalPostsByUserFollowsAsync(currentUserId, categoryFilter);
+        List<int> blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId);
+
+        int totalPosts = await _postRepository.GetTotalPostsByUserFollowsAsync(currentUserId, categoryFilter, blockedUserIds);
         
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
     }
@@ -149,37 +161,13 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int currentUserId)
+    private async Task<List<int>?> GetBlockedUserIds(int? currentUserId)
     {
-        List<Post> posts = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
-
-        return posts.Select(post =>
+        if (currentUserId == null)
         {
-            string? portfolioValue = null;
+            return null;
+        }
 
-            if (post.User.PlaidEnabled == true)
-            {
-                portfolioValue = post.PortfolioValueAtPosting.HasValue
-                    ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(post.PortfolioValueAtPosting.Value)
-                    : "$0";
-            }
-
-            return new PostPreviewVM
-            {
-                Id = post.Id,
-                UserName = post.User.Username,
-                Title = post.Title,
-                Excerpt = post.Content != null && post.Content.Length > 100 
-                    ? $"{post.Content.Substring(0, 100)}..." 
-                    : post.Content ?? string.Empty,
-                TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
-                LikeCount = post.Likes.Count,
-                CommentCount = post.Comments.Count,
-                IsPlaidEnabled = post.User.PlaidEnabled ?? false,
-                PortfolioValueAtPosting = portfolioValue,
-                ProfilePicture = post.User.ProfilePicture,
-                IsLikedByCurrentUser = post.Likes.Any(l => l.UserId == currentUserId)
-            };
-        }).ToList();
+        return await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId.Value);
     }
 }

@@ -13,7 +13,7 @@ else
         @foreach (var user in Model)
         {
             <div class="col-md-6 col-lg-4">
-                <div class="card user-card h-100 shadow-sm p-3">
+                <div class="card user-card h-100 shadow-sm p-3" data-user-id="@user.Id">
                     <div class="d-flex align-items-center">
                         <img src="@(user.ProfilePicture != null 
                             ? $"data:image/jpeg;base64,{Convert.ToBase64String(user.ProfilePicture)}"
@@ -28,12 +28,68 @@ else
                     </div>
 
                     <div class="mt-3 text-end">
-                        <a href="@Url.RouteUrl("UserProfileRoute", new { username = user.Username })" class="btn btn-outline-primary view-profile-btn">
+                        <a href="@Url.RouteUrl("UserProfileRoute", new { username = user.Username })" 
+                           class="btn btn-outline-primary view-profile-btn" 
+                           data-user-id="@user.Id">
                             View Profile
                         </a>
+                        <form method="post" action="/Chat/StartConversation" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-outline-accent ms-2 start-chat-btn">
+                                <i class="bi bi-chat-text"></i> Message
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         }
     </div>
 }
+
+<script>
+    // Direct form submission function
+    function createAndSubmitStartConversationForm(userId) {
+        console.log('Creating form to start conversation with user ID:', userId);
+        
+        // Create a form to submit
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/Chat/StartConversation';
+        
+        // Add CSRF token if the site uses it
+        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (tokenElement) {
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = tokenElement.value;
+            form.appendChild(tokenInput);
+        }
+        
+        // Add the user ID
+        const userIdInput = document.createElement('input');
+        userIdInput.type = 'hidden';
+        userIdInput.name = 'userId';
+        userIdInput.value = userId;
+        
+        // Add to form and submit
+        form.appendChild(userIdInput);
+        document.body.appendChild(form);
+        
+        console.log('Submitting form to start conversation...');
+        form.submit();
+    }
+    
+    // Initialize any message buttons on this partial view
+    document.querySelectorAll('.start-chat-btn, [data-action="start-conversation"]').forEach(button => {
+        // For buttons that don't already have an onclick handler
+        if (!button.hasAttribute('onclick')) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const userId = this.getAttribute('data-user-id');
+                createAndSubmitStartConversationForm(userId);
+            });
+        }
+    });
+</script>

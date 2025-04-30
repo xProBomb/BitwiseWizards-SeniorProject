@@ -27,6 +27,7 @@ namespace TestTrustTrade
         private Mock<ILogger<ProfileController>> _loggerMock;
         private Mock<IPostService> _postServiceMock;
         private Mock<IProfileService> _profileServiceMock;
+        private Mock<IUserBlockRepository> _userBlockRepositoryMock;
         private Mock<IUserService> _userServiceMock;
         private Mock<IPerformanceScoreRepository> _performanceScoreRepository;
         private ProfileController _controller;
@@ -51,6 +52,7 @@ namespace TestTrustTrade
             _loggerMock = new Mock<ILogger<ProfileController>>();
             _postServiceMock = new Mock<IPostService>();
             _profileServiceMock = new Mock<IProfileService>();
+            _userBlockRepositoryMock = new Mock<IUserBlockRepository>();
             _userServiceMock = new Mock<IUserService>();
             _performanceScoreRepository = new Mock<IPerformanceScoreRepository>();
             _notificationServiceMock = new Mock<INotificationService>();
@@ -61,6 +63,7 @@ namespace TestTrustTrade
                 _loggerMock.Object,
                 _postServiceMock.Object,
                 _profileServiceMock.Object,
+                _userBlockRepositoryMock.Object,
                 _userServiceMock.Object,
                 _performanceScoreRepository.Object,
                 _notificationServiceMock.Object
