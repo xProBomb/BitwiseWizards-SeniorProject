@@ -35,6 +35,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserBlock> UserBlocks { get; set; }
+
     public virtual DbSet<PortfolioVisibilitySettings> PortfolioVisibilitySettings { get; set; }
 
     public virtual DbSet<VerificationHistory> VerificationHistory { get; set; }
@@ -302,6 +304,22 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
         });
+
+        modelBuilder.Entity<UserBlock>()
+            .HasIndex(ub => new { ub.BlockerId, ub.BlockedId })
+            .IsUnique(); // Prevent duplicate blocks
+
+        modelBuilder.Entity<UserBlock>()
+            .HasOne(ub => ub.Blocker)
+            .WithMany(u => u.BlockedUsers)
+            .HasForeignKey(ub => ub.BlockerId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
+        modelBuilder.Entity<UserBlock>()
+            .HasOne(ub => ub.Blocked)
+            .WithMany(u => u.BlockedByUsers)
+            .HasForeignKey(ub => ub.BlockedId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
         modelBuilder.Entity<PortfolioVisibilitySettings>(entity =>
         {
