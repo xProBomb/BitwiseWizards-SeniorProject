@@ -217,6 +217,14 @@
                     @(isFollowing ? "Unfollow" : "Follow")
                 </button>
             </form>
+
+            <!-- Block/Unblock button -->
+            <form asp-action="@(Model.IsBlocked ? "Unblock" : "Block")" method="post" class="d-inline block-unblock-form">
+                <input type="hidden" name="profileId" value="@Model.IdentityId" />
+                <button type="submit" id="blockButton" class="btn btn-danger">
+                    @(Model.IsBlocked ? "Unblock" : "Block")
+                </button>
+            </form>
         }
         <p class="text-muted">
             Joined:
