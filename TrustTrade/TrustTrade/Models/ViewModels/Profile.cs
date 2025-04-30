@@ -3,6 +3,7 @@ namespace TrustTrade.ViewModels;
 public class ProfileViewModel
 {
     public string? UserTag { get; set; }
+    public int Id { get; set; }
     public string IdentityId { get; set; }
     public string Username { get; set; }
     public DateTime? CreatedAt { get; set; }
@@ -18,6 +19,7 @@ public class ProfileViewModel
     public byte[]? ProfilePicture { get; set; }
     public bool IsBlocked { get; set; }
 
+    public bool CanMessage { get; set; }
     public bool HideDetailedInformation { get; set; }
     public bool HideAllPositions { get; set; }
     public decimal HiddenAssetsValue => Holdings.Where(h => h.IsHidden).Sum(h => h.CurrentValue);

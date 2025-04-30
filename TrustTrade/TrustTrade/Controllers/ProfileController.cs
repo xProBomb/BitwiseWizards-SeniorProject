@@ -156,93 +156,110 @@ namespace TrustTrade.Controllers
         // In order to access the profile of a user, use the route below
         // This is the method for accessing a non-owners profile
         [AllowAnonymous]
-        [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
-        public async Task<IActionResult> UserProfile(string username)
+[HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
+public async Task<IActionResult> UserProfile(string username)
+{
+    
+    
+    var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
+
+    if (string.IsNullOrEmpty(username))
+    {
+        return RedirectToAction(nameof(MyProfile));
+    }
+
+    var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+    var currentUserId = currentUser?.Id;
+    _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+
+
+    var user = await _context.Users
+        .Include(u => u.FollowerFollowerUsers)
+        .Include(u => u.FollowerFollowingUsers)
+        .FirstOrDefaultAsync(u => u.Username == username);
+
+    if (user.Is_Suspended == true)
+    { 
+        var suspendedUserModel = new ProfileViewModel
         {
-            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
+            Id = user.Id,
+            IdentityId = user.IdentityId,
+            Username = user.Username,
+        };
 
-            if (string.IsNullOrEmpty(username))
-            {
-                return RedirectToAction(nameof(MyProfile));
-            }
+        return View("Profile", suspendedUserModel);
+    }
+    if (user == null)
+    {
+        _logger.LogDebug("User not found: {Username}", username);
+        return NotFound();
+    }
 
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
-            var currentUserId = currentUser?.Id;
-            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+    _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
 
-            var user = await _context.Users
-                .Include(u => u.FollowerFollowerUsers)
-                .Include(u => u.FollowerFollowingUsers)
-                .FirstOrDefaultAsync(u => u.Username == username);
+    var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+    var holdingViewModels = holdings.Select(h => new HoldingViewModel
+    {
+        Symbol = h.Symbol,
+        Quantity = h.Quantity,
+        CurrentPrice = h.CurrentPrice,
+        CostBasis = h.CostBasis,
+        Institution = h.PlaidConnection.InstitutionName,
+        TypeOfSecurity = h.TypeOfSecurity,
+        IsHidden = h.IsHidden
+    }).ToList();
 
-            if (user == null)
-            {
-                _logger.LogDebug("User not found: {Username}", username);
-                return NotFound();
-            }
+    var visibilitySettings = await _context.PortfolioVisibilitySettings
+        .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-            _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
+    bool hideDetails = false;
+    bool hideAll = false;
 
-            var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
-            var holdingViewModels = holdings.Select(h => new HoldingViewModel
-            {
-                Symbol = h.Symbol,
-                Quantity = h.Quantity,
-                CurrentPrice = h.CurrentPrice,
-                CostBasis = h.CostBasis,
-                Institution = h.PlaidConnection.InstitutionName,
-                TypeOfSecurity = h.TypeOfSecurity,
-                IsHidden = h.IsHidden
-            }).ToList();
+    if (visibilitySettings != null)
+    {
+        hideDetails = visibilitySettings.HideDetailedInformation;
+        hideAll = visibilitySettings.HideAllPositions;
+    }
 
-            var visibilitySettings = await _context.PortfolioVisibilitySettings
-                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+    var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
+    
+    var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
 
-            bool hideDetails = false;
-            bool hideAll = false;
+    var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
+    var isBlocked = blockedUserIds.Contains(user.Id);
 
-            if (visibilitySettings != null)
-            {
-                hideDetails = visibilitySettings.HideDetailedInformation;
-                hideAll = visibilitySettings.HideAllPositions;
-            }
+    var model = new ProfileViewModel
+    {
+        Id = user.Id,
+        IdentityId = user.IdentityId,
+        Username = user.Username,
+        CreatedAt = user.CreatedAt,
+        Bio = user.Bio,
+        IsVerified = user.IsVerified ?? false,
+        PlaidEnabled = user.PlaidEnabled ?? false,
+        LastPlaidSync = user.LastPlaidSync,
+        FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
+        FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+        Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
+                    new List<string>(),
+        Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
+                    new List<string>(),
+        Holdings = filteredHoldings,
+        LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
+        UserTag = user.UserTag,
+        IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
+        PerformanceScore = score,
+        HasRatedScore = isRated,
+        ScoreBreakdown = breakdown,
+        ProfilePicture = user.ProfilePicture,
+        IsBlocked = isBlocked,
+        // property so we know whether to show the message button
+        CanMessage = currentUserId.HasValue && currentUserId != user.Id
+    };
 
-            var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
-            
-            var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
-
-            var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
-            var isBlocked = blockedUserIds.Contains(user.Id);
-
-            var model = new ProfileViewModel
-            {
-                IdentityId = user.IdentityId,
-                Username = user.Username,
-                CreatedAt = user.CreatedAt,
-                Bio = user.Bio,
-                IsVerified = user.IsVerified ?? false,
-                PlaidEnabled = user.PlaidEnabled ?? false,
-                LastPlaidSync = user.LastPlaidSync,
-                FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
-                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
-                            new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
-                            new List<string>(),
-                Holdings = filteredHoldings,
-                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
-                UserTag = user.UserTag,
-                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
-                PerformanceScore = score,
-                HasRatedScore = isRated,
-                ScoreBreakdown = breakdown,
-                ProfilePicture = user.ProfilePicture,
-                IsBlocked = isBlocked,
-            };
-
-            return View("Profile", model);
-        }
+    return View("Profile", model);
+}
 
         [HttpPost]
         public async Task<IActionResult> RefreshHoldings()
@@ -509,8 +526,6 @@ namespace TrustTrade.Controllers
 
             return RedirectToAction("UserProfile", new { username = userToFollow.Username });
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> Unfollow(string profileId)

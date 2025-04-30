@@ -32,17 +32,55 @@
       </div>
       <div class="modal-body">
         <p><strong>Ticker:</strong> <span id="modalTicker"></span></p>
+
+        <style>
+            .chart-filter-group {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .chart-filter-button {
+                padding: 0.5rem 1rem;
+                border: 1px solid #444;
+                background-color: #1f1f1f;
+                color: #ccc;
+                border-radius: 999px;
+                transition: all 0.2s ease;
+                font-weight: 500;
+                font-size: 0.9rem;
+            }
+
+            .chart-filter-button:hover {
+                background-color: #333;
+                color: #fff;
+                border-color: #666;
+            }
+
+            .chart-filter-button.active {
+                background: linear-gradient(to right, #00c6ff, #0072ff);
+                color: #fff;
+                border: none;
+                box-shadow: 0 0 10px rgba(0, 114, 255, 0.4);
+            }
+        </style>
+
+        <div id="historyFilter" class="chart-filter-group">
+            <button type="button" class="chart-filter-button active" data-days="3">3D</button>
+            <button type="button" class="chart-filter-button" data-days="5">5D</button>
+            <button type="button" class="chart-filter-button" data-days="7">7D</button>
+        </div>
+
         <div class="mb-3">
             <canvas id="stockChart" height="200"></canvas>
         </div>
+
         <p class="text-muted">Last Updated: @Model.FirstOrDefault()?.LastUpdated?.ToString("g")</p>
-        
-
-
       </div>
     </div>
   </div>
 </div>
+
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

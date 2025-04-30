@@ -39,7 +39,8 @@ builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreReposito
 builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -90,6 +91,9 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
@@ -107,6 +111,9 @@ builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 
 // Register notifications repositories
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+// Register admin repositories
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
 // Register notifications services
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -151,8 +158,10 @@ app.MapControllerRoute(
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<SuspensionMiddleware>();
 
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<ChatHub>("/chatHub");
 
 app.MapControllerRoute(
     name: "default",
