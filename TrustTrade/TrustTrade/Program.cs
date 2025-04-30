@@ -38,6 +38,7 @@ builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRe
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
 builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
+builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
 
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
