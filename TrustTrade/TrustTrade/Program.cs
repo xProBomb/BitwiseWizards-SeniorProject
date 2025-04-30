@@ -6,6 +6,7 @@ using TrustTrade.DAL.Concrete;
 using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using TrustTrade.Hubs;
 using TrustTrade.Services;
 using TrustTrade.Services.Background;
 using TrustTrade.Services.Web.Interfaces;
@@ -32,7 +33,14 @@ builder.Services.AddScoped<ISearchUserRepository, SearchUserRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
-
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IVerificationHistoryRepository, VerificationHistoryRepository>();
+builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
+builder.Services.AddScoped<IMarketRepository, MarketRepository>();
+builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
+builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -78,9 +86,14 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 // Add services to the container.
+builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();
@@ -93,11 +106,20 @@ builder.Services.AddScoped<IMarketRepository, MarketRepository>();
 // Add HttpClient factory
 builder.Services.AddHttpClient();
 
-// Register DAL services
+// Register DAL services for fin news
 builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 
-// Register application services
-builder.Services.AddScoped<IFinancialNewsService, AlphaVantageNewsService>();
+// Register notifications repositories
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+// Register admin repositories
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+
+// Register notifications services
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Add support for real-time updates
+builder.Services.AddSignalR();
 
 // Register background service - only in production environments
 if (!builder.Environment.IsDevelopment())
@@ -128,9 +150,18 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.MapControllerRoute(
+    name: "following",
+    pattern: "Home/Following",
+    defaults: new { controller = "Home", action = "Following", isFollowing = true});
+
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<SuspensionMiddleware>();
+
+app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<ChatHub>("/chatHub");
 
 app.MapControllerRoute(
     name: "default",

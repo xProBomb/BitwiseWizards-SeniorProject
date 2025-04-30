@@ -28,9 +28,13 @@ public partial class User
     [StringLength(256, ErrorMessage = "Bio cannot exceed 128 characters")]
     public string? Bio { get; set; }
 
-    public bool? IsAdmin { get; set; }
+    public bool IsAdmin { get; set; }
 
     public bool? IsVerified { get; set; }
+
+    public bool? Is_Suspended { get; set; }
+
+    public string? PastUsername { get; set; }
 
     public byte[]? EncryptedApikey { get; set; }
 
@@ -57,4 +61,8 @@ public partial class User
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
     public virtual ICollection<Trade> Trades { get; set; } = new List<Trade>();
+
+    public virtual ICollection<UserBlock> BlockedUsers { get; set; } = new List<UserBlock>();
+
+    public virtual ICollection<UserBlock> BlockedByUsers { get; set; } = new List<UserBlock>();
 }

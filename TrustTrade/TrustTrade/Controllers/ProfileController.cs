@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.Models.ViewModels;
+using TrustTrade.Services;
 using TrustTrade.ViewModels;
 using TrustTrade.Services.Web.Interfaces;
 
@@ -18,8 +19,10 @@ namespace TrustTrade.Controllers
         private readonly ILogger<ProfileController> _logger;
         private readonly IPostService _postService;
         private readonly IProfileService _profileService;
+        private readonly IUserBlockRepository _userBlockRepository;
         private readonly IUserService _userService;
         private readonly IPerformanceScoreRepository _performanceScoreRepository;
+        private readonly INotificationService _notificationService;
 
         public ProfileController(
             TrustTradeDbContext context,
@@ -27,16 +30,20 @@ namespace TrustTrade.Controllers
             ILogger<ProfileController> logger,
             IPostService postService,
             IProfileService profileService,
+            IUserBlockRepository userBlockRepository,
             IUserService userService,
-            IPerformanceScoreRepository performanceScoreRepository)
+            IPerformanceScoreRepository performanceScoreRepository,
+            INotificationService notificationService)
         {
             _context = context;
             _holdingsRepository = holdingsRepository;
             _logger = logger;
             _postService = postService;
             _profileService = profileService;
+            _userBlockRepository = userBlockRepository;
             _userService = userService;
             _performanceScoreRepository = performanceScoreRepository;
+            _notificationService = notificationService;
         }
 
         // route to get to logged in users profile "/Profile"
@@ -121,28 +128,29 @@ namespace TrustTrade.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProfilePicture(IFormFile ProfilePicture)
         {
-            if (ProfilePicture != null && ProfilePicture.Length > 0)
+            if (ProfilePicture == null || !ProfilePicture.ContentType.StartsWith("image/"))
             {
-                var validImageTypes = new[] { "image/jpeg", "image/png" };
-                if (!validImageTypes.Contains(ProfilePicture.ContentType))
-                {
-                    TempData["ProfilePictureError"] = "Invalid image type. Only JPEG and PNG are allowed.";
-                    return RedirectToAction("MyProfile");
-                }
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await ProfilePicture.CopyToAsync(memoryStream);
-                    var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
-                    if (user != null)
-                    {
-                        user.ProfilePicture = memoryStream.ToArray();
-                        _context.Update(user);
-                        await _context.SaveChangesAsync();
-                    }
-                }
+                TempData["ProfilePictureError"] = "Invalid file type. Please upload a valid image.";
+                return RedirectToAction("MyProfile");
             }
+
+            // Process the valid image file (e.g., save it to the database or file system)
+            using (var memoryStream = new MemoryStream())
+            {
+                ProfilePicture.CopyTo(memoryStream);
+                var imageData = memoryStream.ToArray();
+
+                // Save the image data to the user's profile (example)
+                var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+                user.ProfilePicture = imageData;
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+                // delay to ensure the image is saved
+                await Task.Delay(1000);
+            }
+
+            TempData["ProfilePictureSuccess"] = "Profile picture updated successfully.";
             return RedirectToAction("MyProfile");
         }
 
@@ -152,86 +160,107 @@ namespace TrustTrade.Controllers
         [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
         public async Task<IActionResult> UserProfile(string username)
         {
-            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
+    
+    
+    var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
 
-            if (string.IsNullOrEmpty(username))
-            {
-                return RedirectToAction(nameof(MyProfile));
-            }
+    if (string.IsNullOrEmpty(username))
+    {
+        return RedirectToAction(nameof(MyProfile));
+    }
 
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
-            var currentUserId = currentUser?.Id;
-            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+    var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+    var currentUserId = currentUser?.Id;
+    _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
-            var user = await _context.Users
-                .Include(u => u.FollowerFollowerUsers)
-                .Include(u => u.FollowerFollowingUsers)
-                .FirstOrDefaultAsync(u => u.Username == username);
 
-            if (user == null)
-            {
-                _logger.LogDebug("User not found: {Username}", username);
-                return NotFound();
-            }
+    var user = await _context.Users
+        .Include(u => u.FollowerFollowerUsers)
+        .Include(u => u.FollowerFollowingUsers)
+        .FirstOrDefaultAsync(u => u.Username == username);
 
-            _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
+    if (user.Is_Suspended == true)
+    { 
+        var suspendedUserModel = new ProfileViewModel
+        {
+            Id = user.Id,
+            IdentityId = user.IdentityId,
+            Username = user.Username,
+        };
 
-            var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
-            var holdingViewModels = holdings.Select(h => new HoldingViewModel
-            {
-                Symbol = h.Symbol,
-                Quantity = h.Quantity,
-                CurrentPrice = h.CurrentPrice,
-                CostBasis = h.CostBasis,
-                Institution = h.PlaidConnection.InstitutionName,
-                TypeOfSecurity = h.TypeOfSecurity,
-                IsHidden = h.IsHidden
-            }).ToList();
+        return View("Profile", suspendedUserModel);
+    }
+    if (user == null)
+    {
+        _logger.LogDebug("User not found: {Username}", username);
+        return NotFound();
+    }
 
-            var visibilitySettings = await _context.PortfolioVisibilitySettings
-                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+    _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
 
-            bool hideDetails = false;
-            bool hideAll = false;
+    var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+    var holdingViewModels = holdings.Select(h => new HoldingViewModel
+    {
+        Symbol = h.Symbol,
+        Quantity = h.Quantity,
+        CurrentPrice = h.CurrentPrice,
+        CostBasis = h.CostBasis,
+        Institution = h.PlaidConnection.InstitutionName,
+        TypeOfSecurity = h.TypeOfSecurity,
+        IsHidden = h.IsHidden
+    }).ToList();
 
-            if (visibilitySettings != null)
-            {
-                hideDetails = visibilitySettings.HideDetailedInformation;
-                hideAll = visibilitySettings.HideAllPositions;
-            }
+    var visibilitySettings = await _context.PortfolioVisibilitySettings
+        .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-            var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
-            
-            var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
+    bool hideDetails = false;
+    bool hideAll = false;
 
-            var model = new ProfileViewModel
-            {
-                IdentityId = user.IdentityId,
-                Username = user.Username,
-                CreatedAt = user.CreatedAt,
-                Bio = user.Bio,
-                IsVerified = user.IsVerified ?? false,
-                PlaidEnabled = user.PlaidEnabled ?? false,
-                LastPlaidSync = user.LastPlaidSync,
-                FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
-                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
-                            new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
-                            new List<string>(),
-                Holdings = filteredHoldings,
-                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
-                UserTag = user.UserTag,
-                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
-                PerformanceScore = score,
-                HasRatedScore = isRated,
-                ScoreBreakdown = breakdown,
-                ProfilePicture = user.ProfilePicture
-            };
+    if (visibilitySettings != null)
+    {
+        hideDetails = visibilitySettings.HideDetailedInformation;
+        hideAll = visibilitySettings.HideAllPositions;
+    }
 
-            return View("Profile", model);
-        }
+    var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
+    
+    var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
+
+    var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
+    var isBlocked = blockedUserIds.Contains(user.Id);
+
+    var model = new ProfileViewModel
+    {
+        Id = user.Id,
+        IdentityId = user.IdentityId,
+        Username = user.Username,
+        CreatedAt = user.CreatedAt,
+        Bio = user.Bio,
+        IsVerified = user.IsVerified ?? false,
+        PlaidEnabled = user.PlaidEnabled ?? false,
+        LastPlaidSync = user.LastPlaidSync,
+        FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
+        FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+        Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
+                    new List<string>(),
+        Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
+                    new List<string>(),
+        Holdings = filteredHoldings,
+        LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
+        UserTag = user.UserTag,
+        IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
+        PerformanceScore = score,
+        HasRatedScore = isRated,
+        ScoreBreakdown = breakdown,
+        ProfilePicture = user.ProfilePicture,
+        IsBlocked = isBlocked,
+        // property so we know whether to show the message button
+        CanMessage = currentUserId.HasValue && currentUserId != user.Id
+    };
+
+    return View("Profile", model);
+}
 
         [HttpPost]
         public async Task<IActionResult> RefreshHoldings()
@@ -492,11 +521,12 @@ namespace TrustTrade.Controllers
 
             _context.Followers.Add(follower);
             await _context.SaveChangesAsync();
+            
+            // Create notification for the followed user
+            await _notificationService.CreateFollowNotificationAsync(currentUser.Id, userToFollow.Id);
 
-            return Json(new { success = true });
+            return RedirectToAction("UserProfile", new { username = userToFollow.Username });
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> Unfollow(string profileId)
@@ -528,7 +558,63 @@ namespace TrustTrade.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Json(new { success = true });
+            return RedirectToAction("UserProfile", new { username = userToUnfollow.Username });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Block(string profileId)
+        {
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var userToBlock = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToBlock == null)
+            {
+                return NotFound();
+            }
+
+            var block = new UserBlock
+            {
+                BlockedId = userToBlock.Id,
+                BlockerId = currentUser.Id,
+                BlockedAt = DateTime.UtcNow
+            };
+
+            _context.UserBlocks.Add(block);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("UserProfile", new { username = userToBlock.Username });
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Unblock(string profileId)
+        {
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var userToUnblock = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
+            if (userToUnblock == null)
+            {
+                return NotFound();
+            }
+
+            var block = await _context.UserBlocks
+                .FirstOrDefaultAsync(b => b.BlockerId == currentUser.Id && b.BlockedId == userToUnblock.Id);
+
+            if (block != null)
+            {
+                _context.UserBlocks.Remove(block);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("UserProfile", new { username = userToUnblock.Username });
         }
 
         [AllowAnonymous]

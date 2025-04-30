@@ -23,37 +23,42 @@ namespace TrustTrade.Controllers
             _userService = userService;
         }
 
-        public async Task<IActionResult> Index(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> Index(
+            string? categoryFilter = null,
+            int pageNumber = 1,
+            string sortOrder = "DateDesc")
         {
-            // Retrieve posts
-            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder);
-    
-            // Build filters and pagination
+            User? user = await _userService.GetCurrentUserAsync(User);
+
+            // Retrieve posts for the general feed
+            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder, user?.Id);
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, user?.Id);
 
             var vm = new IndexVM
             {
                 Posts = postPreviews,
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
+                IsFollowing = false
             };
 
             return View(vm);
         }
 
         [Authorize]
-        public async Task<IActionResult> Following(string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
-        {
+        public async Task<IActionResult> Following(
+            string? categoryFilter = null,
+            int pageNumber = 1,
+            string sortOrder = "DateDesc")
+        {                
             User? user = await _userService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized();            
+            if (user == null) return Unauthorized();
 
             int currentUserId = user.Id;
 
-            // Retrieve posts
+            // Retrieve posts for the "following" feed
             List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
-
-            // Build filters and pagination
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
             PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
 
@@ -62,9 +67,10 @@ namespace TrustTrade.Controllers
                 Posts = postPreviews,
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
+                IsFollowing = true
             };
 
-            return View(vm);
+            return View("Index", vm);
         }
 
         public IActionResult Privacy()

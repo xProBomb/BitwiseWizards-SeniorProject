@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Contact Support";
+    var isSuspended = Context.Request.Query["suspended"].ToString();
 }
 
 <div class="container py-5">
@@ -11,6 +12,15 @@
                 <h1 class="fw-bold display-6">Contact Support</h1>
                 <p class="text-muted">Let us know how we can help — we usually respond within 24 hours.</p>
             </div>
+
+            @if (!string.IsNullOrEmpty(isSuspended))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Your account has been suspended. Please contact support to appeal.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
 
             @if (ViewBag.SuccessMessage != null)
             {
@@ -35,13 +45,13 @@
 
                     <div class="mb-3">
                         <label asp-for="Name" class="form-label fw-semibold">Your Name</label>
-                        <input asp-for="Name" class="form-control rounded-3" />
+                        <input asp-for="Name" class="form-control rounded-3" required />
                         <span asp-validation-for="Name" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Message" class="form-label fw-semibold">Message</label>
-                        <textarea asp-for="Message" rows="5" class="form-control rounded-3"></textarea>
+                        <textarea asp-for="Message" rows="5" class="form-control rounded-3" required></textarea>
                         <span asp-validation-for="Message" class="text-danger small"></span>
                     </div>
 

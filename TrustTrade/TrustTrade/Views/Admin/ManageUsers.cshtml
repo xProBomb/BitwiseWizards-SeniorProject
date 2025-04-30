@@ -1,0 +1,61 @@
+@model List<User>
+
+<h1 class="mb-4">Manage TrustTrade Users</h1>
+
+<div class="mb-3">
+    <input type="text" id="userSearchInput" class="form-control" placeholder="Search users..." />
+</div>
+
+<!-- Hidden antiforgery token so JavaScript can read it -->
+<form method="post" id="tokenForm">@Html.AntiForgeryToken()</form>
+
+<div id="userList">
+    @await Html.PartialAsync("_UserListPartial", Model)
+</div>
+
+@section Scripts {
+<script>
+    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    function attachSuspendButtons() {
+        document.querySelectorAll('.suspend-btn').forEach(button => {
+            button.addEventListener('click', async e => {
+                e.preventDefault();
+
+                const userId = parseInt(button.dataset.userId);
+                const isReactivate = button.textContent.trim().toLowerCase() === "reactivate";
+                const endpoint = isReactivate ? "/Admin/UnsuspendUser" : "/Admin/SuspendUser";
+
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": token
+                    },
+                    body: JSON.stringify({ userId })
+                });
+
+                if (response.ok) {
+                    // Toggle button state
+                    button.textContent = isReactivate ? "Suspend" : "Reactivate";
+                    button.classList.toggle("btn-danger");
+                    button.classList.toggle("btn-warning");
+                } else {
+                    alert("Failed to update user status.");
+                }
+            });
+        });
+    }
+
+    // Search + reattach buttons after AJAX
+    const searchInput = document.getElementById('userSearchInput');
+    searchInput.addEventListener('input', async () => {
+        const response = await fetch('/Admin/SearchUsers?searchTerm=' + encodeURIComponent(searchInput.value));
+        const html = await response.text();
+        document.getElementById('userList').innerHTML = html;
+        attachSuspendButtons();
+    });
+
+    attachSuspendButtons(); // Initial attach
+</script>
+}

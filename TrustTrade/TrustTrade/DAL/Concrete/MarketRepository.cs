@@ -8,7 +8,6 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.Data;
 using TrustTrade.Models;
 
-
 public class MarketRepository : IMarketRepository
 {
     private readonly TrustTradeDbContext _context;
@@ -27,17 +26,28 @@ public class MarketRepository : IMarketRepository
                 .ToList();
         }
 
-        return await _context.Stocks
+        var stockList = await _context.Stocks
             .OrderByDescending(s => Math.Abs(s.DailyChange))
-            .Select(s => new StockViewModel
-            {
-                Ticker = s.TickerSymbol,
-                Name = "",
-                Price = s.StockPrice,
-                Change = s.DailyChange,
-                LastUpdated = s.LastUpdated
-            })
             .ToListAsync();
+
+        var highsLookup = await _context.StockHistories
+            .Where(h => stockList.Select(s => s.TickerSymbol).Contains(h.TickerSymbol))
+            .OrderByDescending(h => h.Date)
+            .GroupBy(h => h.TickerSymbol)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.Date).Take(7).OrderBy(x => x.Date).Select(x => x.HighPrice).ToList()
+            );
+
+        return stockList.Select(s => new StockViewModel
+        {
+            Ticker = s.TickerSymbol,
+            Name = "", // You can expand this if needed
+            Price = s.StockPrice,
+            Change = s.DailyChange,
+            LastUpdated = s.LastUpdated,
+            Highs = highsLookup.ContainsKey(s.TickerSymbol) ? highsLookup[s.TickerSymbol] : new List<decimal>()
+        }).ToList();
     }
 
     public async Task<List<StockViewModel>> SearchStocksAsync(string searchTerm, bool isCrypto)
@@ -51,15 +61,40 @@ public class MarketRepository : IMarketRepository
                 .ToList();
         }
 
-        return await _context.Stocks
+        var matchedStocks = await _context.Stocks
             .Where(s => s.TickerSymbol.Contains(searchTerm))
-            .Select(s => new StockViewModel
-            {
-                Ticker = s.TickerSymbol,
-                Name = "",
-                Price = s.StockPrice,
-                Change = s.DailyChange
-            })
+            .OrderByDescending(s => Math.Abs(s.DailyChange))
+            .Take(20)
+            .ToListAsync();
+
+        var highsLookup = await _context.StockHistories
+            .Where(h => matchedStocks.Select(s => s.TickerSymbol).Contains(h.TickerSymbol))
+            .OrderByDescending(h => h.Date)
+            .GroupBy(h => h.TickerSymbol)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.Date).Take(7).OrderBy(x => x.Date).Select(x => x.HighPrice).ToList()
+            );
+
+        return matchedStocks.Select(s => new StockViewModel
+        {
+            Ticker = s.TickerSymbol,
+            Name = "",
+            Price = s.StockPrice,
+            Change = s.DailyChange,
+            LastUpdated = s.LastUpdated,
+            Highs = highsLookup.ContainsKey(s.TickerSymbol) ? highsLookup[s.TickerSymbol] : new List<decimal>()
+        }).ToList();
+    }
+
+    public async Task<List<(DateTime Date, decimal High, decimal Low)>> GetHighLowHistoryAsync(string ticker, int days = 30)
+    {
+        return await _context.StockHistories
+            .Where(h => h.TickerSymbol == ticker)
+            .OrderByDescending(h => h.Date)
+            .Take(days)
+            .OrderBy(h => h.Date)
+            .Select(h => new ValueTuple<DateTime, decimal, decimal>(h.Date, h.HighPrice, h.LowPrice))
             .ToListAsync();
     }
 

@@ -32,7 +32,9 @@ public class UserServiceTests
         _userService = new UserService(
             _loggerMock.Object,
             _userManagerMock.Object,
-            _userRepositoryMock.Object
+            _userRepositoryMock.Object,
+            null!
+
         );
 
         // Test users

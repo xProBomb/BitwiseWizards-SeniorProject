@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
+using TrustTrade.Services;
 using TrustTrade.ViewModels;
 using TrustTrade.Services.Web.Interfaces;
 
@@ -26,6 +27,7 @@ namespace TestTrustTrade
         private Mock<ILogger<ProfileController>> _loggerMock;
         private Mock<IPostService> _postServiceMock;
         private Mock<IProfileService> _profileServiceMock;
+        private Mock<IUserBlockRepository> _userBlockRepositoryMock;
         private Mock<IUserService> _userServiceMock;
         private Mock<IPerformanceScoreRepository> _performanceScoreRepository;
         private ProfileController _controller;
@@ -33,6 +35,7 @@ namespace TestTrustTrade
         private List<PostPreviewVM> _postPreviews;
         private PostFiltersPartialVM _postFiltersPartialVM;
         private PaginationPartialVM _paginationPartialVM;
+        private Mock<INotificationService> _notificationServiceMock;
         
         [TearDown]
         public void TearDown()
@@ -49,8 +52,10 @@ namespace TestTrustTrade
             _loggerMock = new Mock<ILogger<ProfileController>>();
             _postServiceMock = new Mock<IPostService>();
             _profileServiceMock = new Mock<IProfileService>();
+            _userBlockRepositoryMock = new Mock<IUserBlockRepository>();
             _userServiceMock = new Mock<IUserService>();
             _performanceScoreRepository = new Mock<IPerformanceScoreRepository>();
+            _notificationServiceMock = new Mock<INotificationService>();
 
             _controller = new ProfileController(
                 _contextMock.Object,
@@ -58,8 +63,10 @@ namespace TestTrustTrade
                 _loggerMock.Object,
                 _postServiceMock.Object,
                 _profileServiceMock.Object,
+                _userBlockRepositoryMock.Object,
                 _userServiceMock.Object,
-                _performanceScoreRepository.Object
+                _performanceScoreRepository.Object,
+                _notificationServiceMock.Object
             );
 
             // Mock users

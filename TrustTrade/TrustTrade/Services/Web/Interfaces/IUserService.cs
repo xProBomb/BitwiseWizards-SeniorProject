@@ -23,4 +23,11 @@ public interface IUserService
     /// <param name="username">The username of the user to find.</param>
     /// <returns>The user with the specified username, or null if not found.</returns>
     Task<User?> GetUserByUsernameAsync(string username);
+    
+    /// <summary>
+    /// Get a user from TrustTrade Db
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<User> GetUserByIdAsync(int userId);
 }

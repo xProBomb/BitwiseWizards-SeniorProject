@@ -140,7 +140,10 @@ namespace TrustTrade.Controllers
             Post? post = await _postRepository.FindByIdAsync(id);
             if (post == null) return NotFound();
 
-            var isPlaidEnabled = post.User.PlaidEnabled ?? false;
+            // Get current logged-in user ONCE
+            User? user = await _userService.GetCurrentUserAsync(User);
+
+            var isPlaidEnabled = post.User?.PlaidEnabled ?? false;
             string? portfolioValue = null;
 
             // Retreive and format the portfolio value if Plaid is enabled
@@ -158,13 +161,36 @@ namespace TrustTrade.Controllers
 
             bool isOwnedByCurrentUser = false;
             bool isLikedByCurrentUser = false;
-            User? user = await _userService.GetCurrentUserAsync(User);
+
             if (user != null && user.Id == post.UserId)
             {
                 isOwnedByCurrentUser = true;
-
                 isLikedByCurrentUser = post.Likes.Any(l => l.UserId == user.Id);
             }
+
+            List<CommentVM> comments = post.Comments.Select(comment =>
+            {
+                string? commentPortfolioValue = null;
+
+                if (comment.User?.PlaidEnabled == true)
+                {
+                    commentPortfolioValue = comment.PortfolioValueAtPosting.HasValue
+                        ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(comment.PortfolioValueAtPosting.Value)
+                        : "$0";
+                }
+
+                return new CommentVM
+                {
+                    Id = comment.Id,
+                    Username = comment.User?.Username ?? "Unknown",
+                    Content = comment.Content,
+                    TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
+                    IsPlaidEnabled = comment.User.PlaidEnabled ?? false,
+                    PortfolioValueAtPosting = portfolioValue,
+                    ProfilePicture = comment.User.ProfilePicture,
+                    IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
+                };
+            }).ToList();
 
             // Map the post to the view model
             var vm = new PostDetailsVM
@@ -172,20 +198,23 @@ namespace TrustTrade.Controllers
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
-                Username = post.User.Username,
+                Username = post.User?.Username ?? "Unknown",
                 TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
-                Tags = post.Tags.Select(t => t.TagName).ToList(),
-                LikeCount = post.Likes.Count,
+                Tags = post.Tags?.Select(t => t.TagName).ToList() ?? new List<string>(),
+                LikeCount = post.Likes?.Count ?? 0,
                 IsLikedByCurrentUser = isLikedByCurrentUser,
-                CommentCount = post.Comments.Count,
+                CommentCount = post.Comments?.Count ?? 0,
                 IsPlaidEnabled = isPlaidEnabled,
                 PortfolioValueAtPosting = portfolioValue,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
-                ProfilePicture = post.User.ProfilePicture
+                IsUserAdmin = user?.IsAdmin ?? false,
+                ProfilePicture = post.User?.ProfilePicture,
+                Comments = comments
             };
 
             return View(vm);
         }
+
 
         [HttpGet]
         [Authorize]
