@@ -76,6 +76,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
+                // Remove the paragraph element if the list is empty
+                console.log("Hello1");
+                const emptyParagraph = commentsList.querySelector("p");
+                if (emptyParagraph) {
+                    emptyParagraph.remove();
+                }
+
                 const commentHtml = await htmlResponse.text();
 
                 // Insert the new comment HTML into the comments list
