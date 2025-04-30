@@ -125,37 +125,38 @@ namespace TrustTrade.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProfilePicture(IFormFile ProfilePicture)
         {
-            if (ProfilePicture != null && ProfilePicture.Length > 0)
+            if (ProfilePicture == null || !ProfilePicture.ContentType.StartsWith("image/"))
             {
-                var validImageTypes = new[] { "image/jpeg", "image/png" };
-                if (!validImageTypes.Contains(ProfilePicture.ContentType))
-                {
-                    TempData["ProfilePictureError"] = "Invalid image type. Only JPEG and PNG are allowed.";
-                    return RedirectToAction("MyProfile");
-                }
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await ProfilePicture.CopyToAsync(memoryStream);
-                    var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
-                    if (user != null)
-                    {
-                        user.ProfilePicture = memoryStream.ToArray();
-                        _context.Update(user);
-                        await _context.SaveChangesAsync();
-                    }
-                }
+                TempData["ProfilePictureError"] = "Invalid file type. Please upload a valid image.";
+                return RedirectToAction("MyProfile");
             }
+
+            // Process the valid image file (e.g., save it to the database or file system)
+            using (var memoryStream = new MemoryStream())
+            {
+                ProfilePicture.CopyTo(memoryStream);
+                var imageData = memoryStream.ToArray();
+
+                // Save the image data to the user's profile (example)
+                var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+                user.ProfilePicture = imageData;
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+                // delay to ensure the image is saved
+                await Task.Delay(1000);
+            }
+
+            TempData["ProfilePictureSuccess"] = "Profile picture updated successfully.";
             return RedirectToAction("MyProfile");
         }
 
         // In order to access the profile of a user, use the route below
         // This is the method for accessing a non-owners profile
         [AllowAnonymous]
-[HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
-public async Task<IActionResult> UserProfile(string username)
-{
+        [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
+        public async Task<IActionResult> UserProfile(string username)
+        {
     
     
     var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
