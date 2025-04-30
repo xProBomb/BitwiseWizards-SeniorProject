@@ -62,8 +62,6 @@
 
 <script>
     // Re-initialize or ensure tab click handlers are present if loaded via AJAX
-    // (The current implementation attaches handlers after the fetch in Index.cshtml,
-    // but if tabs are reloaded, handlers might need re-attachment depending on how it's done)
     document.querySelectorAll('.financial-news-widget .category-tab').forEach(tab => {
         if (!tab.dataset.handlerAttached) { // Prevent multiple handlers
             tab.addEventListener('click', function() {
@@ -73,7 +71,7 @@
                 const url = this.getAttribute('data-url');
 
                 // Show loading state in news list
-                newsList.innerHTML = `<div class="loading-spinner text-center p-4"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+                newsList.innerHTML = `<div class="loading-spinner text-center p-4"><div class="spinner-border spinner-border-sm text-accent" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
 
                 // Remove active class from all tabs in this widget
                 tabs.forEach(t => t.classList.remove('active'));

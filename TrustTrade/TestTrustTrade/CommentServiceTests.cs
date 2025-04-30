@@ -3,6 +3,8 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.Services.Web.Implementations;
 using TrustTrade.Models;
 using Microsoft.Extensions.Logging;
+using TrustTrade.Services;
+using TrustTrade.Services.Web.Interfaces;
 
 namespace TestTrustTrade;
 
@@ -14,6 +16,7 @@ public class CommentServiceTests
     private CommentService _commentService;
     private Mock<IHoldingsRepository> _holdingsRepositoryMock;
     private Mock<IPostRepository> _postRepositoryMock;
+    private Mock<INotificationService> _notificationServiceMock;
     private List<Comment> _comments;
     private List<Comment> _commentsWithPlaidEnabledUser;
 
@@ -23,12 +26,15 @@ public class CommentServiceTests
         _loggerMock = new Mock<ILogger<CommentService>>();
         _commentRepositoryMock = new Mock<ICommentRepository>();
         _holdingsRepositoryMock = new Mock<IHoldingsRepository>();
+        _notificationServiceMock = new Mock<INotificationService>();
         _postRepositoryMock = new Mock<IPostRepository>();
+        
 
         _commentService = new CommentService(
             _loggerMock.Object,
             _commentRepositoryMock.Object,
             _holdingsRepositoryMock.Object,
+            _notificationServiceMock.Object,
             _postRepositoryMock.Object
         );
 

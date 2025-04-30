@@ -34,6 +34,7 @@ public class UserServiceTests
             _userManagerMock.Object,
             _userRepositoryMock.Object,
             null!
+
         );
 
         // Test users
