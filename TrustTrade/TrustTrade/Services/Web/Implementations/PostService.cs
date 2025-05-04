@@ -26,35 +26,32 @@ public class PostService : IPostService
         _userBlockRepository = userBlockRepository;
     }
 
-    public async Task<List<PostPreviewVM>> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId)
+    public async Task<(List<PostPreviewVM> posts, int totalPosts)> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId)
     {
         List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
+        var (posts, totalPosts) = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
 
-        List<Post> posts = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
-
-        return MapPostsToPostPreviewVM(posts);
+        return (MapPostsToPostPreviewVM(posts), totalPosts);
     }
 
-    public async Task<List<PostPreviewVM>> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder)
+    public async Task<(List<PostPreviewVM> posts, int totalPosts)> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder)
     {
         List<int> blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId);
+        var (posts, totalPosts) = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUserId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
 
-        List<Post> posts = await _postRepository.GetPagedPostsByUserFollowsAsync(currentUserId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
-
-        return MapPostsToPostPreviewVM(posts);
+        return (MapPostsToPostPreviewVM(posts), totalPosts);
     }
 
-    public async Task<List<PostPreviewVM>> GetUserPostPreviewsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder)
+    public async Task<(List<PostPreviewVM> posts, int totalPosts)> GetUserPostPreviewsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder)
     {
-        List<Post> posts = await _postRepository.GetPagedPostsByUserAsync(userId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+        var (posts, totalPosts) = await _postRepository.GetPagedPostsByUserAsync(userId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
 
-        return MapPostsToPostPreviewVM(posts);
+        return (MapPostsToPostPreviewVM(posts), totalPosts);
     }
 
     public async Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, int? currentUserId)
     {
         List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
-
         List<Post> posts = await _postRepository.SearchPostsAsync(searchTerms, blockedUserIds);
 
         return MapPostsToPostPreviewVM(posts);
@@ -73,34 +70,19 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber, int? currentUserId)
+    public async Task<PaginationPartialVM> BuildPaginationAsync(string? categoryFilter, int pageNumber, int totalPosts, int? currentUserId)
     {
         List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
-
-        int totalPosts = await _postRepository.GetTotalPostsAsync(categoryFilter, blockedUserIds);
-
-        return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
-    }
-
-    public async Task<PaginationPartialVM> BuildFollowingPaginationAsync(int currentUserId, string? categoryFilter, int pageNumber)
-    {
-        List<int> blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId);
-
-        int totalPosts = await _postRepository.GetTotalPostsByUserFollowsAsync(currentUserId, categoryFilter, blockedUserIds);
-        
-        return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
-    }
-
-    public async Task<PaginationPartialVM> BuildUserPaginationAsync(int userId, string? categoryFilter, int pageNumber)
-    {
-        int totalPosts = await _postRepository.GetTotalPostsByUserAsync(userId, categoryFilter);
 
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter);
     }
 
     public async Task<PaginationPartialVM> BuildSearchPaginationAsync(string search, List<string> searchTerms, string? categoryFilter, int pageNumber)
     {
-        int totalPosts = await _postRepository.GetTotalPostsBySearchAsync(searchTerms, categoryFilter);
+        //int totalPosts = await _postRepository.GetTotalPostsBySearchAsync(searchTerms, categoryFilter);
+
+        // placeholder
+        int totalPosts = 100; // Replace with actual logic to get total posts based on search terms
 
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter, search);
     }
