@@ -15,7 +15,12 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
-    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null)
+    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(
+        string? categoryFilter = null, 
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
     {
         IQueryable<Post> query = _posts
             .Include(p => p.User)
@@ -33,7 +38,13 @@ public class PostRepository : Repository<Post>, IPostRepository
         return (posts, totalPosts);
     }
 
-    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null)
+    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsByUserFollowsAsync(
+        int currentUserId,
+        string? categoryFilter = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
     {
         // Start with a query that includes related entities.
         IQueryable<Post> query = _posts
@@ -56,14 +67,20 @@ public class PostRepository : Repository<Post>, IPostRepository
         return (posts, totalPosts);
     }
 
-    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsByUserAsync(int userId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null)
+    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsByUserAsync(
+        int userId,
+        string? categoryFilter = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
     {
         // Start with a query that includes related entities.
         IQueryable<Post> query = _posts
             .Include(p => p.User)
             .Include(p => p.Tags);
 
-        query.Where(p => p.UserId == userId);
+        query = query.Where(p => p.UserId == userId);
 
         query = ApplyCategoryFilter(query, categoryFilter);
         query = ApplyBlockedUsersFilter(query, blockedUserIds);

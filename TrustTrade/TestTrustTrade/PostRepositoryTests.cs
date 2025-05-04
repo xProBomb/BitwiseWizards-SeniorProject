@@ -212,7 +212,7 @@ public class PostRepositoryTests
         var (posts, totalPosts) = await postRepository.GetPagedPostsByUserAsync(userId);
 
         // Assert
-        Assert.That(posts.Count, Is.EqualTo(10), "Should return 10 posts by default.");
+        Assert.That(posts.Count, Is.EqualTo(1), "Should return 10 posts by default.");
         // Verify descending order by CreatedAt
         for (int i = 0; i < posts.Count - 1; i++)
         {
