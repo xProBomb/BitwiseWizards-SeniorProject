@@ -15,9 +15,13 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
-    public async Task<List<Post>> GetPagedPostsAsync(string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null)
+    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(
+        string? categoryFilter = null, 
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
     {
-        // Start with a query that includes related entities.
         IQueryable<Post> query = _posts
             .Include(p => p.User)
             .Include(p => p.Tags);
@@ -25,43 +29,69 @@ public class PostRepository : Repository<Post>, IPostRepository
         query = ApplyCategoryFilter(query, categoryFilter);
         query = ApplyBlockedUsersFilter(query, blockedUserIds);
         query = ApplySorting(query, sortOrder);
-        query = ApplyPagination(query, pageNumber, pageSize);
 
-        return await query.ToListAsync();
-    }
-
-    public async Task<List<Post>> GetPagedPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null)
-    {
-        // Start with a query that includes related entities.
-        IQueryable<Post> query = _posts
-            .Include(p => p.User)
-            .Include(p => p.Tags);
-
-        query = ApplyUserFollowsFilter(query, currentUserId);
-        query = ApplyCategoryFilter(query, categoryFilter);
-        query = ApplyBlockedUsersFilter(query, blockedUserIds);
-        query = ApplySorting(query, sortOrder);
-        query = ApplyPagination(query, pageNumber, pageSize);
-
-        return await query.ToListAsync();
-    }
-
-    public async Task<List<Post>> GetPagedPostsByUserAsync(int userId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null)
-    {
-        // Start with a query that includes related entities.
-        IQueryable<Post> query = _posts
-            .Include(p => p.User)
-            .Include(p => p.Tags);
-
+        int totalPosts = await query.CountAsync();
         
+        query = ApplyPagination(query, pageNumber, pageSize);
+        var posts = await query.ToListAsync();
 
-        query = ApplyUserFilter(query, userId);
+        return (posts, totalPosts);
+    }
+
+    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsByUserFollowsAsync(
+        int currentUserId,
+        string? categoryFilter = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
+    {
+        // Start with a query that includes related entities.
+        IQueryable<Post> query = _posts
+            .Include(p => p.User)
+            .Include(p => p.Tags);
+
+        query = query
+            .Where(p => p.User.FollowerFollowerUsers
+                .Any(f => f.FollowingUserId == currentUserId));
+
         query = ApplyCategoryFilter(query, categoryFilter);
         query = ApplyBlockedUsersFilter(query, blockedUserIds);
         query = ApplySorting(query, sortOrder);
-        query = ApplyPagination(query, pageNumber, pageSize);
 
-        return await query.ToListAsync();
+        int totalPosts = await query.CountAsync();
+
+        query = ApplyPagination(query, pageNumber, pageSize);
+        var posts = await query.ToListAsync();
+
+        return (posts, totalPosts);
+    }
+
+    public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsByUserAsync(
+        int userId,
+        string? categoryFilter = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
+    {
+        // Start with a query that includes related entities.
+        IQueryable<Post> query = _posts
+            .Include(p => p.User)
+            .Include(p => p.Tags);
+
+        query = query.Where(p => p.UserId == userId);
+
+        query = ApplyCategoryFilter(query, categoryFilter);
+        query = ApplyBlockedUsersFilter(query, blockedUserIds);
+        query = ApplySorting(query, sortOrder);
+
+        int totalPosts = await query.CountAsync();
+
+        query = ApplyPagination(query, pageNumber, pageSize);
+        var posts = await query.ToListAsync();
+
+        return (posts, totalPosts);
     }
 
     public async Task<List<Post>> SearchPostsAsync(List<string> searchTerms, List<int>? blockedUserIds = null)
@@ -71,61 +101,18 @@ public class PostRepository : Repository<Post>, IPostRepository
             .Include(p => p.User)
             .Include(p => p.Tags);
 
-        query = ApplySearchTerms(query, searchTerms);
+        if (searchTerms != null && searchTerms.Count > 0)
+        {
+            foreach (var term in searchTerms)
+            {
+                var lowerTerm = term.ToLower();
+                query = query.Where(p => p.Title.ToLower().Contains(lowerTerm) || p.Content.ToLower().Contains(lowerTerm));
+            }
+        }
+
         query = ApplyBlockedUsersFilter(query, blockedUserIds);
 
         return await query.ToListAsync();
-    }
-
-    public async Task<int> GetTotalPostsAsync(string? categoryFilter = null, List<int>? blockedUserIds = null)
-    {
-        // Start with a query that includes the related Tags.
-        IQueryable<Post> query = _posts
-            .Include(p => p.Tags);
-
-        query = ApplyBlockedUsersFilter(query, blockedUserIds);
-        query = ApplyCategoryFilter(query, categoryFilter);
-
-        return await query.CountAsync();
-    }
-
-    public async Task<int> GetTotalPostsByUserFollowsAsync(int currentUserId, string? categoryFilter = null, List<int>? blockedUserIds = null)
-    {
-        // Start with a query that includes the related Tags.
-        IQueryable<Post> query = _posts
-            .Include(p => p.Tags);
-
-        query = ApplyUserFollowsFilter(query, currentUserId);
-        query = ApplyBlockedUsersFilter(query, blockedUserIds);
-        query = ApplyCategoryFilter(query, categoryFilter);
-
-        return await query.CountAsync();
-    }
-
-    public async Task<int> GetTotalPostsByUserAsync(int userId, string? categoryFilter = null, List<int>? blockedUserIds = null)
-    {
-        // Start with a query that includes the related Tags.
-        IQueryable<Post> query = _posts
-            .Include(p => p.Tags);
-
-        query = ApplyUserFilter(query, userId);
-        query = ApplyBlockedUsersFilter(query, blockedUserIds);
-        query = ApplyCategoryFilter(query, categoryFilter);
-
-        return await query.CountAsync();
-    }
-
-    public async Task<int> GetTotalPostsBySearchAsync(List<string> searchTerms, string? categoryFilter = null, List<int>? blockedUserIds = null)
-    {
-        // Start with a query that includes the related Tags.
-        IQueryable<Post> query = _posts
-            .Include(p => p.Tags);
-
-        query = ApplySearchTerms(query, searchTerms);
-        query = ApplyBlockedUsersFilter(query, blockedUserIds);
-        query = ApplyCategoryFilter(query, categoryFilter);
-
-        return await query.CountAsync();
     }
 
     private static IQueryable<Post> ApplyBlockedUsersFilter(IQueryable<Post> query, List<int>? blockedUserIds)
@@ -136,29 +123,6 @@ public class PostRepository : Repository<Post>, IPostRepository
         }
 
         return query.Where(p => !blockedUserIds.Contains(p.UserId));
-    }
-
-    private static IQueryable<Post> ApplySearchTerms(IQueryable<Post> query, List<string> searchTerms)
-    {
-        if (searchTerms != null && searchTerms.Count > 0)
-        {
-            foreach (var term in searchTerms)
-            {
-                var lowerTerm = term.ToLower();
-                query = query.Where(p => p.Title.ToLower().Contains(lowerTerm) || p.Content.ToLower().Contains(lowerTerm));
-            }
-        }
-        return query;
-    }
-
-    private static IQueryable<Post> ApplyUserFilter(IQueryable<Post> query, int userId)
-    {
-        return query.Where(p => p.UserId == userId);
-    }
-
-    private static IQueryable<Post> ApplyUserFollowsFilter(IQueryable<Post> query, int currentUserId)
-    {
-        return query.Where(p => p.User.FollowerFollowerUsers.Any(f => f.FollowingUserId == currentUserId));
     }
 
     private static IQueryable<Post> ApplyCategoryFilter(IQueryable<Post> query, string? category)
@@ -192,7 +156,5 @@ public class PostRepository : Repository<Post>, IPostRepository
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize);
     }
-
-
 }
 
