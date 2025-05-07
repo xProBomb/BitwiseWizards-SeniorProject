@@ -61,4 +61,27 @@ public class CommentLikeRepositoryTests
         // Assert
         Assert.That(result, Is.Null);
     }
+
+    [Test]
+    public async Task GetLikeCountByCommentIdAsync_WhenLikesExist_ReturnsCount()
+    {
+        // Arrange & Act
+        var result = await _commentLikeRepository.GetLikeCountByCommentIdAsync(1);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task GetLikeCountByCommentIdAsync_WhenNoLikes_ReturnsZero()
+    {
+        // Arrange
+        _commentLikes.Clear();
+
+        // Act
+        var result = await _commentLikeRepository.GetLikeCountByCommentIdAsync(1);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(0));
+    }
 }

@@ -21,4 +21,10 @@ public class CommentLikeRepository : Repository<CommentLike>, ICommentLikeReposi
         return await _commentLikes
             .FirstOrDefaultAsync(cl => cl.CommentId == commentId && cl.UserId == userId);
     }
+
+    public async Task<int> GetLikeCountByCommentIdAsync(int commentId)
+    {
+        return await _commentLikes
+            .CountAsync(cl => cl.CommentId == commentId);
+    }
 }

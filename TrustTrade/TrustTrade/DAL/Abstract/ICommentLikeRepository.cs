@@ -14,4 +14,6 @@ public interface ICommentLikeRepository : IRepository<CommentLike>
     /// <param name="userId">The ID of the user.</param>
     /// <returns>The CommentLike entity, or null if not found.</returns>
     Task<CommentLike?> FindByCommentIdAndUserIdAsync(int commentId, int userId);
+
+    Task<int> GetLikeCountByCommentIdAsync(int commentId);
 }
