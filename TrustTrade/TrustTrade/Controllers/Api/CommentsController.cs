@@ -36,10 +36,10 @@ namespace TrustTrade.Controllers.Api
 
             try
             {
-                User? user = await _userService.GetCurrentUserAsync(User);
-                if (user == null) return Unauthorized();
+                User? currentUser = await _userService.GetCurrentUserAsync(User);
+                if (currentUser == null) return Unauthorized();
 
-                Comment comment = await _commentService.CreateCommentAsync(user, commentCreateDTO);
+                Comment comment = await _commentService.CreateCommentAsync(currentUser, commentCreateDTO);
 
                 return Ok(new { commentId = comment.Id });
             }
@@ -61,10 +61,10 @@ namespace TrustTrade.Controllers.Api
         {
             try
             {
-                User? user = await _userService.GetCurrentUserAsync(User);
-                if (user == null) return Unauthorized();
+                User? currentUser = await _userService.GetCurrentUserAsync(User);
+                if (currentUser == null) return Unauthorized();
 
-                bool result = await _commentService.DeleteCommentAsync(commentId, user.Id);
+                bool result = await _commentService.DeleteCommentAsync(commentId, currentUser.Id);
 
                 if (!result)
                 {
@@ -77,6 +77,32 @@ namespace TrustTrade.Controllers.Api
             {
                 _logger.LogError(ex, "Error deleting comment.");
                 return StatusCode(500, "An error occurred while deleting the comment.");
+            }
+        }
+
+        // POST: api/comments/{commentId}/toggleLike
+        [HttpPost("{commentId}/toggleLike")]
+        [Authorize]
+        public async Task<IActionResult> ToggleCommentLike(int commentId)
+        {
+            try
+            {
+                User? currentUser = await _userService.GetCurrentUserAsync(User);
+                if (currentUser == null) return Unauthorized();
+
+                bool isLiked = await _commentService.ToggleCommentLikeAsync(commentId, currentUser.Id);
+                int likeCount = await _commentService.GetCommentLikeCountAsync(commentId);
+
+                return Ok(new { isLiked, likeCount });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling like on comment.");
+                return StatusCode(500, "An error occurred while toggling the like on the comment.");
             }
         }
     }

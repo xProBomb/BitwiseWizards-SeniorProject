@@ -32,4 +32,8 @@ public interface ICommentService
     Task<Comment> CreateCommentAsync(User user, CommentCreateDTO commentCreateDTO);
 
     Task<bool> DeleteCommentAsync(int commentId, int userId);
+
+    Task<bool> ToggleCommentLikeAsync(int commentId, int userId);
+
+    Task<int> GetCommentLikeCountAsync(int commentId);
 }
