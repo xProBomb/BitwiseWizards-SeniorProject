@@ -624,9 +624,9 @@ namespace TrustTrade.Controllers
             var user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
-            var postPreviews = await _postService.GetUserPostPreviewsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var (postPreviews, totalPosts) = await _postService.GetUserPostPreviewsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
             var postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            var paginationVM = await _postService.BuildUserPaginationAsync(user.Id, categoryFilter, pageNumber);
+            var paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, user.Id);
 
             var vm = new UserPostsVM
             {

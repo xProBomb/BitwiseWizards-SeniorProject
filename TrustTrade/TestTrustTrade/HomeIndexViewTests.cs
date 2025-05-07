@@ -70,10 +70,10 @@ namespace TestTrustTrade
         {
             // Arrange
             _postServiceMock.Setup(s => s.GetPostPreviewsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
-                .ReturnsAsync(_postPreviews);
+                .ReturnsAsync((_postPreviews, _postPreviews.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
-            _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+             _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null))
                 .ReturnsAsync(_paginationPartialVM);
 
             // Act
@@ -89,10 +89,10 @@ namespace TestTrustTrade
         {
             // Arrange
             _postServiceMock.Setup(s => s.GetPostPreviewsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
-                .ReturnsAsync(_postPreviews);
+                .ReturnsAsync((_postPreviews, _postPreviews.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
-            _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), null))
+             _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null))
                 .ReturnsAsync(_paginationPartialVM);
 
             // Act
@@ -114,10 +114,10 @@ namespace TestTrustTrade
             _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
                 .ReturnsAsync(_user);
             _postServiceMock.Setup(s => s.GetFollowingPostPreviewsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(_postPreviews);
+                .ReturnsAsync((_postPreviews, _postPreviews.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
-            _postServiceMock.Setup(s => s.BuildFollowingPaginationAsync(1, It.IsAny<string>(), It.IsAny<int>()))
+             _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(_paginationPartialVM);
 
             // Act
@@ -134,10 +134,10 @@ namespace TestTrustTrade
             _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
                 .ReturnsAsync(_user);
             _postServiceMock.Setup(s => s.GetFollowingPostPreviewsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(_postPreviews);
+                .ReturnsAsync((_postPreviews, _postPreviews.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
-            _postServiceMock.Setup(s => s.BuildFollowingPaginationAsync(1, It.IsAny<string>(), It.IsAny<int>()))
+             _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(_paginationPartialVM);
 
             // Act

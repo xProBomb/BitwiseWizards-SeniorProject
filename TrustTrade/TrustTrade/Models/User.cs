@@ -54,6 +54,8 @@ public partial class User
 
     public virtual ICollection<Follower> FollowerFollowingUsers { get; set; } = new List<Follower>();
 
+    public virtual ICollection<CommentLike> CommentLikes { get; set; } = new List<CommentLike>();
+
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual ICollection<PlaidConnection> PlaidConnections { get; set; } = new List<PlaidConnection>();
