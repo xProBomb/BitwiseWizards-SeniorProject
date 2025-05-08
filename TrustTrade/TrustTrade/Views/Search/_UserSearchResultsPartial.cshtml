@@ -35,7 +35,7 @@ else
                         </a>
                         <form method="post" action="/Chat/StartConversation" style="display: inline;">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@user.Id" />
+                            <input type="hidden" name="userId" value="@user.Id" data-user-id="@user.Id"/>
                             <button type="submit" class="btn btn-outline-accent ms-2 start-chat-btn">
                                 <i class="bi bi-chat-text"></i> Message
                             </button>
