@@ -17,19 +17,22 @@ public class CommentService : ICommentService
     private readonly IHoldingsRepository _holdingsRepository;
     private readonly INotificationService _notificationService;
     private readonly IPostRepository _postRepository;
+    private readonly ICommentLikeRepository _commentLikeRepository;
 
     public CommentService(
         ILogger<CommentService> logger, 
         ICommentRepository commentRepository, 
         IHoldingsRepository holdingsRepository,
         INotificationService notificationService,
-        IPostRepository postRepository)
+        IPostRepository postRepository,
+        ICommentLikeRepository commentLikeRepository)
     {
         _logger = logger;
         _commentRepository = commentRepository;
         _holdingsRepository = holdingsRepository;
         _notificationService = notificationService;
         _postRepository = postRepository;
+        _commentLikeRepository = commentLikeRepository;
     }
 
     public async Task<List<CommentVM>> GetPostCommentsAsync(int postId)
@@ -161,4 +164,48 @@ public class CommentService : ICommentService
         return true;
     }
 
+    public async Task<bool> ToggleCommentLikeAsync(int commentId, int userId)
+    {
+        Comment? comment = await _commentRepository.FindByIdAsync(commentId);
+        
+        if (comment == null)
+        {
+            _logger.LogWarning($"Comment with ID {commentId} not found.");
+            throw new KeyNotFoundException($"Comment with ID {commentId} not found.");
+        }
+
+        CommentLike? existingLike = await _commentLikeRepository.FindByCommentIdAndUserIdAsync(commentId, userId);
+
+        bool isLiked;
+
+        if (existingLike != null)
+        {
+            // User already liked the comment, so we remove the like
+            await _commentLikeRepository.DeleteAsync(existingLike);
+            isLiked = false;
+            _logger.LogInformation($"User {userId} unliked comment {commentId}.");
+        }
+        else
+        {
+            // User has not liked the comment yet, so we add a like
+            var newLike = new CommentLike
+            {
+                CommentId = commentId,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _commentLikeRepository.AddOrUpdateAsync(newLike);
+            isLiked = true;
+            _logger.LogInformation($"User {userId} liked comment {commentId}.");
+        }
+
+        return isLiked;
+    }
+
+    public async Task<int> GetCommentLikeCountAsync(int commentId)
+    {
+        int likeCount = await _commentLikeRepository.GetLikeCountByCommentIdAsync(commentId);
+        return likeCount;
+    }
 }

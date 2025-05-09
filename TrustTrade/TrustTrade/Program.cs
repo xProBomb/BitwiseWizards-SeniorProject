@@ -41,6 +41,7 @@ builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
