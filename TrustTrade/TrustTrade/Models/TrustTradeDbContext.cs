@@ -29,6 +29,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<Post> Posts { get; set; }
 
+    public virtual DbSet<Photo> Photos { get; set; }
+
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Tag> Tags { get; set; }
@@ -238,6 +240,23 @@ public partial class TrustTradeDbContext : DbContext
                         j.Property<int>("PostID").HasColumnName("PostID");
                         j.Property<int>("TagID").HasColumnName("TagID");
                     });
+        });
+
+        modelBuilder.Entity<Photo>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Photos__3214EC27A2F1B0E1");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Image).HasColumnType("varbinary(max)");
+            entity.Property(e => e.PostId).HasColumnName("PostID");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.Photos)
+                .HasForeignKey(d => d.PostId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Photos_Post");
         });
 
         modelBuilder.Entity<Stock>(entity =>
