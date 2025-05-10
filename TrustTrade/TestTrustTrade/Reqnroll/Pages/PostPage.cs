@@ -44,7 +44,7 @@ namespace TestTrustTrade.Reqnroll.Pages
         public bool IsCommentLiked()
         {
             var likeButton = Driver.FindElement(_commentLikeButton);
-            return likeButton.GetAttribute("class").Contains("liked");
+            return likeButton.GetAttribute("class")?.Contains("liked") ?? false;
         }
 
         public bool HasCommentTransitionedToLiked()
@@ -52,8 +52,8 @@ namespace TestTrustTrade.Reqnroll.Pages
             var likeButton = Driver.FindElement(_commentLikeButton);
 
             // Wait for the "liked" class to be added
-            Wait.Until(d => likeButton.GetAttribute("class").Contains("liked"));
-            return likeButton.GetAttribute("class").Contains("liked");
+            Wait.Until(d => likeButton.GetAttribute("class")?.Contains("liked") == true);
+            return likeButton.GetAttribute("class")?.Contains("liked") ?? false;
         }
 
         public bool HasCommentTransitionedToUnliked()
@@ -61,8 +61,8 @@ namespace TestTrustTrade.Reqnroll.Pages
             var likeButton = Driver.FindElement(_commentLikeButton);
 
             // Wait for the "liked" class to be removed
-            Wait.Until(d => !likeButton.GetAttribute("class").Contains("liked"));
-            return likeButton.GetAttribute("class").Contains("liked");
+            Wait.Until(d => !likeButton.GetAttribute("class")?.Contains("liked") == true);
+            return likeButton.GetAttribute("class")?.Contains("liked") ?? false;
         }
     }
 }

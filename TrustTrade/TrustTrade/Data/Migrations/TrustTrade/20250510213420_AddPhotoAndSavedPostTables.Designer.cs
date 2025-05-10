@@ -12,8 +12,8 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    [Migration("20250507033241_Photo")]
-    partial class Photo
+    [Migration("20250510213420_AddPhotoAndSavedPostTables")]
+    partial class AddPhotoAndSavedPostTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,6 +83,38 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.CommentLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int")
+                        .HasColumnName("CommentID");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserID");
+
+                    b.HasKey("Id")
+                        .HasName("PK__CommentL__3214EC27F1A0E5D8");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommentLikes");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Conversation", b =>
@@ -654,6 +686,37 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.SavedPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id")
+                        .HasName("PK_SavedPosts");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId", "PostId")
+                        .IsUnique()
+                        .HasDatabaseName("UQ__SavedPost__A9D10534A3A3D3A4");
+
+                    b.ToTable("SavedPosts");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Stock", b =>
                 {
                     b.Property<int>("Id")
@@ -995,6 +1058,26 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.CommentLike", b =>
+                {
+                    b.HasOne("TrustTrade.Models.Comment", "Comment")
+                        .WithMany("CommentLikes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_CommentLikes_Comment");
+
+                    b.HasOne("TrustTrade.Models.User", "User")
+                        .WithMany("CommentLikes")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_CommentLikes_User");
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Conversation", b =>
                 {
                     b.HasOne("TrustTrade.Models.User", "User1")
@@ -1192,6 +1275,26 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.SavedPost", b =>
+                {
+                    b.HasOne("TrustTrade.Models.Post", "Post")
+                        .WithMany("SavedPosts")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SavedPosts_Post");
+
+                    b.HasOne("TrustTrade.Models.User", "User")
+                        .WithMany("SavedPosts")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_SavedPosts_User");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Trade", b =>
                 {
                     b.HasOne("TrustTrade.Models.Stock", "TickerSymbolNavigation")
@@ -1244,6 +1347,11 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.Comment", b =>
+                {
+                    b.Navigation("CommentLikes");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.Conversation", b =>
                 {
                     b.Navigation("Messages");
@@ -1268,6 +1376,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Navigation("Likes");
 
                     b.Navigation("Photos");
+
+                    b.Navigation("SavedPosts");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Stock", b =>
@@ -1281,6 +1391,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
 
                     b.Navigation("BlockedUsers");
 
+                    b.Navigation("CommentLikes");
+
                     b.Navigation("Comments");
 
                     b.Navigation("FollowerFollowerUsers");
@@ -1292,6 +1404,8 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Navigation("PlaidConnections");
 
                     b.Navigation("Posts");
+
+                    b.Navigation("SavedPosts");
 
                     b.Navigation("Trades");
                 });

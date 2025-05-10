@@ -67,4 +67,6 @@ public partial class User
     public virtual ICollection<UserBlock> BlockedUsers { get; set; } = new List<UserBlock>();
 
     public virtual ICollection<UserBlock> BlockedByUsers { get; set; } = new List<UserBlock>();
+
+    public virtual ICollection<SavedPost> SavedPosts { get; set; } = new List<SavedPost>();
 }
