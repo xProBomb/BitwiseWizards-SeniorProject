@@ -15,15 +15,17 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly ITagRepository _tagRepository;
     private readonly IUserBlockRepository _userBlockRepository;
+    private readonly ISavedPostRepository _savedPostRepository;
     private const int PAGE_SIZE = 10;
     private const int MAX_PAGES_TO_SHOW = 7;
 
-    public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository, IUserBlockRepository userBlockRepository)
+    public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository, IUserBlockRepository userBlockRepository, ISavedPostRepository savedPostRepository)
     {
         _logger = logger;
         _postRepository = postRepository;
         _tagRepository = tagRepository;
         _userBlockRepository = userBlockRepository;
+        _savedPostRepository = savedPostRepository;
     }
 
     public async Task<(List<PostPreviewVM> posts, int totalPosts)> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId)
@@ -31,7 +33,7 @@ public class PostService : IPostService
         List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
         var (posts, totalPosts) = await _postRepository.GetPagedPostsAsync(categoryFilter, pageNumber, PAGE_SIZE, sortOrder, blockedUserIds);
 
-        return (MapPostsToPostPreviewVM(posts), totalPosts);
+        return (MapPostsToPostPreviewVM(posts, currentUserId), totalPosts);
     }
 
     public async Task<(List<PostPreviewVM> posts, int totalPosts)> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder)
@@ -87,7 +89,42 @@ public class PostService : IPostService
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter, search);
     }
 
-    private static List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts)
+    public async Task AddPostToSavedPostsAsync(int postId, int userId)
+    {
+        Post? post = await _postRepository.FindByIdAsync(postId);
+        if (post == null)
+        {
+            throw new KeyNotFoundException($"Post with ID {postId} not found.");
+        }
+
+        bool isPostSaved = await _savedPostRepository.IsPostSavedByUserAsync(postId, userId);
+        if (isPostSaved)
+        {
+            throw new InvalidOperationException($"Post with ID {postId} is already saved by user with ID {userId}.");
+        }
+
+        var savedPost = new SavedPost
+        {
+            PostId = postId,
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _savedPostRepository.AddOrUpdateAsync(savedPost);
+    }
+
+    public async Task RemovePostFromSavedPostsAsync(int postId, int userId)
+    {
+        SavedPost? savedPost = await _savedPostRepository.FindByPostIdAndUserIdAsync(postId, userId);
+        if (savedPost == null)
+        {
+            throw new KeyNotFoundException($"Saved post with PostId {postId} and UserId {userId} not found.");
+        }
+
+        await _savedPostRepository.DeleteAsync(savedPost);
+    }
+
+    private static List<PostPreviewVM> MapPostsToPostPreviewVM(List<Post> posts, int? currentUserId = null)
     {
         List<PostPreviewVM> postPreviews = new List<PostPreviewVM>();
 
@@ -122,7 +159,8 @@ public class PostService : IPostService
                 CommentCount = post.Comments.Count,
                 IsPlaidEnabled = post.User.PlaidEnabled ?? false,
                 PortfolioValueAtPosting = portfolioValue,
-                ProfilePicture = post.User.ProfilePicture
+                ProfilePicture = post.User.ProfilePicture,
+                IsSavedByCurrentUser = post.SavedPosts.Any(sp => sp.UserId == currentUserId),
             });
         }
 

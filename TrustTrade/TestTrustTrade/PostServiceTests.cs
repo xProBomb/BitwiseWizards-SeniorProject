@@ -5,6 +5,7 @@ using TrustTrade.Models;
 using Microsoft.Extensions.Logging;
 using TrustTrade.ViewModels;
 using TrustTrade.DAL.Concrete;
+using Microsoft.IdentityModel.Logging;
 
 namespace TestTrustTrade;
 
@@ -15,6 +16,7 @@ public class PostServiceTests
     private Mock<IPostRepository> _postRepositoryMock;
     private Mock<ITagRepository> _tagRepositoryMock;
     private Mock<IUserBlockRepository> _userBlockRepositoryMock;
+    private Mock<ISavedPostRepository> _savedPostRepositoryMock;
     private PostService _postService;
     private List<Post> _posts;
     private List<Post> _postsWithPlaidEnabledUser;
@@ -26,12 +28,14 @@ public class PostServiceTests
         _postRepositoryMock = new Mock<IPostRepository>();
         _tagRepositoryMock = new Mock<ITagRepository>();
         _userBlockRepositoryMock = new Mock<IUserBlockRepository>();
+        _savedPostRepositoryMock = new Mock<ISavedPostRepository>();
 
         _postService = new PostService(
             _loggerMock.Object,
             _postRepositoryMock.Object,
             _tagRepositoryMock.Object,
-            _userBlockRepositoryMock.Object
+            _userBlockRepositoryMock.Object,
+            _savedPostRepositoryMock.Object
         );
 
         var user = new User
