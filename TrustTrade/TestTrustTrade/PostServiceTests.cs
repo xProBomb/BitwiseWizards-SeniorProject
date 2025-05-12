@@ -88,15 +88,15 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(_posts);
+            .ReturnsAsync((_posts, _posts.Count));
 
         // Act
-        var result = await _postService.GetPostPreviewsAsync("test-category", 1, "test-sort", null);
+        var (posts, totalPosts) = await _postService.GetPostPreviewsAsync("test-category", 1, "test-sort", null);
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].Title, Is.EqualTo("Post 1"));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(1));
+        Assert.That(posts[0].Title, Is.EqualTo("Post 1"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 
@@ -105,17 +105,17 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(_postsWithPlaidEnabledUser);
+            .ReturnsAsync((_postsWithPlaidEnabledUser, _postsWithPlaidEnabledUser.Count));
 
         // Act
-        var result = await _postService.GetPostPreviewsAsync("test-category", 1, "test-sort", null);
+        var (posts, totalPosts) = await _postService.GetPostPreviewsAsync("test-category", 1, "test-sort", null);
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].Title, Is.EqualTo("Post 2"));
-        Assert.That(result[0].IsPlaidEnabled, Is.True);
-        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(1));
+        Assert.That(posts[0].Title, Is.EqualTo("Post 2"));
+        Assert.That(posts[0].IsPlaidEnabled, Is.True);
+        Assert.That(posts[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 
@@ -124,14 +124,14 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(new List<Post>());
+            .ReturnsAsync((new List<Post>(), 0));
 
         // Act
-        var result = await _postService.GetPostPreviewsAsync("test-category", 1, "test-sort", null);
+        var (posts, totalPosts) = await _postService.GetPostPreviewsAsync("test-category", 1, "test-sort", null);
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(0));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(0));
     }
 
     [Test]
@@ -139,15 +139,15 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(_posts);
+            .ReturnsAsync((_posts, _posts.Count));
 
         // Act
-        var result = await _postService.GetFollowingPostPreviewsAsync(1, "test-category", 1, "test-sort");
+        var (posts, totalPosts) = await _postService.GetFollowingPostPreviewsAsync(1, "test-category", 1, "test-sort");
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].Title, Is.EqualTo("Post 1"));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(1));
+        Assert.That(posts[0].Title, Is.EqualTo("Post 1"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 
@@ -156,17 +156,17 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(_postsWithPlaidEnabledUser);
+            .ReturnsAsync((_postsWithPlaidEnabledUser, _postsWithPlaidEnabledUser.Count));
 
         // Act
-        var result = await _postService.GetFollowingPostPreviewsAsync(1, "test-category", 1, "test-sort");
+        var (posts, totalPosts) = await _postService.GetFollowingPostPreviewsAsync(1, "test-category", 1, "test-sort");
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].Title, Is.EqualTo("Post 2"));
-        Assert.That(result[0].IsPlaidEnabled, Is.True);
-        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(1));
+        Assert.That(posts[0].Title, Is.EqualTo("Post 2"));
+        Assert.That(posts[0].IsPlaidEnabled, Is.True);
+        Assert.That(posts[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 
@@ -175,14 +175,14 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(new List<Post>());
+            .ReturnsAsync((new List<Post>(), 0));
 
         // Act
-        var result = await _postService.GetFollowingPostPreviewsAsync(1, "test-category", 1, "test-sort");
+        var (posts, totalPosts) = await _postService.GetFollowingPostPreviewsAsync(1, "test-category", 1, "test-sort");
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(0));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(0));
     }
 
     [Test]
@@ -190,15 +190,15 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(_posts);
+            .ReturnsAsync((_posts, _posts.Count));
 
         // Act
-        var result = await _postService.GetUserPostPreviewsAsync(1, "test-category", 1, "test-sort");
+        var (posts, totalPosts) = await _postService.GetUserPostPreviewsAsync(1, "test-category", 1, "test-sort");
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].Title, Is.EqualTo("Post 1"));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(1));
+        Assert.That(posts[0].Title, Is.EqualTo("Post 1"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 
@@ -207,17 +207,17 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(_postsWithPlaidEnabledUser);
+            .ReturnsAsync((_postsWithPlaidEnabledUser, _postsWithPlaidEnabledUser.Count));
 
         // Act
-        var result = await _postService.GetUserPostPreviewsAsync(2, "test-category", 1, "test-sort");
+        var (posts, totalPosts) = await _postService.GetUserPostPreviewsAsync(2, "test-category", 1, "test-sort");
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].Title, Is.EqualTo("Post 2"));
-        Assert.That(result[0].IsPlaidEnabled, Is.True);
-        Assert.That(result[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(1));
+        Assert.That(posts[0].Title, Is.EqualTo("Post 2"));
+        Assert.That(posts[0].IsPlaidEnabled, Is.True);
+        Assert.That(posts[0].PortfolioValueAtPosting, Is.EqualTo("$10K"));
         _postRepositoryMock.Verify(r => r.GetPagedPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 
@@ -226,14 +226,14 @@ public class PostServiceTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.GetPagedPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(new List<Post>());
+            .ReturnsAsync((new List<Post>(), 0));
 
         // Act
-        var result = await _postService.GetUserPostPreviewsAsync(1, "test-category", 1, "test-sort");
+        var (posts, totalPosts) = await _postService.GetUserPostPreviewsAsync(1, "test-category", 1, "test-sort");
 
         // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
-        Assert.That(result.Count, Is.EqualTo(0));
+        Assert.That(posts, Is.Not.Null.And.InstanceOf<List<PostPreviewVM>>());
+        Assert.That(posts.Count, Is.EqualTo(0));
     }
 
     [Test]
@@ -277,11 +277,9 @@ public class PostServiceTests
     public async Task BuildPaginationAsync_ReturnsCorrectPagination()
     {
         // Arrange
-        _postRepositoryMock.Setup(r => r.GetTotalPostsAsync(It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(25);
 
         // Act
-        var result = await _postService.BuildPaginationAsync(null, 2, null);
+        var result = await _postService.BuildPaginationAsync(null, 2, 25, null);
 
         // Assert
         Assert.That(result, Is.Not.Null.And.InstanceOf<PaginationPartialVM>());
@@ -289,44 +287,5 @@ public class PostServiceTests
         Assert.That(result.TotalPages, Is.EqualTo(3)); // 25 posts / 10 per page = 3 pages
         Assert.That(result.PagesToShow, Is.EquivalentTo(new List<int> { 1, 2, 3 }));
         Assert.That(result.CategoryFilter, Is.Null);
-        _postRepositoryMock.Verify(repo => repo.GetTotalPostsAsync(It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
-    }
-
-    [Test]
-    public async Task BuildFollowingPaginationAsync_ReturnsCorrectPagination()
-    {
-        // Arrange
-        _postRepositoryMock.Setup(r => r.GetTotalPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(25);
-
-        // Act
-        var result = await _postService.BuildFollowingPaginationAsync(1, null, 2);
-
-        // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<PaginationPartialVM>());
-        Assert.That(result.CurrentPage, Is.EqualTo(2));
-        Assert.That(result.TotalPages, Is.EqualTo(3)); // 25 posts / 10 per page = 3 pages
-        Assert.That(result.PagesToShow, Is.EquivalentTo(new List<int> { 1, 2, 3 }));
-        Assert.That(result.CategoryFilter, Is.Null);
-        _postRepositoryMock.Verify(repo => repo.GetTotalPostsByUserFollowsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
-    }
-
-    [Test]
-    public async Task BuildUserPaginationAsync_ReturnsCorrectPagination()
-    {
-        // Arrange
-        _postRepositoryMock.Setup(r => r.GetTotalPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()))
-            .ReturnsAsync(25);
-
-        // Act
-        var result = await _postService.BuildUserPaginationAsync(1, null, 2);
-
-        // Assert
-        Assert.That(result, Is.Not.Null.And.InstanceOf<PaginationPartialVM>());
-        Assert.That(result.CurrentPage, Is.EqualTo(2));
-        Assert.That(result.TotalPages, Is.EqualTo(3)); // 25 posts / 10 per page = 3 pages
-        Assert.That(result.PagesToShow, Is.EquivalentTo(new List<int> { 1, 2, 3 }));
-        Assert.That(result.CategoryFilter, Is.Null);
-        _postRepositoryMock.Verify(repo => repo.GetTotalPostsByUserAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<List<int>>()), Times.Once);
     }
 }

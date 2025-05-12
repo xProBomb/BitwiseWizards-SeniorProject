@@ -112,51 +112,6 @@ public class PostRepositoryTests
     }
 
     [Test]
-    public async Task GetTotalPostsAsync_WhenNoParametersGiven_ReturnsTotalNumberOfPosts()
-    {
-        // Arrange
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-        var expected = _posts.Count;
-
-        // Act
-        var result = await postRepository.GetTotalPostsAsync();
-
-        // Assert
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase("Memes", 1)]
-    [TestCase("Gain", 2)]
-    [TestCase("Loss", 3)]
-    [TestCase("Stocks", 4)]
-    [TestCase("Crypto", 5)]
-    public async Task GetTotalPostsAsync_WhenCategoryFilterUsed_ReturnsTotalNumberOfPostsInCategory(string category, int expected)
-    {
-        // Arrange
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-
-        // Act
-        var result = await postRepository.GetTotalPostsAsync(category);
-
-        // Assert
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public async Task GetTotalPostsByUserAsync_WhenUserFollows_ReturnsTotalNumberOfPostsByUser()
-    {
-        // Arrange
-        IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
-        var userId = 1;
-
-        // Act
-        var result = await postRepository.GetTotalPostsByUserAsync(userId);
-
-        // Assert
-        Assert.That(result, Is.EqualTo(1));
-    }
-
-    [Test]
     public async Task GetPagedPostsAsync_WhenNoParametersGiven_Returns10PostsSortedByDateDesc()
     {
         // Arrange
@@ -164,15 +119,15 @@ public class PostRepositoryTests
 
         // Act
         // By default, category = null, sortOrder = "DateDesc", page=1, pageSize=10
-        var results = await postRepository.GetPagedPostsAsync();
+        var (posts, totalPosts) = await postRepository.GetPagedPostsAsync();
 
         // Assert
-        Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default.");
+        Assert.That(posts.Count, Is.EqualTo(10), "Should return 10 posts by default.");
         // Verify descending order by CreatedAt
-        for (int i = 0; i < results.Count - 1; i++)
+        for (int i = 0; i < posts.Count - 1; i++)
         {
             Assert.That(
-                results[i].CreatedAt >= results[i + 1].CreatedAt,
+                posts[i].CreatedAt >= posts[i + 1].CreatedAt,
                 $"Posts are not sorted by descending CreatedAt at index {i}."
             );
         }
@@ -185,15 +140,15 @@ public class PostRepositoryTests
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "DateAsc");
+        var (posts, totalPosts) = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "DateAsc");
 
         // Assert
-        Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
+        Assert.That(posts.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
         // Verify ascending order by CreatedAt
-        for (int i = 0; i < results.Count - 1; i++)
+        for (int i = 0; i < posts.Count - 1; i++)
         {
             Assert.That(
-                results[i].CreatedAt <= results[i + 1].CreatedAt,
+                posts[i].CreatedAt <= posts[i + 1].CreatedAt,
                 $"Posts are not sorted by ascending CreatedAt at index {i}."
             );
         }
@@ -206,15 +161,15 @@ public class PostRepositoryTests
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "TitleAsc");
+        var (posts, totalPosts) = await postRepository.GetPagedPostsAsync(pageNumber: 1, pageSize: 10, sortOrder: "TitleAsc");
 
         // Assert
-        Assert.That(results.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
+        Assert.That(posts.Count, Is.EqualTo(10), "Should return 10 posts by default page size.");
         // Verify ascending order by Title
-        for (int i = 0; i < results.Count - 1; i++)
+        for (int i = 0; i < posts.Count - 1; i++)
         {
             Assert.That(
-                string.Compare(results[i].Title, results[i + 1].Title, StringComparison.Ordinal) <= 0,
+                string.Compare(posts[i].Title, posts[i + 1].Title, StringComparison.Ordinal) <= 0,
                 $"Posts are not sorted by ascending Title at index {i}."
             );
         }
@@ -233,13 +188,13 @@ public class PostRepositoryTests
         IPostRepository postRepository = new PostRepository(_mockDbContext.Object);
 
         // Act
-        var results = await postRepository.GetPagedPostsAsync(categoryFilter: categoryName);
+        var (posts, totalPosts) = await postRepository.GetPagedPostsAsync(categoryFilter: categoryName);
 
         // Assert
-        Assert.That(results.Count, Is.EqualTo(expectedCount), "Should return expected number of posts in category.");
+        Assert.That(posts.Count, Is.EqualTo(expectedCount), "Should return expected number of posts in category.");
         
         // Verify all posts have the expected category
-        foreach (var post in results)
+        foreach (var post in posts)
         {
             var tagNames = post.Tags.Select(t => t.TagName).ToList();
             Assert.That(tagNames, Has.Some.EqualTo(categoryName).IgnoreCase, $"Post does not have the expected category: {categoryName}");
@@ -254,15 +209,15 @@ public class PostRepositoryTests
         var userId = 1;
 
         // Act
-        var results = await postRepository.GetPagedPostsByUserAsync(userId);
+        var (posts, totalPosts) = await postRepository.GetPagedPostsByUserAsync(userId);
 
         // Assert
-        Assert.That(results.Count, Is.EqualTo(1), "Should return 10 posts by default.");
+        Assert.That(posts.Count, Is.EqualTo(1), "Should return 10 posts by default.");
         // Verify descending order by CreatedAt
-        for (int i = 0; i < results.Count - 1; i++)
+        for (int i = 0; i < posts.Count - 1; i++)
         {
             Assert.That(
-                results[i].CreatedAt >= results[i + 1].CreatedAt,
+                posts[i].CreatedAt >= posts[i + 1].CreatedAt,
                 $"Posts are not sorted by descending CreatedAt at index {i}."
             );
         }

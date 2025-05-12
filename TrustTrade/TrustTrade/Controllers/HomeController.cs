@@ -37,9 +37,9 @@ namespace TrustTrade.Controllers
             User? user = await _userService.GetCurrentUserAsync(User);
 
             // Retrieve posts for the general feed
-            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder, user?.Id);
+            (List<PostPreviewVM> postPreviews, int totalPosts) = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder, user?.Id);
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, user?.Id);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, user?.Id);
 
             var vm = new IndexVM
             {
@@ -64,9 +64,9 @@ namespace TrustTrade.Controllers
             int currentUserId = user.Id;
 
             // Retrieve posts for the "following" feed
-            List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
+            (List<PostPreviewVM> postPreviews, int totalPosts) = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, currentUserId);
 
             var vm = new IndexVM
             {

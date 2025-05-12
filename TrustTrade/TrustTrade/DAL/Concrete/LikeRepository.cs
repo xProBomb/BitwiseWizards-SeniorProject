@@ -7,18 +7,16 @@ namespace TrustTrade.DAL.Concrete
 {
     public class LikeRepository : Repository<Like>, ILikeRepository
     {
-        private readonly TrustTradeDbContext _context;
-        private readonly DbSet<Like> _dbSet;
+        private readonly DbSet<Like> _likes;
 
         public LikeRepository(TrustTradeDbContext context) : base(context)
         {
-            _context = context;
-            _dbSet = context.Set<Like>();
+            _likes = context.Likes;
         }
 
         public async Task<Like?> GetLikeByUserAndPostAsync(int userId, int postId)
         {
-            return await _dbSet
+            return await _likes
                 .FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId);
         }
     }

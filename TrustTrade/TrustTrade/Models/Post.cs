@@ -23,7 +23,11 @@ public partial class Post
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
+    public virtual ICollection<Photo> Photos { get; set; } = new List<Photo>();
+
     public virtual User User { get; set; } = null!;
 
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+    public virtual ICollection<SavedPost> SavedPosts { get; set; } = new List<SavedPost>();
 }

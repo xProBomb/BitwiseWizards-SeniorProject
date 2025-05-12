@@ -40,4 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    document.getElementById('submitButton').addEventListener('click', function () {
+        this.disabled = true;
+        this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Posting...';
+        this.form.submit();
+    });
 });
