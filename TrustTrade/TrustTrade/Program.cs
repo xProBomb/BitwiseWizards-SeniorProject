@@ -150,11 +150,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.MapControllerRoute(
-    name: "following",
-    pattern: "Home/Following",
-    defaults: new { controller = "Home", action = "Following", isFollowing = true});
-
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
@@ -163,9 +158,21 @@ app.UseMiddleware<SuspensionMiddleware>();
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<ChatHub>("/chatHub");
 
+// Set Landing as the default page when the app launches
+app.MapControllerRoute(
+    name: "landing",
+    pattern: "",
+    defaults: new { controller = "Home", action = "Landing" });
+
+// Keep the following route for access to specific actions
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages();
+
+// Map following route
+app.MapControllerRoute(
+    name: "following",
+    pattern: "Home/Following",
+    defaults: new { controller = "Home", action = "Following", isFollowing = true});
 
 app.Run();

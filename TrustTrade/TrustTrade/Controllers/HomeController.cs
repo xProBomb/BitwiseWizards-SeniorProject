@@ -22,6 +22,12 @@ namespace TrustTrade.Controllers
             _postService = postService;
             _userService = userService;
         }
+        
+        [AllowAnonymous]
+        public IActionResult Landing()
+        {
+            return View();
+        }
 
         public async Task<IActionResult> Index(
             string? categoryFilter = null,
