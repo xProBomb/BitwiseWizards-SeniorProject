@@ -7,6 +7,7 @@ using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Hubs;
+using TrustTrade.Middleware;
 using TrustTrade.Services;
 using TrustTrade.Services.Background;
 using TrustTrade.Services.Web.Interfaces;
@@ -151,15 +152,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.MapControllerRoute(
-    name: "following",
-    pattern: "Home/Following",
-    defaults: new { controller = "Home", action = "Following", isFollowing = true});
-
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<SuspensionMiddleware>();
+app.UseMiddleware<LandingPageMiddleware>();
 
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<ChatHub>("/chatHub");
@@ -167,6 +164,17 @@ app.MapHub<ChatHub>("/chatHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Keep only the default route
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "following",
+    pattern: "Home/Following",
+    defaults: new { controller = "Home", action = "Following", isFollowing = true});
+
 app.MapRazorPages();
 
 app.Run();
