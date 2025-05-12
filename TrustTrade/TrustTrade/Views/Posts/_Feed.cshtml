@@ -10,43 +10,64 @@
     {
         foreach (var post in Model)
         {
-            <!-- Display each post as a clickable list item -->
             <li class="list-group-item">
-                <div class="d-flex align-items-center">
-                    <!-- Profile Links -->
-                    <a asp-controller="Profile" 
-                        asp-action="UserProfile" 
-                        asp-route-username="@post.UserName"
-                        class="image-profile-link">
-                        @if (post.ProfilePicture != null)
-                        {
-                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(post.ProfilePicture)" alt="Profile Picture"
-                                 class="rounded-circle" style="width: 50px; height: 50px;">
-                        }
-                        else
-                        {
-                            <img src="/icons/defpfp.png" alt="Profile Picture"
-                                 class="rounded-circle" style="width: 50px; height: 50px;">
-                        }
-                    </a>
-                    <a asp-controller="Profile" 
-                        asp-action="UserProfile" 
-                        asp-route-username="@post.UserName"
-                        class="username-profile-link ms-2">
-                        @post.UserName
-                    </a>
-                    @if (post.IsPlaidEnabled)
-                    {
-                        <span class="text-success ms-2">
-                            @if (!string.IsNullOrEmpty(post.PortfolioValueAtPosting))
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Left Section: Profile Picture, Username, and Timestamp -->
+                    <div class="d-flex align-items-center">
+                        <!-- Profile Links -->
+                        <a asp-controller="Profile" 
+                            asp-action="UserProfile" 
+                            asp-route-username="@post.UserName"
+                            class="image-profile-link">
+                            @if (post.ProfilePicture != null)
                             {
-                                @post.PortfolioValueAtPosting
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(post.ProfilePicture)" alt="Profile Picture"
+                                    class="rounded-circle" style="width: 50px; height: 50px;">
                             }
-                            <i class="bi bi-patch-check-fill"></i>
-                        </span>
-                    }
-                    <span class="ms-2 clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.TimeAgo</span>
+                            else
+                            {
+                                <img src="/icons/defpfp.png" alt="Profile Picture"
+                                    class="rounded-circle" style="width: 50px; height: 50px;">
+                            }
+                        </a>
+                        <a asp-controller="Profile" 
+                            asp-action="UserProfile" 
+                            asp-route-username="@post.UserName"
+                            class="username-profile-link ms-2">
+                            @post.UserName
+                        </a>
+                        @if (post.IsPlaidEnabled)
+                        {
+                            <span class="text-success ms-2">
+                                @if (!string.IsNullOrEmpty(post.PortfolioValueAtPosting))
+                                {
+                                    @post.PortfolioValueAtPosting
+                                }
+                                <i class="bi bi-patch-check-fill"></i>
+                            </span>
+                        }
+                        <span class="ms-2 clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.TimeAgo</span>
+                    </div>
+
+                    <!-- Right Section: Kebab Menu -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="postActionsMenu-@post.Id" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postActionsMenu-@post.Id">
+                            <li>
+                                <button class="dropdown-item save-post-button" data-post-id="@post.Id" data-is-saved="@post.IsSavedByCurrentUser">
+                                    <i class="bi @(post.IsSavedByCurrentUser ? "bi-bookmark-fill" : "bi-bookmark")"></i>
+                                    <span class="save-status-text">
+                                        @(post.IsSavedByCurrentUser ? "Unsave" : "Save")
+                                    </span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Main Post Content -->
                 <h3 class="clickable-post" style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Title</h3>
                 <p class="clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Excerpt</p>
                 <!-- Like and Comment Buttons -->
