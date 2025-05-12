@@ -33,10 +33,6 @@ namespace TrustTrade.Controllers.Api
                 User? currentUser = await _userService.GetCurrentUserAsync(User);
                 if (currentUser == null) return Unauthorized();
 
-                Console.WriteLine("userId: " + currentUser.Id);
-                Console.WriteLine("postId: " + postId);
-                Console.WriteLine("We are in the AddPostSave method.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1");
-
                 await _postService.AddPostToSavedPostsAsync(postId, currentUser.Id);
                 return Ok(new { message = "Post saved successfully." });
             }
