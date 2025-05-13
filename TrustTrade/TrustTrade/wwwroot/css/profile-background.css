@@ -1,0 +1,223 @@
+/* Profile Background Styles with Cropper.js Support */
+
+/* Import Cropper.js CSS */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js');
+
+/* Profile Header Styles */
+.profile-header {
+    position: relative;
+    margin-bottom: 2rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    min-height: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.profile-header.has-background {
+    color: white;
+}
+
+.profile-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+    transition: transform 0.5s ease-out;
+}
+
+.profile-header.has-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    transition: background 0.3s ease;
+}
+
+.profile-header:hover .profile-background {
+    transform: scale(1.02);
+}
+
+.profile-content {
+    position: relative;
+    z-index: 3;
+    padding: 2rem;
+}
+
+.background-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 4;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.background-controls:hover {
+    opacity: 1;
+}
+
+/* Image Preview Container */
+.bg-preview-container {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin: 1rem 0;
+    background-color: var(--hover-bg);
+    transition: border-color 0.3s ease;
+}
+
+.bg-preview-container:hover {
+    border-color: var(--accent-color);
+}
+
+/* Cropper.js Custom Styles */
+.cropper-container {
+    direction: ltr;
+    font-size: 0;
+    line-height: 0;
+    position: relative;
+    touch-action: none;
+    user-select: none;
+}
+
+.cropper-container img {
+    display: block;
+    height: auto;
+    image-orientation: 0deg;
+    max-height: none !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    width: 100%;
+}
+
+.cropper-wrap-box,
+.cropper-canvas,
+.cropper-drag-box,
+.cropper-crop-box,
+.cropper-modal {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+/* Customized Cropper.js styles for theme consistency */
+[data-bs-theme="dark"] .cropper-face {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .cropper-view-box {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+    outline: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+[data-bs-theme="dark"] .cropper-point {
+    background-color: var(--accent-light);
+}
+
+[data-bs-theme="dark"] .cropper-point.point-n,
+[data-bs-theme="dark"] .cropper-point.point-s,
+[data-bs-theme="dark"] .cropper-point.point-e,
+[data-bs-theme="dark"] .cropper-point.point-w {
+    background-color: var(--accent-color);
+}
+
+[data-bs-theme="light"] .cropper-face {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-bs-theme="light"] .cropper-view-box {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+    outline: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="light"] .cropper-point {
+    background-color: var(--accent-color);
+}
+
+/* Preview Image */
+#previewImage {
+    max-width: 100%;
+    display: none;
+}
+
+/* Preview Placeholder */
+#previewPlaceholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--bs-secondary-color);
+}
+
+/* Cropper Control Buttons */
+.cropper-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.cropper-controls button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.cropper-controls button i {
+    font-size: 1rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .profile-header {
+        min-height: 150px;
+    }
+
+    .background-controls {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .profile-content {
+        padding: 1rem;
+    }
+
+    .cropper-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cropper-controls button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .bg-preview-container {
+        height: 180px;
+    }
+}

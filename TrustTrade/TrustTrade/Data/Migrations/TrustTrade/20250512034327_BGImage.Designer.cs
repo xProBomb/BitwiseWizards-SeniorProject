@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrustTrade.Models;
 
@@ -11,9 +12,11 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    partial class TrustTradeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512034327_BGImage")]
+    partial class BGImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -864,6 +867,12 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Property<string>("BackgroundImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("BackgroundPosition")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("center");
 
                     b.Property<string>("BackgroundSource")
                         .ValueGeneratedOnAdd()

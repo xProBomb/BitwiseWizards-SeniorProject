@@ -8,7 +8,7 @@
     <div class="container">
         <div class="row align-items-center">
             <!-- Capstone Project Banner -->
-            <div class="alert alert-info text-center mb-0" role="alert">
+            <div class="alert alert-info text-center mb-2 mt-1" role="alert">
                 <strong>Educational Project:</strong> TrustTrade is a capstone project for educational purposes only. Social media links and other external connections are non-functional. Plaid integration uses sandbox mode only.
             </div>
             <div class="col-lg-6 hero-content">
@@ -20,6 +20,9 @@
                     </a>
                     <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary btn-lg rounded-pill">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg rounded-pill" id="NavToIndex">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Explore the Platform
                     </a>
                 </div>
             </div>

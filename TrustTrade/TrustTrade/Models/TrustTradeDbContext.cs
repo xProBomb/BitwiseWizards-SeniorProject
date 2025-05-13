@@ -392,6 +392,9 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.BackgroundImage).HasColumnType("varbinary(max)");
+            entity.Property(e => e.BackgroundImageUrl).HasMaxLength(500);
+            entity.Property(e => e.BackgroundSource).HasMaxLength(10).HasDefaultValue("File");
         });
 
         modelBuilder.Entity<UserBlock>()
