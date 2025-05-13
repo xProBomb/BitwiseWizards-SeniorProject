@@ -205,5 +205,64 @@ namespace TrustTrade.DAL.Concrete
                 return Math.Max(50 + (percentageChange * 2.5m), 0);
             }
         }
+
+        public async Task<decimal> CalculateStockPerformanceScoreAsync(string tickerSymbol, int days = 30)
+        {
+            try
+            {
+                var cutoffDate = DateTime.UtcNow.Date.AddDays(-days);
+
+                var history = await _context.StockHistories
+                    .Where(s => s.TickerSymbol == tickerSymbol && s.Date >= cutoffDate)
+                    .OrderBy(s => s.Date)
+                    .ToListAsync();
+
+                if (history.Count < 2)
+                {
+                    _logger.LogInformation("Not enough data for {Ticker} to calculate performance", tickerSymbol);
+                    return 0;
+                }
+
+                var returns = new List<decimal>();
+                for (int i = 1; i < history.Count; i++)
+                {
+                    decimal previous = history[i - 1].HighPrice;
+                    decimal current = history[i].HighPrice;
+
+                    if (previous > 0)
+                    {
+                        decimal dailyReturn = (current - previous) / previous;
+                        returns.Add(dailyReturn);
+                    }
+                }
+
+                if (returns.Count == 0)
+                    return 0;
+
+                decimal avgDailyReturn = returns.Average();
+                decimal stdDev = (decimal)Math.Sqrt((double)returns.Average(r => (r - avgDailyReturn) * (r - avgDailyReturn)));
+
+                // Annualize average return and volatility (assuming 252 trading days)
+                decimal annualizedReturn = avgDailyReturn * 252;
+                decimal annualizedVolatility = stdDev * (decimal)Math.Sqrt(252);
+
+                // Performance score: Sharpe-like ratio (without risk-free rate)
+                decimal rawScore = annualizedReturn / (annualizedVolatility + 0.0001m); // prevent div by 0
+
+                // Normalize: scale to 0–100
+                decimal normalizedScore = Math.Clamp(rawScore * 20 + 50, 0, 100); // shift so ~0 ratio = 50
+
+                _logger.LogDebug("Stock {Ticker}: AvgReturn={Avg}, Volatility={Vol}, RawScore={Raw}, FinalScore={Final}",
+                    tickerSymbol, avgDailyReturn, annualizedVolatility, rawScore, normalizedScore);
+
+                return normalizedScore;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to calculate detailed stock performance score for {Ticker}", tickerSymbol);
+                return 0;
+            }
+        }
+
     }
 }
