@@ -257,8 +257,10 @@ namespace TrustTrade.Controllers
                 ScoreBreakdown = breakdown,
                 ProfilePicture = user.ProfilePicture,
                 IsBlocked = isBlocked,
-                // property so we know whether to show the message button
-                CanMessage = currentUserId.HasValue && currentUserId != user.Id
+                CanMessage = currentUserId.HasValue && currentUserId != user.Id,
+                BackgroundImage = user.BackgroundImage,
+                BackgroundImageUrl = user.BackgroundImageUrl,
+                BackgroundSource = user.BackgroundSource.Trim()
             };
 
             return View("Profile", model);
