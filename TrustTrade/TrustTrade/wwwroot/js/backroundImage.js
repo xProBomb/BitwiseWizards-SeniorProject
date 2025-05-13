@@ -18,6 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const zoomOutBtn = document.getElementById('zoomOutBtn');
     const resetBtn = document.getElementById('resetCropperBtn');
     const saveBtn = document.getElementById('saveCropBtn');
+    // Add new directional control buttons
+    const moveUpBtn = document.getElementById('moveUpBtn');
+    const moveDownBtn = document.getElementById('moveDownBtn');
+    const moveLeftBtn = document.getElementById('moveLeftBtn');
+    const moveRightBtn = document.getElementById('moveRightBtn');
 
     // Cropper instance
     let cropper = null;
@@ -157,6 +162,12 @@ document.addEventListener('DOMContentLoaded', function() {
         previewImage.src = imageSrc;
         previewImage.style.display = 'block';
 
+        // Hide the placeholder message
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        if (previewPlaceholder) {
+            previewPlaceholder.style.display = 'none';
+        }
+
         // Destroy existing cropper if any
         if (cropper) {
             cropper.destroy();
@@ -222,6 +233,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Add event listeners for movement controls
+    if (moveUpBtn) {
+        moveUpBtn.addEventListener('click', () => {
+            if (cropper) cropper.move(0, -10); // Move 10px up
+        });
+    }
+
+    if (moveDownBtn) {
+        moveDownBtn.addEventListener('click', () => {
+            if (cropper) cropper.move(0, 10); // Move 10px down
+        });
+    }
+
+    if (moveLeftBtn) {
+        moveLeftBtn.addEventListener('click', () => {
+            if (cropper) cropper.move(-10, 0); // Move 10px left
+        });
+    }
+
+    if (moveRightBtn) {
+        moveRightBtn.addEventListener('click', () => {
+            if (cropper) cropper.move(10, 0); // Move 10px right
+        });
+    }
+
     // Handle modal open/close events
     if (backgroundModal) {
         backgroundModal.addEventListener('show.bs.modal', function() {
@@ -269,7 +305,12 @@ document.addEventListener('DOMContentLoaded', function() {
             zoomInBtn,
             zoomOutBtn,
             resetBtn,
-            saveBtn
+            saveBtn,
+            // Add the new directional controls
+            moveUpBtn,
+            moveDownBtn,
+            moveLeftBtn,
+            moveRightBtn
         ];
 
         controls.forEach(control => {

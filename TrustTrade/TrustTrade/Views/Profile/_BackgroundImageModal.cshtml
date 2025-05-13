@@ -1,6 +1,5 @@
-@* _BackgroundImageModal.cshtml *@
-
-<div class="modal fade" id="updateBackgroundImageModal" tabindex="-1" aria-labelledby="backgroundImageModalLabel" aria-hidden="true">
+<div class="modal fade" id="updateBackgroundImageModal" tabindex="-1" aria-labelledby="backgroundImageModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,40 +7,45 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="backgroundImageForm" asp-controller="Profile" asp-action="UpdateBackgroundImage" method="post" enctype="multipart/form-data">
+                <form id="backgroundImageForm" asp-controller="Profile" asp-action="UpdateBackgroundImage" method="post"
+                      enctype="multipart/form-data">
                     <!-- Source Type Selection -->
                     <div class="mb-3">
                         <label class="form-label d-block">Image Source</label>
                         <div class="btn-group" role="group" aria-label="Image source selection">
-                            <input type="radio" class="btn-check" name="sourceType" id="sourceType-file" value="File" checked autocomplete="off">
+                            <input type="radio" class="btn-check" name="sourceType" id="sourceType-file" value="File"
+                                   checked autocomplete="off">
                             <label class="btn btn-outline-primary" for="sourceType-file">
                                 <i class="bi bi-file-earmark-image"></i> Upload File
                             </label>
-                            
-                            <input type="radio" class="btn-check" name="sourceType" id="sourceType-url" value="Url" autocomplete="off">
+
+                            <input type="radio" class="btn-check" name="sourceType" id="sourceType-url" value="Url"
+                                   autocomplete="off">
                             <label class="btn btn-outline-primary" for="sourceType-url">
                                 <i class="bi bi-link-45deg"></i> Image URL
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Hidden input to store the source type -->
                     <input type="hidden" id="backgroundSourceInput" name="BackgroundSource" value="File">
-                    
+
                     <!-- File Upload Container -->
                     <div id="fileUploadContainer" class="mb-3">
                         <label for="backgroundImageInput" class="form-label">Select Image (Max 5MB)</label>
-                        <input class="form-control" type="file" id="backgroundImageInput" name="BackgroundImage" accept="image/*">
+                        <input class="form-control" type="file" id="backgroundImageInput" name="BackgroundImage"
+                               accept="image/*">
                         <div class="form-text">Supported formats: JPG, PNG, GIF</div>
                     </div>
-                    
+
                     <!-- URL Input Container -->
                     <div id="urlInputContainer" class="mb-3" style="display: none;">
                         <label for="backgroundImageUrl" class="form-label">Image URL</label>
-                        <input type="url" class="form-control" id="backgroundImageUrl" name="BackgroundImageUrl" placeholder="https://example.com/image.jpg">
+                        <input type="url" class="form-control" id="backgroundImageUrl" name="BackgroundImageUrl"
+                               placeholder="https://example.com/image.jpg">
                         <div class="form-text">Enter a direct link to an image (must be publicly accessible)</div>
                     </div>
-                    
+
                     <!-- Image Preview Container -->
                     <div class="mb-3">
                         <label class="form-label">Preview & Adjust</label>
@@ -53,42 +57,76 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Cropper Controls -->
                     <div class="mb-3">
                         <div class="d-flex flex-wrap gap-2 justify-content-center">
-                            <button type="button" id="rotateLeftBtn" class="btn btn-sm btn-outline-secondary disabled" disabled>
+                            <button type="button" id="rotateLeftBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                    disabled>
                                 <i class="bi bi-arrow-counterclockwise"></i> Rotate Left
                             </button>
-                            <button type="button" id="rotateRightBtn" class="btn btn-sm btn-outline-secondary disabled" disabled>
+                            <button type="button" id="rotateRightBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                    disabled>
                                 <i class="bi bi-arrow-clockwise"></i> Rotate Right
                             </button>
-                            <button type="button" id="zoomInBtn" class="btn btn-sm btn-outline-secondary disabled" disabled>
+                            <button type="button" id="zoomInBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                    disabled>
                                 <i class="bi bi-zoom-in"></i> Zoom In
                             </button>
-                            <button type="button" id="zoomOutBtn" class="btn btn-sm btn-outline-secondary disabled" disabled>
+                            <button type="button" id="zoomOutBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                    disabled>
                                 <i class="bi bi-zoom-out"></i> Zoom Out
                             </button>
-                            <button type="button" id="resetCropperBtn" class="btn btn-sm btn-outline-secondary disabled" disabled>
+                            <button type="button" id="resetCropperBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                    disabled>
                                 <i class="bi bi-arrow-repeat"></i> Reset
                             </button>
                         </div>
+
+                        <!-- Position Controls -->
+                        <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                            <div class="btn-group-vertical">
+                                <button type="button" id="moveUpBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                        disabled>
+                                    <i class="bi bi-arrow-up"></i>
+                                </button>
+                                <button type="button" id="moveDownBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                        disabled>
+                                    <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group-horizontal">
+                                <button type="button" id="moveLeftBtn" class="btn btn-sm btn-outline-secondary disabled"
+                                        disabled>
+                                    <i class="bi bi-arrow-left"></i>
+                                </button>
+                                <button type="button" id="moveRightBtn"
+                                        class="btn btn-sm btn-outline-secondary disabled" disabled>
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                            <div class="position-control-label ms-2 mt-1">
+                                <small class="text-muted">Position</small>
+                            </div>
+                        </div>
                     </div>
-                    
+
                     <!-- Options -->
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="includeCroppedData" checked>
                             <label class="form-check-label" for="includeCroppedData">
-                                Use cropped version
+                                Use cropped version(gifs become static)
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Submit Buttons -->
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveCropBtn" class="btn btn-primary disabled" disabled>Save Background</button>
+                        <button type="submit" id="saveCropBtn" class="btn btn-primary disabled" disabled>Save
+                            Background
+                        </button>
                     </div>
                 </form>
             </div>

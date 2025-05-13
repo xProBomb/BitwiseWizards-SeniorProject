@@ -23,7 +23,7 @@ namespace TrustTrade.Middleware
                     // First visit and not logged in: Show Landing page
                     context.Response.Cookies.Append("HasVisitedBefore", "true", new CookieOptions
                     {
-                        Expires = DateTimeOffset.Now.AddDays(1), // Cookie expires after 1 day
+                        Expires = DateTimeOffset.Now.AddDays(3), // Cookie expires after 3 day
                         IsEssential = true,
                         SameSite = SameSiteMode.Lax
                     });
