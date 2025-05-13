@@ -79,4 +79,6 @@ public interface IPostService
     Task AddPostToSavedPostsAsync(int postId, int userId);
 
     Task RemovePostFromSavedPostsAsync(int postId, int userId);
+
+    Task<(List<Post> posts, int totalPosts)> GetUserSavedPagedPostsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder);
 }

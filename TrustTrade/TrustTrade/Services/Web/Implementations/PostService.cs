@@ -51,6 +51,13 @@ public class PostService : IPostService
         return (posts, totalPosts);
     }
 
+    public async Task<(List<Post> posts, int totalPosts)> GetUserSavedPagedPostsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder)
+    {
+        var (posts, totalPosts) = await _postRepository.GetUserSavedPagedPostsAsync(userId, categoryFilter, pageNumber, PAGE_SIZE, sortOrder);
+
+        return (posts, totalPosts);
+    }
+
     public async Task<List<Post>> SearchPostsAsync(List<string> searchTerms, int? currentUserId)
     {
         List<int>? blockedUserIds = await GetBlockedUserIds(currentUserId);
