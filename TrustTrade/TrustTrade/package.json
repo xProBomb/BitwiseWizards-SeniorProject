@@ -19,5 +19,8 @@
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
+  },
+  "dependencies": {
+    "cropperjs": "^1.6.2"
   }
 }

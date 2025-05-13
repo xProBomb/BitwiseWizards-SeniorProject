@@ -81,7 +81,7 @@ namespace TrustTrade.Controllers
             }
 
             var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
-            
+
             var holdingViewModels = holdings.Select(h => new HoldingViewModel
             {
                 Symbol = h.Symbol,
@@ -92,9 +92,9 @@ namespace TrustTrade.Controllers
                 TypeOfSecurity = h.TypeOfSecurity,
                 IsHidden = hideAll || h.IsHidden
             }).ToList();
-            
+
             var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
-            
+
             var model = new ProfileViewModel
             {
                 IdentityId = user.IdentityId,
@@ -119,7 +119,10 @@ namespace TrustTrade.Controllers
                 PerformanceScore = score,
                 HasRatedScore = isRated,
                 ScoreBreakdown = breakdown,
-                ProfilePicture = user.ProfilePicture
+                ProfilePicture = user.ProfilePicture,
+                BackgroundImage = user.BackgroundImage,
+                BackgroundImageUrl = user.BackgroundImageUrl,
+                BackgroundSource = user.BackgroundSource
             };
 
             return View("Profile", model);
@@ -160,107 +163,108 @@ namespace TrustTrade.Controllers
         [HttpGet("/Profile/User/{username}", Name = "UserProfileRoute")]
         public async Task<IActionResult> UserProfile(string username)
         {
-    
-    
-    var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogDebug("Current Identity ID: {IdentityId}", identityId);
 
-    if (string.IsNullOrEmpty(username))
-    {
-        return RedirectToAction(nameof(MyProfile));
-    }
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction(nameof(MyProfile));
+            }
 
-    var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
-    var currentUserId = currentUser?.Id;
-    _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            var currentUserId = currentUser?.Id;
+            _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
 
-    var user = await _context.Users
-        .Include(u => u.FollowerFollowerUsers)
-        .Include(u => u.FollowerFollowingUsers)
-        .FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users
+                .Include(u => u.FollowerFollowerUsers)
+                .Include(u => u.FollowerFollowingUsers)
+                .FirstOrDefaultAsync(u => u.Username == username);
 
-    if (user.Is_Suspended == true)
-    { 
-        var suspendedUserModel = new ProfileViewModel
-        {
-            Id = user.Id,
-            IdentityId = user.IdentityId,
-            Username = user.Username,
-        };
+            if (user.Is_Suspended == true)
+            {
+                var suspendedUserModel = new ProfileViewModel
+                {
+                    Id = user.Id,
+                    IdentityId = user.IdentityId,
+                    Username = user.Username,
+                };
 
-        return View("Profile", suspendedUserModel);
-    }
-    if (user == null)
-    {
-        _logger.LogDebug("User not found: {Username}", username);
-        return NotFound();
-    }
+                return View("Profile", suspendedUserModel);
+            }
 
-    _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
+            if (user == null)
+            {
+                _logger.LogDebug("User not found: {Username}", username);
+                return NotFound();
+            }
 
-    var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
-    var holdingViewModels = holdings.Select(h => new HoldingViewModel
-    {
-        Symbol = h.Symbol,
-        Quantity = h.Quantity,
-        CurrentPrice = h.CurrentPrice,
-        CostBasis = h.CostBasis,
-        Institution = h.PlaidConnection.InstitutionName,
-        TypeOfSecurity = h.TypeOfSecurity,
-        IsHidden = h.IsHidden
-    }).ToList();
+            _logger.LogDebug("Viewing Profile User ID: {UserId}", user.Id);
 
-    var visibilitySettings = await _context.PortfolioVisibilitySettings
-        .FirstOrDefaultAsync(p => p.UserId == user.Id);
+            var holdings = await _holdingsRepository.GetHoldingsForUserAsync(user.Id);
+            var holdingViewModels = holdings.Select(h => new HoldingViewModel
+            {
+                Symbol = h.Symbol,
+                Quantity = h.Quantity,
+                CurrentPrice = h.CurrentPrice,
+                CostBasis = h.CostBasis,
+                Institution = h.PlaidConnection.InstitutionName,
+                TypeOfSecurity = h.TypeOfSecurity,
+                IsHidden = h.IsHidden
+            }).ToList();
 
-    bool hideDetails = false;
-    bool hideAll = false;
+            var visibilitySettings = await _context.PortfolioVisibilitySettings
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-    if (visibilitySettings != null)
-    {
-        hideDetails = visibilitySettings.HideDetailedInformation;
-        hideAll = visibilitySettings.HideAllPositions;
-    }
+            bool hideDetails = false;
+            bool hideAll = false;
 
-    var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
-    
-    var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
+            if (visibilitySettings != null)
+            {
+                hideDetails = visibilitySettings.HideDetailedInformation;
+                hideAll = visibilitySettings.HideAllPositions;
+            }
 
-    var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
-    var isBlocked = blockedUserIds.Contains(user.Id);
+            var filteredHoldings = holdingViewModels.Where(h => !hideAll || !h.IsHidden).ToList();
 
-    var model = new ProfileViewModel
-    {
-        Id = user.Id,
-        IdentityId = user.IdentityId,
-        Username = user.Username,
-        CreatedAt = user.CreatedAt,
-        Bio = user.Bio,
-        IsVerified = user.IsVerified ?? false,
-        PlaidEnabled = user.PlaidEnabled ?? false,
-        LastPlaidSync = user.LastPlaidSync,
-        FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
-        FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-        Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
-                    new List<string>(),
-        Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
-                    new List<string>(),
-        Holdings = filteredHoldings,
-        LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
-        UserTag = user.UserTag,
-        IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
-        PerformanceScore = score,
-        HasRatedScore = isRated,
-        ScoreBreakdown = breakdown,
-        ProfilePicture = user.ProfilePicture,
-        IsBlocked = isBlocked,
-        // property so we know whether to show the message button
-        CanMessage = currentUserId.HasValue && currentUserId != user.Id
-    };
+            var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
 
-    return View("Profile", model);
-}
+            var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
+            var isBlocked = blockedUserIds.Contains(user.Id);
+
+            var model = new ProfileViewModel
+            {
+                Id = user.Id,
+                IdentityId = user.IdentityId,
+                Username = user.Username,
+                CreatedAt = user.CreatedAt,
+                Bio = user.Bio,
+                IsVerified = user.IsVerified ?? false,
+                PlaidEnabled = user.PlaidEnabled ?? false,
+                LastPlaidSync = user.LastPlaidSync,
+                FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
+                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
+                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
+                            new List<string>(),
+                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
+                            new List<string>(),
+                Holdings = filteredHoldings,
+                LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
+                UserTag = user.UserTag,
+                IsFollowing = user.FollowerFollowerUsers?.Any(f => f.FollowingUserId == currentUserId) ?? false,
+                PerformanceScore = score,
+                HasRatedScore = isRated,
+                ScoreBreakdown = breakdown,
+                ProfilePicture = user.ProfilePicture,
+                IsBlocked = isBlocked,
+                CanMessage = currentUserId.HasValue && currentUserId != user.Id,
+                BackgroundImage = user.BackgroundImage,
+                BackgroundImageUrl = user.BackgroundImageUrl,
+                BackgroundSource = user.BackgroundSource.Trim()
+            };
+
+            return View("Profile", model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> RefreshHoldings()
@@ -455,13 +459,15 @@ namespace TrustTrade.Controllers
                         {
                             IdentityId = updatedUser.IdentityId,
                             Username = updatedUser.Username, // Keep the original username.
-                            Bio = updatedUser.Bio,           // Keep the original bio.
-                            UserTag = updatedUser.UserTag,   // Keep the original trading preference.
+                            Bio = updatedUser.Bio, // Keep the original bio.
+                            UserTag = updatedUser.UserTag, // Keep the original trading preference.
                             CreatedAt = updatedUser.CreatedAt,
                             FollowersCount = updatedUser.FollowerFollowerUsers?.Count ?? 0,
                             FollowingCount = updatedUser.FollowerFollowingUsers?.Count ?? 0,
-                            Followers = updatedUser.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ?? new List<string>(),
-                            Following = updatedUser.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ?? new List<string>(),
+                            Followers = updatedUser.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username)
+                                .ToList() ?? new List<string>(),
+                            Following = updatedUser.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username)
+                                .ToList() ?? new List<string>(),
                             IsFollowing = false,
                             HideDetailedInformation = false,
                             HideAllPositions = false,
@@ -521,7 +527,7 @@ namespace TrustTrade.Controllers
 
             _context.Followers.Add(follower);
             await _context.SaveChangesAsync();
-            
+
             // Create notification for the followed user
             await _notificationService.CreateFollowNotificationAsync(currentUser.Id, userToFollow.Id);
 
@@ -587,7 +593,6 @@ namespace TrustTrade.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction("UserProfile", new { username = userToBlock.Username });
-
         }
 
         [HttpPost]
@@ -619,12 +624,14 @@ namespace TrustTrade.Controllers
 
         [AllowAnonymous]
         [HttpGet("/Profile/User/{username}/Posts")]
-        public async Task<IActionResult> UserPosts(string username, string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> UserPosts(string username, string? categoryFilter = null, int pageNumber = 1,
+            string sortOrder = "DateDesc")
         {
             var user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
-            var (postPreviews, totalPosts) = await _postService.GetUserPostPreviewsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var (postPreviews, totalPosts) =
+                await _postService.GetUserPostPreviewsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
             var postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
             var paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, user.Id);
 
@@ -636,6 +643,131 @@ namespace TrustTrade.Controllers
             };
 
             return View(vm);
+        }
+
+        /// <summary>
+        /// Updates the background image for a user profile.
+        /// This method handles both file uploads and URL-based images.
+        /// </summary>
+        /// <param name="BackgroundImage">The uploaded background image file (optional).</param>
+        /// <param name="BackgroundImageUrl">The URL of a background image (optional).</param>
+        /// <param name="BackgroundSource">The source type: "File" or "Url".</param>
+        /// <returns>A redirection to the user's profile page.</returns>
+        [HttpPost]
+        public async Task<IActionResult> UpdateBackgroundImage(IFormFile? BackgroundImage, string? BackgroundImageUrl,
+            string BackgroundSource)
+        {
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
+                return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            if (user == null)
+                return NotFound();
+
+            // Log the update attempt
+            _logger.LogInformation(
+                "Background image update attempt. Source: {Source}, HasFile: {HasFile}, HasUrl: {HasUrl}",
+                BackgroundSource, BackgroundImage != null, !string.IsNullOrEmpty(BackgroundImageUrl));
+
+            if (BackgroundSource == "File" && BackgroundImage != null)
+            {
+                // Handle file upload
+                if (!BackgroundImage.ContentType.StartsWith("image/"))
+                {
+                    TempData["BackgroundImageError"] = "Invalid file type. Please upload a valid image.";
+                    return RedirectToAction("MyProfile");
+                }
+
+                // Check file size (5MB limit)
+                if (BackgroundImage.Length > 5 * 1024 * 1024)
+                {
+                    TempData["BackgroundImageError"] = "Image size cannot exceed 5MB.";
+                    return RedirectToAction("MyProfile");
+                }
+
+                // Process the valid image file
+                using (var memoryStream = new MemoryStream())
+                {
+                    await BackgroundImage.CopyToAsync(memoryStream);
+                    var imageData = memoryStream.ToArray();
+
+                    // Save the image data to the user's profile
+                    user.BackgroundImage = imageData;
+                    user.BackgroundImageUrl = null; // Clear any existing URL
+                    user.BackgroundSource = "File";
+
+                    _logger.LogInformation(
+                        "User {UserId} updated background with file: {Filename}, size: {Size} bytes",
+                        user.Id, BackgroundImage.FileName, BackgroundImage.Length);
+                }
+            }
+            else if (BackgroundSource == "Url" && !string.IsNullOrEmpty(BackgroundImageUrl))
+            {
+                // Handle URL-based image
+                try
+                {
+                    // Basic URL validation
+                    if (!Uri.TryCreate(BackgroundImageUrl, UriKind.Absolute, out Uri? uriResult) ||
+                        (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+                    {
+                        TempData["BackgroundImageError"] =
+                            "Invalid URL format. Please provide a valid http or https URL.";
+                        return RedirectToAction("MyProfile");
+                    }
+
+                    // You can optionally validate that the URL points to an image
+                    // by making a HEAD request and checking the content type
+
+                    // Store the URL in the user profile
+                    user.BackgroundImageUrl = BackgroundImageUrl;
+                    user.BackgroundImage = null; // Clear any existing uploaded image
+                    user.BackgroundSource = "Url";
+
+                    _logger.LogInformation(
+                        "User {UserId} updated background with URL: {Url}",
+                        user.Id, BackgroundImageUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing URL for background image");
+                    TempData["BackgroundImageError"] = "Error processing the provided URL. Please try again.";
+                    return RedirectToAction("MyProfile");
+                }
+            }
+            else
+            {
+                TempData["BackgroundImageError"] = "Please provide either an image file or a valid URL.";
+                return RedirectToAction("MyProfile");
+            }
+
+            // Save changes
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["BackgroundImageSuccess"] = "Background image updated successfully.";
+            return RedirectToAction("MyProfile");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveBackgroundImage()
+        {
+            var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(identityId))
+                return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
+            if (user == null)
+                return NotFound();
+
+            user.BackgroundImage = null;
+            user.BackgroundImageUrl = null;
+            user.BackgroundSource = null;
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["BackgroundImageSuccess"] = "Background image removed successfully.";
+            return RedirectToAction("MyProfile");
         }
     }
 }

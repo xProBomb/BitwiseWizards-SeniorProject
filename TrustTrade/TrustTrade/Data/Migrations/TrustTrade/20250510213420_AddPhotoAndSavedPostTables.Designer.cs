@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrustTrade.Models;
 
@@ -11,9 +12,11 @@ using TrustTrade.Models;
 namespace TrustTrade.Data.Migrations.TrustTrade
 {
     [DbContext(typeof(TrustTradeDbContext))]
-    partial class TrustTradeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250510213420_AddPhotoAndSavedPostTables")]
+    partial class AddPhotoAndSavedPostTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -857,19 +860,6 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasColumnName("ID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<byte[]>("BackgroundImage")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("BackgroundImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("BackgroundSource")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasDefaultValue("File");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
