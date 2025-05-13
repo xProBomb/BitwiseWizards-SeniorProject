@@ -8,6 +8,7 @@ using TrustTrade.Models.ViewModels;
 using TrustTrade.Services;
 using TrustTrade.ViewModels;
 using TrustTrade.Services.Web.Interfaces;
+using TrustTrade.Models.ExtensionMethods;
 
 namespace TrustTrade.Controllers
 {
@@ -565,10 +566,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> Block(string profileId)
         {
             var currentUser = await _userService.GetCurrentUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+            if (currentUser == null) return Unauthorized();
 
             var userToBlock = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
             if (userToBlock == null)
@@ -594,10 +592,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> Unblock(string profileId)
         {
             var currentUser = await _userService.GetCurrentUserAsync(User);
-            if (currentUser == null)
-            {
-                return Unauthorized();
-            }
+            if (currentUser == null) return Unauthorized();
 
             var userToUnblock = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == profileId);
             if (userToUnblock == null)
@@ -624,13 +619,36 @@ namespace TrustTrade.Controllers
             var user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
-            var (postPreviews, totalPosts) = await _postService.GetUserPostPreviewsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+
+            var (posts, totalPosts) = await _postService.GetUserPagedPostsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
             var postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
             var paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, user.Id);
 
             var vm = new UserPostsVM
             {
-                Posts = postPreviews,
+                Posts = posts.ToPreviewViewModels(currentUser?.Id),
+                Pagination = paginationVM,
+                PostFilters = postFiltersVM,
+            };
+
+            return View(vm);
+        }
+
+        
+        [HttpGet("/Profile/User/{username}/Saved")]
+        public async Task<IActionResult> UserSaves(string username, string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        {
+            var user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            var (posts, totalPosts) = await _postService.GetUserSavedPagedPostsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
+            var paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, user.Id);
+
+            var vm = new UserSavesVM
+            {
+                Posts = posts.ToPreviewViewModels(user.Id),
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
             };
