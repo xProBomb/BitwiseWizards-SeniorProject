@@ -17,7 +17,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<(List<PostPreviewVM> posts, int totalPosts)> GetPostPreviewsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId);
+    Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId);
 
     /// <summary>
     /// Get a list of post previews for posts from users that the current user follows.
@@ -27,7 +27,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<(List<PostPreviewVM> posts, int totalPosts)> GetFollowingPostPreviewsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder);
+    Task<(List<Post> posts, int totalPosts)> GetFollowingPagedPostsAsync(int currentUserId, string? categoryFilter, int pageNumber, string sortOrder);
 
     /// <summary>
     /// Get a list of post previews for posts from a specific user.
@@ -37,7 +37,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<(List<PostPreviewVM> posts, int totalPosts)> GetUserPostPreviewsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder);
+    Task<(List<Post> posts, int totalPosts)> GetUserPagedPostsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder);
 
     /// <summary>
     /// Search for posts based on a list of search terms.
@@ -47,7 +47,7 @@ public interface IPostService
     /// <param name="pageNumber">The page number for pagination.</param>
     /// <param name="sortOrder">The sort order for the posts.</param>
     /// <returns>A list of post previews.</returns>
-    Task<List<PostPreviewVM>> SearchPostsAsync(List<string> searchTerms, int? currentUserId);
+    Task<List<Post>> SearchPostsAsync(List<string> searchTerms, int? currentUserId);
 
     /// <summary>
     /// Build the post filters for the view model.

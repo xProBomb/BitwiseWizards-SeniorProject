@@ -8,6 +8,7 @@ using TrustTrade.DAL.Abstract;
 using TrustTrade.Models;
 using TrustTrade.DAL.Concrete;
 using TrustTrade.Data;
+using TrustTrade.Models.ExtensionMethods;
 
 
 namespace TrustTrade.Controllers
@@ -40,12 +41,12 @@ namespace TrustTrade.Controllers
             if (string.IsNullOrWhiteSpace(search))
                 return PartialView("_PostSearchResultsPartial", new List<PostPreviewVM>());
 
-            User? user = await _userService.GetCurrentUserAsync(User);
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
 
             var searchTerms = search.Split(' ').ToList();
-            var postPreviews = await _postService.SearchPostsAsync(searchTerms, user?.Id);
+            var posts = await _postService.SearchPostsAsync(searchTerms, currentUser?.Id);
 
-            return PartialView("_PostSearchResultsPartial", postPreviews);
+            return PartialView("_PostSearchResultsPartial", posts.ToPreviewViewModels());
         }
 
         [HttpGet("Search/SearchUsers")]
