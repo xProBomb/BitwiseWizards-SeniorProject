@@ -76,9 +76,5 @@ public interface IPostService
     /// <returns>A PaginationPartialVM object containing pagination information.</returns>
     Task<PaginationPartialVM> BuildSearchPaginationAsync(string search, List<string> searchTerms, string? categoryFilter, int pageNumber);
 
-    Task AddPostToSavedPostsAsync(int postId, int userId);
-
-    Task RemovePostFromSavedPostsAsync(int postId, int userId);
-
     Task<(List<Post> posts, int totalPosts)> GetUserSavedPagedPostsAsync(int userId, string? categoryFilter, int pageNumber, string sortOrder);
 }

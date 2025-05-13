@@ -9,16 +9,16 @@ namespace TrustTrade.Controllers.Api
     [ApiController]
     public class SavesApiController : ControllerBase
     {
-        private readonly IPostService _postService;
+        private readonly ISaveService _saveService;
         private readonly IUserService _userService;
         private readonly ILogger<SavesApiController> _logger;
 
         public SavesApiController(
-            IPostService postService,
+            ISaveService saveService,
             IUserService userService,
             ILogger<SavesApiController> logger)
         {
-            _postService = postService;
+            _saveService = saveService;
             _userService = userService;
             _logger = logger;
         }
@@ -33,7 +33,7 @@ namespace TrustTrade.Controllers.Api
                 User? currentUser = await _userService.GetCurrentUserAsync(User);
                 if (currentUser == null) return Unauthorized();
 
-                await _postService.AddPostToSavedPostsAsync(postId, currentUser.Id);
+                await _saveService.AddSavedPostAsync(postId, currentUser.Id);
                 return Ok(new { message = "Post saved successfully." });
             }
             catch (KeyNotFoundException ex)
@@ -61,7 +61,7 @@ namespace TrustTrade.Controllers.Api
                 User? currentUser = await _userService.GetCurrentUserAsync(User);
                 if (currentUser == null) return Unauthorized();
 
-                await _postService.RemovePostFromSavedPostsAsync(postId, currentUser.Id);
+                await _saveService.RemoveSavedPostAsync(postId, currentUser.Id);
                 return Ok(new { message = "Post removed from saved posts." });
             }
             catch (KeyNotFoundException ex)

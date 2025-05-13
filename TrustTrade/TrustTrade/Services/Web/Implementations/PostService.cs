@@ -15,17 +15,15 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly ITagRepository _tagRepository;
     private readonly IUserBlockRepository _userBlockRepository;
-    private readonly ISavedPostRepository _savedPostRepository;
     private const int PAGE_SIZE = 10;
     private const int MAX_PAGES_TO_SHOW = 7;
 
-    public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository, IUserBlockRepository userBlockRepository, ISavedPostRepository savedPostRepository)
+    public PostService(ILogger<PostService> logger, IPostRepository postRepository, ITagRepository tagRepository, IUserBlockRepository userBlockRepository)
     {
         _logger = logger;
         _postRepository = postRepository;
         _tagRepository = tagRepository;
         _userBlockRepository = userBlockRepository;
-        _savedPostRepository = savedPostRepository;
     }
 
     public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(string? categoryFilter, int pageNumber, string sortOrder, int? currentUserId)
@@ -94,41 +92,6 @@ public class PostService : IPostService
         int totalPosts = 100; // Replace with actual logic to get total posts based on search terms
 
         return MapToPaginationPartialVM(pageNumber, totalPosts, categoryFilter, search);
-    }
-
-    public async Task AddPostToSavedPostsAsync(int postId, int userId)
-    {
-        Post? post = await _postRepository.FindByIdAsync(postId);
-        if (post == null)
-        {
-            throw new KeyNotFoundException($"Post with ID {postId} not found.");
-        }
-
-        bool isPostSaved = await _savedPostRepository.IsPostSavedByUserAsync(postId, userId);
-        if (isPostSaved)
-        {
-            throw new InvalidOperationException($"Post with ID {postId} is already saved by user with ID {userId}.");
-        }
-
-        var savedPost = new SavedPost
-        {
-            PostId = postId,
-            UserId = userId,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        await _savedPostRepository.AddOrUpdateAsync(savedPost);
-    }
-
-    public async Task RemovePostFromSavedPostsAsync(int postId, int userId)
-    {
-        SavedPost? savedPost = await _savedPostRepository.FindByPostIdAndUserIdAsync(postId, userId);
-        if (savedPost == null)
-        {
-            throw new KeyNotFoundException($"Saved post with PostId {postId} and UserId {userId} not found.");
-        }
-
-        await _savedPostRepository.DeleteAsync(savedPost);
     }
 
     private static PaginationPartialVM MapToPaginationPartialVM(int currentPage, int totalPosts, string? categoryFilter, string? searchQuery = null)
