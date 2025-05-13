@@ -10,10 +10,13 @@ using TrustTrade.ViewModels;
 public class MarketController : Controller
 {
     private readonly IMarketRepository _marketRepo;
+    private readonly IPerformanceScoreRepository _performanceScoreRepository;
 
-    public MarketController(IMarketRepository marketRepo)
+
+    public MarketController(IMarketRepository marketRepo, IPerformanceScoreRepository performanceScoreRepository)
     {
-        _marketRepo = marketRepo;
+        _performanceScoreRepository = performanceScoreRepository;
+        _marketRepo = marketRepo; 
     }
 
     public async Task<IActionResult> Index(string type)
