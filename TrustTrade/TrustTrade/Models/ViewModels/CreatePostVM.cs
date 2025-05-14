@@ -14,6 +14,9 @@ public class CreatePostVM
     [StringLength(1024, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 1024 characters long.")]
     public string Content { get; set; } = string.Empty;
 
+    [Display(Name = "Photos")]
+    public List<string>? Photos { get; set; } = new List<string>();
+
     [Display(Name = "Privacy Setting")]
     [Required(ErrorMessage = "Privacy setting is required.")]
     public bool? IsPublic { get; set; }

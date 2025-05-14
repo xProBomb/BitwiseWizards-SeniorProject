@@ -36,7 +36,7 @@ namespace TestTrustTrade.Reqnroll.Pages
         {
             Driver.Navigate().GoToUrl($"{BaseUrl}{PageUrl}");
         }
-        
+
         /// <summary>
         /// Waits for the page to be loaded
         /// </summary>

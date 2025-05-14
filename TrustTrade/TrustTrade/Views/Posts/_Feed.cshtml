@@ -70,6 +70,18 @@
                 <!-- Main Post Content -->
                 <h3 class="clickable-post" style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Title</h3>
                 <p class="clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Excerpt</p>
+
+                <!-- photo -->
+                @if (post.Photos != null && post.Photos.Any())
+                {
+                    <div class="post-images mb-3">
+                        @foreach (var photo in post.Photos)
+                        {
+                            <img src="data:image/jpeg;base64,@photo" alt="Post Image" class="img-fluid rounded mb-2" />
+                        }
+                    </div>
+                }
+
                 <!-- Like and Comment Buttons -->
                 <div class="d-flex mt-3">
                     <button class="btn btn-sm btn-outline-primary like-btn @(post.IsLikedByCurrentUser ? "liked" : "")" 
