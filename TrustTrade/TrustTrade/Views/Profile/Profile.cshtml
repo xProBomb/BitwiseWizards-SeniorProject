@@ -223,6 +223,14 @@
                                 Posts
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                                asp-controller="Profile" 
+                                asp-action="UserSaves" 
+                                asp-route-username="@Model.Username">
+                                Saved
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -49,4 +49,6 @@ public interface IPostRepository : IRepository<Post>
     /// <param name="sortOrder">Sorting order (e.g., "DateDesc", "DateAsc").</param>
     /// <returns>A list of posts that match the search criteria.</returns>
     Task<List<Post>> SearchPostsAsync(List<string> searchTerms, List<int>? blockedUserIds = null);
+
+    Task<(List<Post> posts, int totalPosts)> GetUserSavedPagedPostsAsync(int userId, string? categoryFilter = null, int pageNumber = 1, int pageSize = 10, string sortOrder = "DateDesc", List<int>? blockedUserIds = null);
 }

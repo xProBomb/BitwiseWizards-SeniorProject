@@ -94,6 +94,33 @@ public class PostRepository : Repository<Post>, IPostRepository
         return (posts, totalPosts);
     }
 
+    public async Task<(List<Post> posts, int totalPosts)> GetUserSavedPagedPostsAsync(
+        int userId,
+        string? categoryFilter = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        string sortOrder = "DateDesc",
+        List<int>? blockedUserIds = null)
+    {
+        // Start with a query that includes related entities.
+        IQueryable<Post> query = _posts
+            .Include(p => p.User)
+            .Include(p => p.Tags);
+
+        query = query.Where(p => p.SavedPosts.Any(sp => sp.UserId == userId));
+
+        query = ApplyCategoryFilter(query, categoryFilter);
+        query = ApplyBlockedUsersFilter(query, blockedUserIds);
+        query = ApplySorting(query, sortOrder);
+
+        int totalPosts = await query.CountAsync();
+
+        query = ApplyPagination(query, pageNumber, pageSize);
+        var posts = await query.ToListAsync();
+
+        return (posts, totalPosts);
+    }
+
     public async Task<List<Post>> SearchPostsAsync(List<string> searchTerms, List<int>? blockedUserIds = null)
     {
         // Start with a query that includes related entities.

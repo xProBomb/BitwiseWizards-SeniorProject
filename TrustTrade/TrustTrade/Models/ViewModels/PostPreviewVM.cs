@@ -25,4 +25,6 @@ public class PostPreviewVM
     public string? PortfolioValueAtPosting { get; set; }
 
     public byte[]? ProfilePicture { get; set; }
+
+    public bool IsSavedByCurrentUser { get; set; }
 }

@@ -51,41 +51,62 @@
     <!-- Post Details -->
     <div class="card">
         <div class="card-body">
-            <div class="d-flex align-items-center">
-                <!-- Profile Links -->
-                <a asp-controller="Profile" 
-                    asp-action="UserProfile" 
-                    asp-route-username="@Model.Username"
-                    class="image-profile-link">
-                    <img src="@(Model.ProfilePicture != null 
-                            ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.ProfilePicture)}"
-                            : "/icons/defpfp.png")"
-                             alt="Profile Picture"
-                             class="rounded-circle"
-                             style="width: 50px; height: 50px;" />
-                </a>
-                <a asp-controller="Profile" 
-                    asp-action="UserProfile" 
-                    asp-route-username="@Model.Username"
-                    class="username-profile-link ms-2">
-                    @Model.Username
-                </a>
-                <!-- Display Plaid Info If Enabled-->
-                @if (Model.IsPlaidEnabled)
-                {
-                    <span class="text-success ms-2">
-                        @if (!string.IsNullOrEmpty(Model.PortfolioValueAtPosting))
-                        {
-                            @Model.PortfolioValueAtPosting
-                        }
-                        <i class="bi bi-patch-check-fill"></i>
-                        <!-- Consider whether or not to add this <small> Plaid Enabled</small> -->
-                    </span>
-                }
-                <!-- Display Time Ago -->
-                <span class="text-muted ms-2">@Model.TimeAgo</span>
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Left Section: Profile Picture, Username, and Timestamp -->
+                <div class="d-flex align-items-center">
+                    <!-- Profile Links -->
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@Model.Username"
+                        class="image-profile-link">
+                        <img src="@(Model.ProfilePicture != null 
+                                ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.ProfilePicture)}"
+                                : "/icons/defpfp.png")"
+                                alt="Profile Picture"
+                                class="rounded-circle"
+                                style="width: 50px; height: 50px;" />
+                    </a>
+                    <a asp-controller="Profile" 
+                        asp-action="UserProfile" 
+                        asp-route-username="@Model.Username"
+                        class="username-profile-link ms-2">
+                        @Model.Username
+                    </a>
+                    <!-- Display Plaid Info If Enabled-->
+                    @if (Model.IsPlaidEnabled)
+                    {
+                        <span class="text-success ms-2">
+                            @if (!string.IsNullOrEmpty(Model.PortfolioValueAtPosting))
+                            {
+                                @Model.PortfolioValueAtPosting
+                            }
+                            <i class="bi bi-patch-check-fill"></i>
+                            <!-- Consider whether or not to add this <small> Plaid Enabled</small> -->
+                        </span>
+                    }
+                    <!-- Display Time Ago -->
+                    <span class="text-muted ms-2">@Model.TimeAgo</span>
+                </div>
+
+                <!-- Right Section: Kebab Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="postActionsMenu-@Model.Id" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postActionsMenu-@Model.Id">
+                        <li>
+                            <button class="dropdown-item save-post-button" data-post-id="@Model.Id" data-is-saved="@Model.IsSavedByCurrentUser">
+                                <i class="bi @(Model.IsSavedByCurrentUser ? "bi-bookmark-fill" : "bi-bookmark")"></i>
+                                <span class="save-status-text">
+                                    @(Model.IsSavedByCurrentUser ? "Unsave" : "Save")
+                                </span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <!-- Consider whether or not to add this tag here <hr /> -->
+
+
             <!-- Display Main Post Content -->
             <h2 class="card-title mt-3">@Model.Title</h2>
             <div class="mt-2">

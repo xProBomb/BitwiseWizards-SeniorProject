@@ -16,4 +16,80 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // Attach click event listener to all save post buttons
+    document.querySelectorAll(".save-post-button").forEach(button => {
+        button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            await togglePostSave(button);
+        });
+    });
 });
+
+async function togglePostSave(button) {
+    // Disable the save button to prevent multiple clicks
+    button.disabled = true;
+
+    const postId = button.getAttribute("data-post-id");
+    const isSaved = button.dataset.isSaved?.toLowerCase() === "true"; // Use data attribute to check if saved
+    const buttonStatusText = button.querySelector(".save-status-text");
+    const iconElement = button.querySelector(".bi");
+
+    let response;
+    try {
+        if (isSaved) {
+            response = await fetch(`/api/saves/posts/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/problem+json; charset=utf-8',
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                credentials: 'same-origin'
+            });
+        }
+        else {
+            response = await fetch(`/api/saves/posts/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/problem+json; charset=utf-8',
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                credentials: 'same-origin'
+            });
+        }
+
+        if (!response.ok) {
+            // Handle unauthorized or error
+            if (response.status === 401) {
+                // Redirect to login page
+                window.location.href = '/Identity/Account/Login?ReturnUrl=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+            throw new Error('Failed to toggle save');
+        }
+
+        const data = await response.json();
+
+        // Update save button appearance and status text
+        if (isSaved) {
+            iconElement.className = "bi bi-bookmark";
+            button.classList.remove("saved");
+            button.dataset.isSaved = "false";
+            buttonStatusText.textContent = "Save";
+        } else {
+            iconElement.className = "bi bi-bookmark-fill";
+            button.classList.add("saved");
+            button.dataset.isSaved = "true";
+            buttonStatusText.textContent = "Unsave";
+        }
+    }
+    catch (error) {
+        console.error('Error toggling save:', error);
+        // Restore original icon on error
+        const iconElement = button.querySelector(".bi");
+        iconElement.className = isSaved ? "bi bi-bookmark-fill" : "bi bi-bookmark";
+    } finally {
+        // Re-enable the button after processing
+        button.disabled = false;
+    }
+}
