@@ -42,6 +42,7 @@ namespace TrustTrade.Models.ExtensionMethods
                 PortfolioValueAtPosting = portfolioValue,
                 ProfilePicture = post.User.ProfilePicture,
                 IsSavedByCurrentUser = post.SavedPosts.Any(sp => sp.UserId == currentUserId),
+                Photos = post.Photos.Select(p => Convert.ToBase64String(p.Image ?? Array.Empty<byte>())).ToList(),
             };
         }
 

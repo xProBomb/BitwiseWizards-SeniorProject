@@ -98,6 +98,8 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();

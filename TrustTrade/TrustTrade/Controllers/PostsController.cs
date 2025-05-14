@@ -5,6 +5,7 @@ using TrustTrade.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
+using TrustTrade.DAL.Concrete;
 
 namespace TrustTrade.Controllers
 {
@@ -15,19 +16,22 @@ namespace TrustTrade.Controllers
         private readonly IHoldingsRepository _holdingsRepository;
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly IPhotoRepository _photoRepository;
 
         public PostsController(
             ILogger<PostsController> logger,
             IUserService userService,
             IHoldingsRepository holdingsRepository,
             IPostRepository postRepository,
-            ITagRepository tagRepository)
+            ITagRepository tagRepository,
+            IPhotoRepository photoRepository)
         {
             _logger = logger;
             _userService = userService;
             _holdingsRepository = holdingsRepository;
             _postRepository = postRepository;
             _tagRepository = tagRepository;
+            _photoRepository = photoRepository;
         }
 
         [HttpGet]
@@ -113,6 +117,42 @@ namespace TrustTrade.Controllers
                     $"User {user.Username} does not have Plaid enabled, skipping portfolio value calculation");
             }
 
+            var base64Images = createPostVM.Photos
+                .Where(photo => !string.IsNullOrWhiteSpace(photo))
+                .SelectMany(photo => photo.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .ToList();
+
+            foreach (string base64Image in base64Images)
+            {
+                try
+                {
+                    string base64Data = base64Image;
+
+                    // Remove any data URI scheme prefix if present
+                    if (base64Data.StartsWith("data:image"))
+                    {
+                        base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
+                    }
+
+                    // Validate and decode Base64
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+                    var photo = new Photo
+                    {
+                        Image = imageBytes,
+                        Post = post,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    await _photoRepository.AddOrUpdateAsync(photo);
+                }
+                catch (FormatException fe)
+                {
+                    _logger.LogWarning(fe, "Invalid Base64 image skipped.");
+                    continue; // Just skip bad entries
+                }
+            }
+
             // Add the selected tags to the post
             foreach (string tagName in createPostVM.SelectedTags)
             {
@@ -146,7 +186,7 @@ namespace TrustTrade.Controllers
             var isPlaidEnabled = post.User?.PlaidEnabled ?? false;
             string? portfolioValue = null;
 
-            // Retreive and format the portfolio value if Plaid is enabled
+            // Retrieve and format the portfolio value if Plaid is enabled
             if (isPlaidEnabled)
             {
                 if (post.PortfolioValueAtPosting.HasValue)
@@ -159,15 +199,10 @@ namespace TrustTrade.Controllers
                 }
             }
 
-            bool isOwnedByCurrentUser = false;
-            bool isLikedByCurrentUser = false;
+            bool isOwnedByCurrentUser = user != null && user.Id == post.UserId;
+            bool isLikedByCurrentUser = user != null && post.Likes.Any(l => l.UserId == user.Id);
 
-            if (user != null && user.Id == post.UserId)
-            {
-                isOwnedByCurrentUser = true;
-                isLikedByCurrentUser = post.Likes.Any(l => l.UserId == user.Id);
-            }
-
+            // Convert comments to view model
             List<CommentVM> comments = post.Comments.Select(comment =>
             {
                 string? commentPortfolioValue = null;
@@ -185,21 +220,32 @@ namespace TrustTrade.Controllers
                     Username = comment.User?.Username ?? "Unknown",
                     Content = comment.Content,
                     TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
-                    IsPlaidEnabled = comment.User.PlaidEnabled ?? false,
-                    PortfolioValueAtPosting = portfolioValue,
-                    ProfilePicture = comment.User.ProfilePicture,
+                    IsPlaidEnabled = comment.User?.PlaidEnabled ?? false,
+                    PortfolioValueAtPosting = commentPortfolioValue,
+                    ProfilePicture = comment.User?.ProfilePicture,
                     IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
                     LikeCount = comment.CommentLikes?.Count ?? 0,
                     IsLikedByCurrentUser = user != null && comment.CommentLikes?.Any(l => l.UserId == user.Id) == true,
                 };
             }).ToList();
 
-            // Map the post to the view model
+            List<string> photos = (await _photoRepository.GetPhotosByPostIdAsync(post.Id))
+                .Where(photo => photo?.Image != null && photo.Image.Length > 0)
+                .Select(photo => $"data:image/jpeg;base64,{Convert.ToBase64String(photo.Image)}")
+                .ToList();
+
+            if (photos.Count == 0)
+            {
+                _logger.LogInformation($"No photos found for post {post.Id}");
+            }
+
+            // Map to ViewModel
             var vm = new PostDetailsVM
             {
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
+                Photos = photos,
                 Username = post.User?.Username ?? "Unknown",
                 TimeAgo = TimeAgoHelper.GetTimeAgo(post.CreatedAt),
                 Tags = post.Tags?.Select(t => t.TagName).ToList() ?? new List<string>(),

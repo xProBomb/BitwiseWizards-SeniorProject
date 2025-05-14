@@ -116,6 +116,18 @@
                 }
             </div>
             <p class="card-text mt-4">@Model.Content</p>
+
+            <!-- Display Post Images -->
+            @if (Model.Photos != null && Model.Photos.Any())
+            {
+                <div class="post-images mb-3">
+                    @foreach (var photo in Model.Photos)
+                    {
+                        <img src="@photo" alt="Post Image" class="img-fluid rounded mb-2" />
+                    }
+                </div>
+            }
+
             <!-- Like and Comment Buttons -->
             <div class="d-flex align-items-center mt-4">
                 <button class="btn btn-primary like-btn position-relative @(Model.IsLikedByCurrentUser ? "liked" : "")" 
