@@ -34,8 +34,7 @@ public class PostServiceTests
             _loggerMock.Object,
             _postRepositoryMock.Object,
             _tagRepositoryMock.Object,
-            _userBlockRepositoryMock.Object,
-            _savedPostRepositoryMock.Object
+            _userBlockRepositoryMock.Object
         );
 
         var user = new User
