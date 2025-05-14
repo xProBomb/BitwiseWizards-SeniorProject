@@ -53,7 +53,25 @@ public class MarketController : Controller
     {
         var isCrypto = type?.ToLower() == "crypto";
         var results = await _marketRepo.SearchStocksAsync(searchTerm, isCrypto);
-        return PartialView("_MarketCardsPartial", results); 
+        var viewModels = new List<StockViewModel>();
+
+        foreach (var stock in results)
+        {
+            decimal score = await _performanceScoreRepository.CalculateStockPerformanceScoreAsync(stock.Ticker);
+
+            viewModels.Add(new StockViewModel
+            {
+                Ticker = stock.Ticker,
+                Name = stock.Name,
+                Price = stock.Price,
+                Change = stock.Change,
+                LastUpdated = stock.LastUpdated,
+                Highs = stock.Highs,
+                PerformanceScore = score
+            });
+        }
+
+        return PartialView("_MarketCardsPartial", viewModels);
     }
 
     [HttpGet]
