@@ -249,8 +249,16 @@ namespace TrustTrade.DAL.Concrete
                 // Performance score: Sharpe-like ratio (without risk-free rate)
                 decimal rawScore = annualizedReturn / (annualizedVolatility + 0.0001m); // prevent div by 0
 
-                // Normalize: scale to 0–100
-                decimal normalizedScore = Math.Clamp(rawScore * 20 + 50, 0, 100); // shift so ~0 ratio = 50
+                
+
+// Compress and normalize
+                decimal safeRaw = Math.Min(Math.Max(rawScore, -1), 5); // limit extreme values
+
+// Logarithmic compression to reduce skew at high end
+                    decimal compressed = (decimal)Math.Log10(1 + (double)Math.Max(0, safeRaw));
+
+                    // Scale up with more breathing room
+                    decimal normalizedScore = Math.Clamp(compressed * 100 / 1.2m, 0, 100); 
 
                 _logger.LogDebug("Stock {Ticker}: AvgReturn={Avg}, Volatility={Vol}, RawScore={Raw}, FinalScore={Final}",
                     tickerSymbol, avgDailyReturn, annualizedVolatility, rawScore, normalizedScore);

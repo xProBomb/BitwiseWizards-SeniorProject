@@ -22,9 +22,30 @@ public class MarketController : Controller
     public async Task<IActionResult> Index(string type)
     {
         var isCrypto = type?.ToLower() == "crypto";
+
         var top = await _marketRepo.GetTopMarketAsync(isCrypto);
+
+        var viewModels = new List<StockViewModel>();
+
+        foreach (var stock in top)
+        {
+            // Calculate the performance score
+            decimal score = await _performanceScoreRepository.CalculateStockPerformanceScoreAsync(stock.Ticker);
+
+            viewModels.Add(new StockViewModel
+            {
+                Ticker = stock.Ticker,
+                Name = stock.Name,
+                Price = stock.Price,
+                Change = stock.Change,
+                LastUpdated = stock.LastUpdated,
+                Highs = stock.Highs,
+                PerformanceScore = score
+            });
+        }
+
         ViewBag.Type = isCrypto ? "crypto" : "stock";
-        return View("MarketHome", top);
+        return View("MarketHome", viewModels);
     }
 
     [HttpGet]

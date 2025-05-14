@@ -20,5 +20,8 @@ namespace TrustTrade.DAL.Abstract
         /// <param name="user">The user entity to evaluate</param>
         /// <returns>True if the user meets requirements, false otherwise</returns>
         bool MeetsMinimumRequirements(User user);
+
+        Task<decimal> CalculateStockPerformanceScoreAsync(string tickerSymbol, int days = 30);
+
     }
 }

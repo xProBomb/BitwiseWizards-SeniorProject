@@ -164,3 +164,28 @@
     transform: translateY(0);
 }
 
+.performance-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.badge-strong {
+    background: linear-gradient(to right, #00c853, #64dd17);
+    color: white;
+}
+
+.badge-hold {
+    background: #ffab00;
+    color: black;
+}
+
+.badge-poor {
+    background: #d50000;
+    color: white;
+}
+
+
