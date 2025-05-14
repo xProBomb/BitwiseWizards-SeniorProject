@@ -35,8 +35,8 @@ else
                         </a>
                         <form method="post" action="/Chat/StartConversation" style="display: inline;">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@user.Id" data-user-id="@user.Id"/>
-                            <button type="submit" class="btn btn-outline-accent ms-2 start-chat-btn">
+                            <input type="hidden" name="userId" value="@user.Id"/>
+                            <button type="submit" class="btn btn-outline-accent ms-2 start-chat-btn" data-user-id="@user.Id">
                                 <i class="bi bi-chat-text"></i> Message
                             </button>
                         </form>
@@ -49,8 +49,17 @@ else
 
 <script>
     // Direct form submission function
-    function createAndSubmitStartConversationForm(userId) {
+    function createAndSubmitStartConversationForm(userId, buttonElement) {
         console.log('Creating form to start conversation with user ID:', userId);
+        
+        // Show loading state on the button that was clicked
+        if (buttonElement) {
+            // Save original button content to restore if needed
+            buttonElement.setAttribute('data-original-html', buttonElement.innerHTML);
+            // Disable button and show spinner
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
+        }
         
         // Create a form to submit
         const form = document.createElement('form');
@@ -88,8 +97,23 @@ else
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const userId = this.getAttribute('data-user-id');
-                createAndSubmitStartConversationForm(userId);
+                createAndSubmitStartConversationForm(userId, this); // Pass the button element
             });
         }
+    });
+    
+    // Also handle the regular form submission
+    document.querySelectorAll('form[action="/Chat/StartConversation"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            // Prevent the default form submission
+            e.preventDefault();
+            
+            // Find the submit button within this form
+            const button = this.querySelector('button[type="submit"]');
+            const userId = this.querySelector('input[name="userId"]').value;
+            
+            // Use our function to handle the submission with loading state
+            createAndSubmitStartConversationForm(userId, button);
+        });
     });
 </script>
