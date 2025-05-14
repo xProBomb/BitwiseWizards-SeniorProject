@@ -42,8 +42,23 @@ let modalHighs = [];
 let modalDates = [];
 
 window.openStockModal = async function (ticker) {
-    document.getElementById("modalTicker").innerText = ticker;
+    const cards = document.querySelectorAll('.stock-card');
+    let score = null;
 
+    // Find the clicked card's score based on ticker
+    for (let card of cards) {
+        if (card.querySelector('.card-title')?.textContent === ticker) {
+            score = card.getAttribute('data-score');
+            break;
+        }
+    }
+
+    document.getElementById("modalTicker").innerText = ticker;
+    document.getElementById("modalScore").innerText = score !== null
+        ? `${parseFloat(score).toFixed(1)} / 100`
+        : "N/A";
+    
+    // fetch/chart logic
     try {
         const response = await fetch(`/api/market/highlow?ticker=${ticker}`);
         const data = await response.json();
@@ -51,7 +66,7 @@ window.openStockModal = async function (ticker) {
         modalHighs = data.map(d => d.high);
         modalDates = data.map(d => d.date);
 
-        renderModalChart(3); // default
+        renderModalChart(30);
 
         document.querySelectorAll('#historyFilter .chart-filter-button').forEach(btn => {
             btn.onclick = () => {
@@ -158,3 +173,11 @@ document.getElementById("stockSearchInput").addEventListener("input", async func
 });
 
 document.addEventListener('DOMContentLoaded', renderSparklineCharts);
+
+document.addEventListener('DOMContentLoaded', function () {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+

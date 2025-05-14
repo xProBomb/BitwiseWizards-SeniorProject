@@ -7,6 +7,7 @@ using TrustTrade.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TrustTrade.Hubs;
+using TrustTrade.Middleware;
 using TrustTrade.Services;
 using TrustTrade.Services.Background;
 using TrustTrade.Services.Web.Interfaces;
@@ -41,6 +42,9 @@ builder.Services.AddScoped<IFinancialNewsRepository, FinancialNewsRepository>();
 builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
+builder.Services.AddScoped<ISavedPostRepository, SavedPostRepository>();
+builder.Services.AddScoped<ISaveService, SaveService>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -150,15 +154,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.MapControllerRoute(
-    name: "following",
-    pattern: "Home/Following",
-    defaults: new { controller = "Home", action = "Following", isFollowing = true});
-
 // Authentication Middleware - ORDER IS CRITICAL
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<SuspensionMiddleware>();
+app.UseMiddleware<LandingPageMiddleware>();
 
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<ChatHub>("/chatHub");
@@ -166,6 +166,17 @@ app.MapHub<ChatHub>("/chatHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Keep only the default route
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "following",
+    pattern: "Home/Following",
+    defaults: new { controller = "Home", action = "Following", isFollowing = true});
+
 app.MapRazorPages();
 
 app.Run();

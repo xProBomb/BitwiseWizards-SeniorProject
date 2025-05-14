@@ -31,4 +31,6 @@ public class PostDetailsVM
     public byte[]? ProfilePicture { get; set; }
 
     public List<CommentVM> Comments { get; set; } = new List<CommentVM>();
+
+    public bool IsSavedByCurrentUser { get; set; }
 }

@@ -189,6 +189,8 @@ namespace TrustTrade.Controllers
                     PortfolioValueAtPosting = portfolioValue,
                     ProfilePicture = comment.User.ProfilePicture,
                     IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
+                    LikeCount = comment.CommentLikes?.Count ?? 0,
+                    IsLikedByCurrentUser = user != null && comment.CommentLikes?.Any(l => l.UserId == user.Id) == true,
                 };
             }).ToList();
 
@@ -209,7 +211,8 @@ namespace TrustTrade.Controllers
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
                 IsUserAdmin = user?.IsAdmin ?? false,
                 ProfilePicture = post.User?.ProfilePicture,
-                Comments = comments
+                Comments = comments,
+                IsSavedByCurrentUser = user?.SavedPosts?.Any(sp => sp.PostId == post.Id) ?? false,
             };
 
             return View(vm);

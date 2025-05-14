@@ -10,6 +10,7 @@
   <ItemGroup>
     <Folder Include="Data\Migrations\TrustTrade\" />
     <Folder Include="wwwroot\icons\" />
+    <Folder Include="wwwroot\img\landing\" />
   </ItemGroup>
 
   <ItemGroup>
