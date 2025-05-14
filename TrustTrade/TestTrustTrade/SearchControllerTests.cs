@@ -19,7 +19,7 @@ namespace TrustTrade.Tests.Controllers
         private Mock<IUserService> _userServiceMock;
         private Mock<IPostService> _postServiceMock;
         private SearchController _controller;
-        private List<PostPreviewVM> _postPreviews;
+        private List<Post> _posts;
         private PostFiltersPartialVM _postFiltersPartialVM;
         private PaginationPartialVM _paginationPartialVM;
 
@@ -34,13 +34,27 @@ namespace TrustTrade.Tests.Controllers
                 _userServiceMock.Object,
                 _postServiceMock.Object);
 
-            _postPreviews = new List<PostPreviewVM>
+
+            var user = new User
             {
-                new PostPreviewVM
+                Id = 1,
+                IdentityId = "test-identity-1",
+                ProfileName = "johnDoe",
+                Username = "johnDoe",
+                Email = "johndoe@example.com",
+                PasswordHash = "dummyHash"
+            };
+
+            _posts = new List<Post>
+            {
+                new Post
                     {
                         Id = 1,
                         Title = "Post 1",
-                        IsPlaidEnabled = true
+                        Content = "Content of post 1",
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = user.Id,
+                        User = user,
                     }
             };
 
@@ -182,8 +196,8 @@ namespace TrustTrade.Tests.Controllers
         public async Task SearchPosts_ReturnsAViewResult()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), It.IsAny<int>()))
-                .ReturnsAsync(_postPreviews);
+            _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), null))
+                .ReturnsAsync(_posts);
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
             _postServiceMock.Setup(s => s.BuildSearchPaginationAsync(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<string>(), It.IsAny<int>()))
@@ -201,7 +215,7 @@ namespace TrustTrade.Tests.Controllers
         {
             // Arrange
             _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), null))
-                .ReturnsAsync(_postPreviews);
+                .ReturnsAsync(_posts);
 
             // Act
             var result = await _controller.SearchPosts("test search") as PartialViewResult;
@@ -210,7 +224,7 @@ namespace TrustTrade.Tests.Controllers
             Assert.That(result, Is.Not.Null);
             Assert.That(result.ViewName, Is.EqualTo("_PostSearchResultsPartial"));
             Assert.That(result.Model, Is.InstanceOf<IEnumerable<PostPreviewVM>>());
-            Assert.That(((IEnumerable<PostPreviewVM>)result.Model).Count(), Is.EqualTo(_postPreviews.Count));
+            Assert.That(((IEnumerable<PostPreviewVM>)result.Model).Count(), Is.EqualTo(_posts.Count));
         }
 
         [Test]

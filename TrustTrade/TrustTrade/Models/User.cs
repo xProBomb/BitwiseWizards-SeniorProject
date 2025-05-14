@@ -47,12 +47,18 @@ public partial class User
     public string? PlaidSettings { get; set; }
     
     public string? UserTag { get; set; }
+    
+    public byte[]? BackgroundImage { get; set; }
+    public string? BackgroundImageUrl { get; set; }
+    public string? BackgroundSource { get; set; } // "File" or "Url"
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<Follower> FollowerFollowerUsers { get; set; } = new List<Follower>();
 
     public virtual ICollection<Follower> FollowerFollowingUsers { get; set; } = new List<Follower>();
+
+    public virtual ICollection<CommentLike> CommentLikes { get; set; } = new List<CommentLike>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
@@ -65,4 +71,6 @@ public partial class User
     public virtual ICollection<UserBlock> BlockedUsers { get; set; } = new List<UserBlock>();
 
     public virtual ICollection<UserBlock> BlockedByUsers { get; set; } = new List<UserBlock>();
+
+    public virtual ICollection<SavedPost> SavedPosts { get; set; } = new List<SavedPost>();
 }

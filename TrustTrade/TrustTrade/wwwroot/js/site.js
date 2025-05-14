@@ -18,39 +18,32 @@ function initSidebar() {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarClose = document.getElementById('sidebarClose');
     const body = document.body;
-    
+
     if (!sidebar || !sidebarToggle || !sidebarClose) return;
-    
+
+    // ✅ Only open sidebar by default on Home/Index
+    const path = window.location.pathname.toLowerCase();
+    const isHomePage = path === "/" || path === "/home" || path === "/home/index";
+
+    if (isHomePage) {
+        sidebar.classList.add('expanded');
+        body.classList.add('sidebar-expanded');
+    }
+
     // Toggle sidebar on button click
-    sidebarToggle.addEventListener('click', function() {
+    sidebarToggle.addEventListener('click', function () {
         sidebar.classList.toggle('expanded');
         body.classList.toggle('sidebar-expanded');
     });
-    
+
     // Close sidebar when X is clicked
-    sidebarClose.addEventListener('click', function() {
+    sidebarClose.addEventListener('click', function () {
         sidebar.classList.remove('expanded');
         body.classList.remove('sidebar-expanded');
     });
-    
-    // Handle window resize - MODIFIED to keep sidebar closed by default
-    function handleResize() {
-        // Always keep sidebar closed by default regardless of screen size
-        sidebar.classList.remove('expanded');
-        body.classList.remove('sidebar-expanded');
-        
-        // Just handle any additional responsive adjustments if needed
-        if (window.innerWidth <= 991.98) {
-            // Mobile-specific adjustments can go here
-        }
-    }
-    
-    // Initialize sidebar state based on screen size
-    handleResize();
-    
-    // Update on resize
-    window.addEventListener('resize', handleResize);
 }
+
+
 
 /**
  * Initialize Bootstrap tooltips

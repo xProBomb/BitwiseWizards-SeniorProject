@@ -4,6 +4,7 @@ using TrustTrade.Models;
 using TrustTrade.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Services.Web.Interfaces;
+using TrustTrade.Models.ExtensionMethods;
 
 namespace TrustTrade.Controllers
 {
@@ -22,22 +23,28 @@ namespace TrustTrade.Controllers
             _postService = postService;
             _userService = userService;
         }
+        
+        [AllowAnonymous]
+        public IActionResult Landing()
+        {
+            return View();
+        }
 
         public async Task<IActionResult> Index(
             string? categoryFilter = null,
             int pageNumber = 1,
             string sortOrder = "DateDesc")
         {
-            User? user = await _userService.GetCurrentUserAsync(User);
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
 
             // Retrieve posts for the general feed
-            List<PostPreviewVM> postPreviews = await _postService.GetPostPreviewsAsync(categoryFilter, pageNumber, sortOrder, user?.Id);
+            (List<Post> posts, int totalPosts) = await _postService.GetPagedPostsAsync(categoryFilter, pageNumber, sortOrder, currentUser?.Id);
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, user?.Id);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, currentUser?.Id);
 
             var vm = new IndexVM
             {
-                Posts = postPreviews,
+                Posts = posts.ToPreviewViewModels(currentUser?.Id),
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
                 IsFollowing = false
@@ -52,19 +59,19 @@ namespace TrustTrade.Controllers
             int pageNumber = 1,
             string sortOrder = "DateDesc")
         {                
-            User? user = await _userService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized();
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
 
-            int currentUserId = user.Id;
+            int currentUserId = currentUser.Id;
 
             // Retrieve posts for the "following" feed
-            List<PostPreviewVM> postPreviews = await _postService.GetFollowingPostPreviewsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
+            (List<Post> posts, int totalPosts) = await _postService.GetFollowingPagedPostsAsync(currentUserId, categoryFilter, pageNumber, sortOrder);
             PostFiltersPartialVM postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
-            PaginationPartialVM paginationVM = await _postService.BuildFollowingPaginationAsync(currentUserId, categoryFilter, pageNumber);
+            PaginationPartialVM paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, currentUserId);
 
             var vm = new IndexVM
             {
-                Posts = postPreviews,
+                Posts = posts.ToPreviewViewModels(currentUserId),
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
                 IsFollowing = true

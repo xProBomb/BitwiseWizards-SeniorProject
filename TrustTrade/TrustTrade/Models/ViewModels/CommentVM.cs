@@ -17,4 +17,8 @@ public class CommentVM
     public byte[]? ProfilePicture { get; set; }
 
     public bool IsOwnedByCurrentUser { get; set; }
+
+    public bool IsLikedByCurrentUser { get; set; }
+
+    public int LikeCount { get; set; }
 }

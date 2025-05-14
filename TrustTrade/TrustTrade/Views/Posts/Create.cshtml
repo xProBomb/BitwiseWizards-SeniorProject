@@ -30,6 +30,20 @@
                 <span asp-validation-for="Content" class="text-danger small"></span>
             </div>
 
+            <!-- Image Adder -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Add Images</label>
+                <div class="input-group">
+                    <input type="file" class="form-control rounded-3" id="imageInput" accept=".png, .jpg, .jpeg .gif" multiple />
+                    <button type="button" class="btn btn-secondary rounded-3" id="addImageButton">Add Images</button>
+                </div>
+                <div id="imagePreview" class="mt-3 d-flex flex-wrap gap-2">
+                    <input asp-for="Photos" type="hidden" value=""/>
+                    <!-- Image previews will be added here -->
+                </div>
+                <span asp-validation-for="Photos" class="text-danger small"></span>
+            </div>
+
             <!-- Visibility -->
             <div class="mb-4">
                 <label asp-for="IsPublic" class="form-label fw-semibold">Visibility</label>
@@ -78,14 +92,6 @@
                     <i class="bi bi-send me-1"></i> Post
                 </button>
             </div>
-
-            <script>
-                document.getElementById('submitButton').addEventListener('click', function () {
-                    this.disabled = true;
-                    this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Posting...';
-                    this.form.submit();
-                });
-            </script>
         </form>
     </div>
 </div>

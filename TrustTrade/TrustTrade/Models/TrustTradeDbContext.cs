@@ -17,6 +17,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<Comment> Comments { get; set; }
 
+    public virtual DbSet<CommentLike> CommentLikes { get; set; }
+
     public virtual DbSet<Follower> Followers { get; set; }
 
     public virtual DbSet<InvestmentPosition> InvestmentPositions { get; set; }
@@ -26,6 +28,10 @@ public partial class TrustTradeDbContext : DbContext
     public virtual DbSet<PlaidConnection> PlaidConnections { get; set; }
 
     public virtual DbSet<Post> Posts { get; set; }
+
+    public virtual DbSet<Photo> Photos { get; set; }
+
+    public virtual DbSet<SavedPost> SavedPosts { get; set; }
 
     public virtual DbSet<Stock> Stocks { get; set; }
 
@@ -69,11 +75,13 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .IsRequired(false);
 
-            entity.HasOne(d => d.Post).WithMany(p => p.Comments)
+            entity.HasOne(d => d.Post)
+                .WithMany(p => p.Comments)
                 .HasForeignKey(d => d.PostId)
                 .HasConstraintName("FK_Comments_Post");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Comments)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Comments_User");
@@ -135,15 +143,44 @@ public partial class TrustTradeDbContext : DbContext
             entity.Property(e => e.PostId).HasColumnName("PostID");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
-            entity.HasOne(d => d.Post).WithMany(p => p.Likes)
+            entity.HasOne(d => d.Post)
+                .WithMany(p => p.Likes)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Likes_Post");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Likes)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Likes)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Likes_User");
         });
+
+        modelBuilder.Entity<CommentLike>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CommentL__3214EC27F1A0E5D8");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.CommentId).HasColumnName("CommentID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            
+            entity.HasOne(e => e.Comment)
+                .WithMany(e => e.CommentLikes)
+                .HasForeignKey(e => e.CommentId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_CommentLikes_Comment");
+
+            entity.HasOne(e => e.User)
+                .WithMany(e => e.CommentLikes)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CommentLikes_User");
+        });
+
+
+
 
         modelBuilder.Entity<PlaidConnection>(entity =>
         {
@@ -207,6 +244,48 @@ public partial class TrustTradeDbContext : DbContext
                         j.Property<int>("PostID").HasColumnName("PostID");
                         j.Property<int>("TagID").HasColumnName("TagID");
                     });
+        });
+
+        modelBuilder.Entity<Photo>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Photos__3214EC27A2F1B0E1");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Image).HasColumnType("varbinary(max)");
+            entity.Property(e => e.PostId).HasColumnName("PostID");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.Photos)
+                .HasForeignKey(d => d.PostId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Photos_Post");
+        });
+
+        modelBuilder.Entity<SavedPost>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_SavedPosts");
+
+            entity.HasIndex(e => new { e.UserId, e.PostId })
+                .HasDatabaseName("UQ__SavedPost__A9D10534A3A3D3A4")
+                .IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(s => s.Post)
+                .WithMany(p => p.SavedPosts)
+                .HasForeignKey(s => s.PostId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_SavedPosts_Post");
+
+            entity.HasOne(s => s.User)
+                .WithMany(u => u.SavedPosts)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SavedPosts_User");
         });
 
         modelBuilder.Entity<Stock>(entity =>
@@ -313,6 +392,9 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.BackgroundImage).HasColumnType("varbinary(max)");
+            entity.Property(e => e.BackgroundImageUrl).HasMaxLength(500);
+            entity.Property(e => e.BackgroundSource).HasMaxLength(10).HasDefaultValue("File");
         });
 
         modelBuilder.Entity<UserBlock>()

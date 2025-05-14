@@ -10,18 +10,42 @@ using TrustTrade.ViewModels;
 public class MarketController : Controller
 {
     private readonly IMarketRepository _marketRepo;
+    private readonly IPerformanceScoreRepository _performanceScoreRepository;
 
-    public MarketController(IMarketRepository marketRepo)
+
+    public MarketController(IMarketRepository marketRepo, IPerformanceScoreRepository performanceScoreRepository)
     {
-        _marketRepo = marketRepo;
+        _performanceScoreRepository = performanceScoreRepository;
+        _marketRepo = marketRepo; 
     }
 
     public async Task<IActionResult> Index(string type)
     {
         var isCrypto = type?.ToLower() == "crypto";
+
         var top = await _marketRepo.GetTopMarketAsync(isCrypto);
+
+        var viewModels = new List<StockViewModel>();
+
+        foreach (var stock in top)
+        {
+            // Calculate the performance score
+            decimal score = await _performanceScoreRepository.CalculateStockPerformanceScoreAsync(stock.Ticker);
+
+            viewModels.Add(new StockViewModel
+            {
+                Ticker = stock.Ticker,
+                Name = stock.Name,
+                Price = stock.Price,
+                Change = stock.Change,
+                LastUpdated = stock.LastUpdated,
+                Highs = stock.Highs,
+                PerformanceScore = score
+            });
+        }
+
         ViewBag.Type = isCrypto ? "crypto" : "stock";
-        return View("MarketHome", top);
+        return View("MarketHome", viewModels);
     }
 
     [HttpGet]
@@ -29,7 +53,25 @@ public class MarketController : Controller
     {
         var isCrypto = type?.ToLower() == "crypto";
         var results = await _marketRepo.SearchStocksAsync(searchTerm, isCrypto);
-        return PartialView("_MarketCardsPartial", results); 
+        var viewModels = new List<StockViewModel>();
+
+        foreach (var stock in results)
+        {
+            decimal score = await _performanceScoreRepository.CalculateStockPerformanceScoreAsync(stock.Ticker);
+
+            viewModels.Add(new StockViewModel
+            {
+                Ticker = stock.Ticker,
+                Name = stock.Name,
+                Price = stock.Price,
+                Change = stock.Change,
+                LastUpdated = stock.LastUpdated,
+                Highs = stock.Highs,
+                PerformanceScore = score
+            });
+        }
+
+        return PartialView("_MarketCardsPartial", viewModels);
     }
 
     [HttpGet]
