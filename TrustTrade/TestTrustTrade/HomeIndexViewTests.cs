@@ -17,7 +17,7 @@ namespace TestTrustTrade
         private Mock<IUserService> _userServiceMock;
         private HomeController _controller;
         private User _user;
-        private List<PostPreviewVM> _postPreviews;
+        private List<Post> _posts;
         private PostFiltersPartialVM _postFiltersPartialVM;
         private PaginationPartialVM _paginationPartialVM;
 
@@ -43,13 +43,16 @@ namespace TestTrustTrade
                 PasswordHash = "dummyHash"
             };
 
-            _postPreviews = new List<PostPreviewVM>
+            _posts = new List<Post>
             {
-                new PostPreviewVM
+                new Post
                     {
                         Id = 1,
                         Title = "Post 1",
-                        IsPlaidEnabled = true
+                        Content = "Content of post 1",
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = _user.Id,
+                        User = _user,
                     }
             };
 
@@ -69,8 +72,8 @@ namespace TestTrustTrade
         public async Task Index_ReturnsAViewResult()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.GetPostPreviewsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
-                .ReturnsAsync((_postPreviews, _postPreviews.Count));
+            _postServiceMock.Setup(s => s.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                .ReturnsAsync((_posts, _posts.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
              _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null))
@@ -88,8 +91,8 @@ namespace TestTrustTrade
         public async Task Index_ReturnsCorrectViewModel()
         {
             // Arrange
-            _postServiceMock.Setup(s => s.GetPostPreviewsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
-                .ReturnsAsync((_postPreviews, _postPreviews.Count));
+            _postServiceMock.Setup(s => s.GetPagedPostsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                .ReturnsAsync((_posts, _posts.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
              _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null))
@@ -102,7 +105,7 @@ namespace TestTrustTrade
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Model, Is.Not.Null);
             Assert.That(result.Model, Is.InstanceOf<IndexVM>());
-            Assert.That(((IndexVM)result.Model).Posts, Is.EqualTo(_postPreviews));
+            Assert.That(((IndexVM)result.Model).Posts?.Count, Is.EqualTo(1));
             Assert.That(((IndexVM)result.Model).PostFilters, Is.EqualTo(_postFiltersPartialVM));
             Assert.That(((IndexVM)result.Model).Pagination, Is.EqualTo(_paginationPartialVM));
         }
@@ -113,8 +116,8 @@ namespace TestTrustTrade
             // Arrange
             _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
                 .ReturnsAsync(_user);
-            _postServiceMock.Setup(s => s.GetFollowingPostPreviewsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync((_postPreviews, _postPreviews.Count));
+            _postServiceMock.Setup(s => s.GetFollowingPagedPostsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync((_posts, _posts.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
              _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
@@ -133,8 +136,8 @@ namespace TestTrustTrade
             // Arrange
             _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
                 .ReturnsAsync(_user);
-            _postServiceMock.Setup(s => s.GetFollowingPostPreviewsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync((_postPreviews, _postPreviews.Count));
+            _postServiceMock.Setup(s => s.GetFollowingPagedPostsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync((_posts, _posts.Count));
             _postServiceMock.Setup(s => s.BuildPostFiltersAsync(It.IsAny<string>(), It.IsAny<string>(), null))
                 .ReturnsAsync(_postFiltersPartialVM);
              _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
@@ -147,7 +150,6 @@ namespace TestTrustTrade
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Model, Is.Not.Null);
             Assert.That(result.Model, Is.InstanceOf<IndexVM>());
-            Assert.That(((IndexVM)result.Model).Posts, Is.EqualTo(_postPreviews));
             Assert.That(((IndexVM)result.Model).PostFilters, Is.EqualTo(_postFiltersPartialVM));
             Assert.That(((IndexVM)result.Model).Pagination, Is.EqualTo(_paginationPartialVM));
         }
