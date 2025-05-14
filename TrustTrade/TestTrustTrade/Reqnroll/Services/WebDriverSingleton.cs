@@ -106,7 +106,7 @@ namespace TestTrustTrade.Reqnroll.Services
         /// </summary>
         /// <param name="timeoutInSeconds">Timeout in seconds</param>
         /// <returns>WebDriverWait instance</returns>
-        public static WebDriverWait GetWait(int timeoutInSeconds = 20)
+        public static WebDriverWait GetWait(int timeoutInSeconds = 10)
         {
             return new WebDriverWait(Instance, TimeSpan.FromSeconds(timeoutInSeconds));
         }

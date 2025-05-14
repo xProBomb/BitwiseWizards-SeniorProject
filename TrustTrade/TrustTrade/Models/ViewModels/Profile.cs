@@ -19,6 +19,9 @@ public class ProfileViewModel
     public byte[]? ProfilePicture { get; set; }
     public bool IsBlocked { get; set; }
 
+    public byte[]? BackgroundImage { get; set; }
+    public string? BackgroundImageUrl { get; set; }
+    public string? BackgroundSource { get; set; }
     public bool CanMessage { get; set; }
     public bool HideDetailedInformation { get; set; }
     public bool HideAllPositions { get; set; }

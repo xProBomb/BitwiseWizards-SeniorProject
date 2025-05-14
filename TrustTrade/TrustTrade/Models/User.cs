@@ -47,6 +47,10 @@ public partial class User
     public string? PlaidSettings { get; set; }
     
     public string? UserTag { get; set; }
+    
+    public byte[]? BackgroundImage { get; set; }
+    public string? BackgroundImageUrl { get; set; }
+    public string? BackgroundSource { get; set; } // "File" or "Url"
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
