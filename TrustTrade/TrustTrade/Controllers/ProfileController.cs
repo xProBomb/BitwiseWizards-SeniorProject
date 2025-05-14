@@ -260,7 +260,7 @@ namespace TrustTrade.Controllers
                 CanMessage = currentUserId.HasValue && currentUserId != user.Id,
                 BackgroundImage = user.BackgroundImage,
                 BackgroundImageUrl = user.BackgroundImageUrl,
-                BackgroundSource = user.BackgroundSource.Trim()
+                BackgroundSource = user.BackgroundSource
             };
 
             return View("Profile", model);

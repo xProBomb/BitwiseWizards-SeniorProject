@@ -96,7 +96,7 @@ namespace TestTrustTrade.StepDefinitions
         public void ThenIShouldBeRedirectedToTheHomePage()
         {
             string currentUrl = _driver.Url;
-            Assert.That(currentUrl, Is.EqualTo("http://localhost:5102/"));
+            Assert.That(currentUrl, Is.EqualTo("http://localhost:5102/Home/Index"));
         }
 
         [Then("I should be redirected to the Following page")]
