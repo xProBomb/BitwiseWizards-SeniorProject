@@ -66,7 +66,7 @@ window.openStockModal = async function (ticker) {
         modalHighs = data.map(d => d.high);
         modalDates = data.map(d => d.date);
 
-        renderModalChart(3);
+        renderModalChart(30);
 
         document.querySelectorAll('#historyFilter .chart-filter-button').forEach(btn => {
             btn.onclick = () => {
