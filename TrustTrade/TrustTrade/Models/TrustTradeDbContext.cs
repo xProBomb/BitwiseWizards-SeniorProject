@@ -259,7 +259,7 @@ public partial class TrustTradeDbContext : DbContext
 
             entity.HasOne(d => d.Post).WithMany(p => p.Photos)
                 .HasForeignKey(d => d.PostId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Photos_Post");
         });
 
