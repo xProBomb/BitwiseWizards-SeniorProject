@@ -69,7 +69,7 @@
 
                 <!-- Main Post Content -->
                 <h3 class="clickable-post" style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Title</h3>
-                <p class="clickable-post" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Excerpt</p>
+                <p class="clickable-post" style="overflow-wrap: break-word; word-break: break-word; overflow: hidden;" data-url="@Url.Action("Details", "Posts", new { id = post.Id })">@post.Excerpt</p>
 
                 <!-- photo -->
                 @if (post.Photos != null && post.Photos.Any())
