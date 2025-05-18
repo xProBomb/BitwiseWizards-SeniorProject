@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     addPageTransitions();
 });
 
-/**
- * Initialize sidebar functionality
- */
+
+ //Initialize sidebar functionality
+
 function initSidebar() {
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
@@ -21,11 +21,12 @@ function initSidebar() {
 
     if (!sidebar || !sidebarToggle || !sidebarClose) return;
 
-    // ✅ Only open sidebar by default on Home/Index
+    // Only open sidebar by default on Home/Index and non-mobile screens
     const path = window.location.pathname.toLowerCase();
     const isHomePage = path === "/" || path === "/home" || path === "/home/index";
+    const isMobile = window.innerWidth <= 768;
 
-    if (isHomePage) {
+    if (isHomePage && !isMobile) {
         sidebar.classList.add('expanded');
         body.classList.add('sidebar-expanded');
     }
