@@ -15,6 +15,18 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
+    private void SanitizeSuspendedUsers(List<Post> posts)
+    {
+        foreach (var post in posts)
+        {
+            if (post.User?.Is_Suspended == true)
+            {
+                post.User.ProfilePicture = Array.Empty<byte>(); // Until justin tells me how
+            }
+        }
+    }
+
+
     public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(
         string? categoryFilter = null, 
         int pageNumber = 1,
@@ -34,6 +46,7 @@ public class PostRepository : Repository<Post>, IPostRepository
         
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -63,6 +76,7 @@ public class PostRepository : Repository<Post>, IPostRepository
 
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -90,6 +104,7 @@ public class PostRepository : Repository<Post>, IPostRepository
 
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -117,6 +132,7 @@ public class PostRepository : Repository<Post>, IPostRepository
 
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
