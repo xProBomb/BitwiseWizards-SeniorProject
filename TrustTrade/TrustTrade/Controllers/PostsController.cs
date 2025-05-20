@@ -186,6 +186,8 @@ namespace TrustTrade.Controllers
             var isPlaidEnabled = post.User?.PlaidEnabled ?? false;
             string? portfolioValue = null;
 
+           
+
             // Retrieve and format the portfolio value if Plaid is enabled
             if (isPlaidEnabled)
             {
@@ -213,6 +215,10 @@ namespace TrustTrade.Controllers
                         ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(comment.PortfolioValueAtPosting.Value)
                         : "$0";
                 }
+                 if (user != null && user.Is_Suspended == true)
+                    {
+                        post.User.ProfilePicture = Array.Empty<byte>(); // Set to default image unless justin tells me a better way
+                    }
 
                 return new CommentVM
                 {
@@ -222,7 +228,7 @@ namespace TrustTrade.Controllers
                     TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
                     IsPlaidEnabled = comment.User?.PlaidEnabled ?? false,
                     PortfolioValueAtPosting = commentPortfolioValue,
-                    ProfilePicture = comment.User?.ProfilePicture,
+                    ProfilePicture = comment.User?.Is_Suspended == true ? Array.Empty<byte>(): comment.User?.ProfilePicture,
                     IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
                     LikeCount = comment.CommentLikes?.Count ?? 0,
                     IsLikedByCurrentUser = user != null && comment.CommentLikes?.Any(l => l.UserId == user.Id) == true,
@@ -237,6 +243,13 @@ namespace TrustTrade.Controllers
             if (photos.Count == 0)
             {
                 _logger.LogInformation($"No photos found for post {post.Id}");
+            }
+
+            // Ensure previous profile picture is set to default if user is suspended
+           
+            if (post.User?.Is_Suspended == true)
+            {
+                post.User.ProfilePicture = Array.Empty<byte>();
             }
 
             // Map to ViewModel
