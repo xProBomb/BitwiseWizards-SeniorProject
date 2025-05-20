@@ -1,11 +1,109 @@
-// UPDATED VERSION - March 9, 2025
-// Version 2.1 - with delete functionality and update connection improvements
+// UPDATED VERSION - May, 2025
+// Version 2.2 - with retry logic, improved error handling, and robust token exchange
 
 // Add a version log to verify we're running the latest code
-console.log("Running plaid.js version 2.1 - with delete functionality");
+console.log("Running plaid.js version 2.2 - with enhanced error handling and retry logic");
 
 // Initialize the Plaid Link handler
 let linkHandler = null;
+
+/**
+ * Exchanges a public token with retry logic
+ * @param {string} publicToken - The public token from Plaid Link
+ * @param {number} maxRetries - Maximum number of retry attempts
+ * @returns {Promise<Object>} - The response from the token exchange
+ */
+async function exchangeTokenWithRetry(publicToken, maxRetries = 3) {
+    let retries = 0;
+
+    while (retries < maxRetries) {
+        try {
+            console.log(`Attempt ${retries + 1} to exchange token`);
+
+            const exchangeResponse = await fetch('/api/plaid/exchange-public-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({publicToken: publicToken})
+            });
+
+            // Get full error details if the response isn't successful
+            if (!exchangeResponse.ok) {
+                let errorData;
+                try {
+                    errorData = await exchangeResponse.json();
+                } catch (e) {
+                    const errorText = await exchangeResponse.text();
+                    errorData = {
+                        error: "Failed to parse error response",
+                        rawText: errorText,
+                        status: exchangeResponse.status
+                    };
+                }
+
+                console.error('Server error:', errorData);
+                throw new Error(errorData.error || 'Failed to exchange public token');
+            }
+
+            return await exchangeResponse.json();
+        } catch (error) {
+            retries++;
+            console.error(`Token exchange failed, attempt ${retries}/${maxRetries}`, error);
+
+            if (retries >= maxRetries) {
+                throw error;
+            }
+
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+        }
+    }
+}
+
+/**
+ * Safely refreshes holdings after successful token exchange
+ * @returns {Promise<boolean>} - Success status of the refresh operation
+ */
+async function safelyRefreshHoldings() {
+    try {
+        console.log('Submitting refresh request to /Profile/RefreshHoldings');
+
+        // Get any CSRF token that might be on the page
+        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+        const formData = new FormData();
+
+        if (tokenElement) {
+            formData.append('__RequestVerificationToken', tokenElement.value);
+        }
+
+        // Use fetch for the refresh request
+        const response = await fetch('/Profile/RefreshHoldings', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            redirect: 'follow'
+        });
+
+        console.log('Refresh request completed with status:', response.status);
+
+        if (response.redirected) {
+            console.log('Redirecting to:', response.url);
+            window.location.href = response.url;
+            return true;
+        } else {
+            // If not redirected automatically, redirect to Profile
+            console.log('No redirect detected, manually navigating to /Profile');
+            window.location.href = '/Profile';
+            return true;
+        }
+    } catch (error) {
+        console.error('Error during holdings refresh:', error);
+        // Still redirect to profile
+        window.location.href = '/Profile';
+        return false;
+    }
+}
 
 async function initializePlaidLink() {
     try {
@@ -19,7 +117,12 @@ async function initializePlaidLink() {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = { error: 'Failed to parse error response' };
+            }
             console.error('Error from server:', errorData);
             throw new Error(errorData.error || 'Failed to get link token');
         }
@@ -37,65 +140,24 @@ async function initializePlaidLink() {
             onSuccess: async (public_token, metadata) => {
                 console.log('Link success - exchanging public token');
                 try {
-                    // First, exchange the public token
-                    const exchangeResponse = await fetch('/api/plaid/exchange-public-token', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({publicToken: public_token})
-                    });
+                    // Use the retry mechanism for token exchange
+                    const exchangeData = await exchangeTokenWithRetry(public_token);
 
-                    if (!exchangeResponse.ok) {
-                        const errorData = await exchangeResponse.json();
-                        console.error('Server error:', errorData);
-                        throw new Error(errorData.error || 'Failed to exchange public token');
-                    }
-
-                    const exchangeData = await exchangeResponse.json();
                     if (exchangeData.success) {
-                        // NEW DISTINCTIVE MESSAGE to verify this code is running
-                        alert('VERSION 2.1: Account linked! Now refreshing your holdings...');
+                        // Notification message to verify this code is running
+                        alert('Connection successful! Your account is now linked. Refreshing your holdings...');
 
-                        // Directly submit form to refresh holdings
-                        const formData = new FormData();
-
-                        // Get any CSRF token that might be on the page
-                        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
-                        if (tokenElement) {
-                            formData.append('__RequestVerificationToken', tokenElement.value);
-                        }
-
-                        // Log that we're about to refresh
-                        console.log('Submitting refresh request to /Profile/RefreshHoldings');
-
-                        // Use fetch for the refresh request
-                        fetch('/Profile/RefreshHoldings', {
-                            method: 'POST',
-                            body: formData,
-                            credentials: 'same-origin',
-                            redirect: 'follow'
-                        }).then(response => {
-                            console.log('Refresh request completed with status:', response.status);
-                            if (response.redirected) {
-                                console.log('Redirecting to:', response.url);
-                                window.location.href = response.url;
-                            } else {
-                                // If not redirected automatically, redirect to Profile
-                                console.log('No redirect detected, manually navigating to /Profile');
-                                window.location.href = '/Profile';
-                            }
-                        }).catch(error => {
-                            console.error('Error during refresh:', error);
-                            // Still redirect to profile
-                            window.location.href = '/Profile';
-                        });
+                        // Safely refresh holdings and handle navigation
+                        await safelyRefreshHoldings();
                     } else {
                         throw new Error('Failed to process brokerage connection');
                     }
                 } catch (error) {
                     console.error('Error exchanging public token:', error);
-                    alert('There was an error connecting your account. Please try again.');
+
+                    // More detailed error message
+                    alert('There was an error connecting your account. Please try again later. ' +
+                        (error.message || 'Unknown error occurred.'));
                 }
             },
             onExit: (err, metadata) => {
@@ -154,7 +216,16 @@ async function deletePlaidConnection() {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                const errorText = await response.text();
+                errorData = {
+                    error: "Failed to parse delete response",
+                    rawText: errorText
+                };
+            }
             console.error('Error deleting connection:', errorData);
             throw new Error(errorData.error || 'Failed to delete connection');
         }
@@ -163,7 +234,7 @@ async function deletePlaidConnection() {
         return data.success;
     } catch (error) {
         console.error('Error deleting Plaid connection:', error);
-        alert('Error deleting connection. Please try again.');
+        alert('Error deleting connection. Please try again. ' + (error.message || ''));
         return false;
     } finally {
         document.body.style.cursor = 'default';

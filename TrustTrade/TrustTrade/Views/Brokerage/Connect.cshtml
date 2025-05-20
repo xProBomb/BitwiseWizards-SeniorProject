@@ -97,34 +97,33 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <!-- TrustTrade/Views/Brokerage/Connect.cshtml - Updated HTML structure -->
                             <div class="verification-summary">
                                 <h5 class="mb-3">Verification Summary</h5>
                                 <div class="card">
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item">
-                                            <span class="label">First Verified</span>
+                                            <div class="label">First Verified</div>
                                             <div class="badge-container">
-                    <span class="badge bg-primary rounded-pill">
+                    <div class="badge bg-primary rounded-pill">
                         @(Model.FirstVerifiedDate?.ToString("M/d/yyyy h:mm tt") ?? "Never")
-                    </span>
+                    </div>
                                             </div>
                                         </li>
                                         <li class="list-group-item">
-                                            <span class="label">Most Recent</span>
+                                            <div class="label">Most Recent</div>
                                             <div class="badge-container">
-                    <span class="badge bg-primary rounded-pill">
+                    <div class="badge bg-primary rounded-pill">
                         @(Model.MostRecentVerifiedDate?.ToString("M/d/yyyy h:mm tt") ?? "Never")
-                    </span>
+                    </div>
                                             </div>
                                         </li>
                                         <li class="list-group-item">
-                                            <span class="label">Total Time</span>
+                                            <div class="label">Total Time</div>
                                             <div class="badge-container">
-                    <span class="badge bg-success rounded-pill"
+                    <div class="badge bg-success rounded-pill"
                           title="Duration since first verification">
                         @Model.FormattedVerifiedDuration
-                    </span>
+                    </div>
                                             </div>
                                         </li>
                                     </ul>
@@ -162,11 +161,11 @@
                                         <td>
                                             @if (item.IsVerified)
                                             {
-                                                <span class="badge bg-success">Verified</span>
+                                                <div class="badge bg-success">Verified</div>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-danger">Unverified</span>
+                                                <div class="badge bg-danger">Unverified</div>
                                             }
                                         </td>
                                         <td>@(item.Source ?? "Unknown")</td>
@@ -252,7 +251,7 @@
     }
 
     .verification-benefit i {
-        color: #0d6efd;
+        color: #6a0dad;
         margin-bottom: 1rem;
     }
 
@@ -267,6 +266,7 @@
         vertical-align: middle;
         border-radius: 10rem;
         max-width: 100%;
+        background-color: #5d3fd3 !important;
     }
 
     /* Improved list items for better responsive behavior */
@@ -297,5 +297,5 @@
 
 @section Scripts {
     <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-    <script src="~/js/plaid.js?v=2.1"></script>
+    <script src="~/js/plaid.js?v=2.2"></script>
 }
