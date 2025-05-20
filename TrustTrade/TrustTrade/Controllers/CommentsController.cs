@@ -25,11 +25,7 @@ namespace TrustTrade.Controllers
         public async Task<IActionResult> RenderCommentPartial(int commentId)
         {
             Comment? comment = await _commentService.GetCommentByIdAsync(commentId);
-
-            if (comment == null)
-            {
-                return NotFound();
-            }
+            if (comment == null) return NotFound();
 
             var vm = comment.ToViewModel();
             return PartialView("_CommentPartial", vm);
