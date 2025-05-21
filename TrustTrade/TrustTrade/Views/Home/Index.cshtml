@@ -18,13 +18,22 @@
             </div>
 
             <!-- Post Preview Feed -->
-            <div class="mt-5">
-                <partial name="../Posts/_Feed" model="Model.Posts" />
+            <ul class="list-group mt-4">
+                <div id="postFeedContainer" class="mt-5">
+                    <partial name="../Posts/_Feed" model="Model.Posts" />
+                </div>
+            </ul>
+
+            <div id="loadTrigger" style="height: 1px;"></div>
+            
+            <div id="loading" class="text-center my-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
 
-            <!-- Pagination Controls -->
-            <div class="mt-5">
-                <partial name="../Posts/_Pagination" model="Model.Pagination" />
+            <div id="endMessage" class="text-center my-4" style="display: none;">
+                <em>No more posts to show.</em>
             </div>
         </div>
 
