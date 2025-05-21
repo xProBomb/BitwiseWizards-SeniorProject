@@ -27,8 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadMorePosts() {
         if (isLoading) return;
 
+        const loadingElement = document.getElementById('loading');
+        const endMessageElement = document.getElementById('endMessage');
+        const postFeedContainer = document.getElementById('postFeedContainer');
+
         isLoading = true;
-        document.getElementById('loading').style.display = 'block';
+        loadingElement.style.display = 'block';
 
         const params = new URLSearchParams({ pageNumber: currentPage, categoryFilter: category });
 
@@ -41,18 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const postsFeedHtml = await response.text();
         
+        // Check if the response contains any posts
         if (postsFeedHtml.trim() === "") {
-            document.getElementById('endMessage').style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
+            endMessageElement.style.display = 'block';
+            loadingElement.style.display = 'none';
             observer.disconnect();
             return;
         }
-
-        document.getElementById('postFeedContainer').insertAdjacentHTML('beforeend', postsFeedHtml);
-
+        
+        postFeedContainer.insertAdjacentHTML('beforeend', postsFeedHtml);
         currentPage++;
         isLoading = false;
-        console.log('Loaded more posts:', currentPage);
-        document.getElementById('loading').style.display = 'none';
+        loadingElement.style.display = 'none';
     }
 });
