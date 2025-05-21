@@ -106,12 +106,30 @@ namespace TestTrustTrade.Reqnroll.StepDefinitions
             // Wait briefly for the navigation to happen
             System.Threading.Thread.Sleep(1000);
         }
+        
+        [When(@"I see the ""Contact Support"" button")]
+        public void WhenISeeTheContactSupportButton()
+        {
+            // Find the button with the specified text
+            bool supportButtonExists = _driver.FindElements(By.CssSelector(".bi-headset")).Count > 0;
+            
+            // Wait briefly for the navigation to happen
+            System.Threading.Thread.Sleep(1000);
+        }
 
         [Then(@"I should be redirected to the home page")]
         public void ThenIShouldBeRedirectedToTheHomePage()
         {
             // Verify we're on the home page
             Assert.That(_homePage.IsPageLoaded(), Is.True, "Home page failed to load after clicking home button");
+        }
+        
+        [Then(@"I should verify that the contact support button exists on the error page")]
+        public void ThenIShouldVerifyThatTheContactSupportButtonExistsOnTheErrorPage()
+        {
+            bool supportButtonExists = _driver.FindElements(By.CssSelector(".bi-headset")).Count > 0;
+            // Verify we're on the contact support page
+            Assert.That(_errorPage.IsPageLoaded() && supportButtonExists, Is.True, "Contact support page failed to load after clicking contact support button");
         }
 
         public void Dispose()
