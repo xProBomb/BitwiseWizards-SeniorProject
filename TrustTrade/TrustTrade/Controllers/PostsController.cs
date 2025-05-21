@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.DAL.Concrete;
+using TrustTrade.Models.ExtensionMethods;
 
 namespace TrustTrade.Controllers
 {
@@ -17,6 +18,7 @@ namespace TrustTrade.Controllers
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
         private readonly IPhotoRepository _photoRepository;
+        private readonly IPostService _postService;
 
         public PostsController(
             ILogger<PostsController> logger,
@@ -24,7 +26,8 @@ namespace TrustTrade.Controllers
             IHoldingsRepository holdingsRepository,
             IPostRepository postRepository,
             ITagRepository tagRepository,
-            IPhotoRepository photoRepository)
+            IPhotoRepository photoRepository,
+            IPostService postService)
         {
             _logger = logger;
             _userService = userService;
@@ -32,6 +35,7 @@ namespace TrustTrade.Controllers
             _postRepository = postRepository;
             _tagRepository = tagRepository;
             _photoRepository = photoRepository;
+            _postService = postService;
         }
 
         [HttpGet]
@@ -366,6 +370,22 @@ namespace TrustTrade.Controllers
             await _postRepository.DeleteAsync(post);
 
             return RedirectToAction("Index", "Home");
+        }
+
+        // GET: /posts/loadmore
+        [HttpGet("posts/loadmore")]
+        public async Task<IActionResult> LoadMore(
+            string? categoryFilter = null, 
+            int pageNumber = 1, 
+            string sortOrder = "DateDesc")
+        {
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+
+            // Retrieve posts for the general feed
+            (List<Post> posts, int totalPosts) = await _postService.GetPagedPostsAsync(categoryFilter, pageNumber, sortOrder, currentUser?.Id);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
         }
     }
 }
