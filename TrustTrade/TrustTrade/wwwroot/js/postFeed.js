@@ -9,7 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     let currentPage = 2; // Start from page 2 since page 1 is already loaded
+    let category = document.getElementById('categoryFilter').value;
     let isLoading = false;
+    
 
     // Set up infinite scroll for loading more posts
     const observer = new IntersectionObserver((entries) => {
@@ -27,9 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isLoading = true;
         document.getElementById('loading').style.display = 'block';
-        category = document.getElementById('categoryFilter').value;
 
-        const response = await fetch(`/posts/loadmore?pageNumber=${currentPage}&categoryFilter=${category}`)
+        const params = new URLSearchParams({ pageNumber: currentPage, categoryFilter: category });
+
+        const response = await fetch(`/posts/loadmore?${params.toString()}`)
 
         if (!response.ok) {
             console.error('Failed to load more posts');
