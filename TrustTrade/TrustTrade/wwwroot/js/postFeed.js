@@ -30,13 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const loadingElement = document.getElementById('loading');
         const endMessageElement = document.getElementById('endMessage');
         const postFeedContainer = document.getElementById('postFeedContainer');
+        const url = postFeedContainer.dataset.url;
+        console.log(url);
 
         isLoading = true;
         loadingElement.style.display = 'block';
 
         const params = new URLSearchParams({ pageNumber: currentPage, categoryFilter: category });
 
-        const response = await fetch(`/posts/loadmore?${params.toString()}`)
+        const response = await fetch(`${url}?${params.toString()}`)
 
         if (!response.ok) {
             console.error('Failed to load more posts');
@@ -52,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
             observer.disconnect();
             return;
         }
-        
+
         postFeedContainer.insertAdjacentHTML('beforeend', postsFeedHtml);
         currentPage++;
         isLoading = false;
