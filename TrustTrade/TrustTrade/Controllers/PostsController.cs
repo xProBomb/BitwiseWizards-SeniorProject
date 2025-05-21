@@ -387,5 +387,22 @@ namespace TrustTrade.Controllers
 
             return PartialView("_Feed", postPreviews);
         }
+
+        // GET: /posts/loadmore/followings
+        [HttpGet("posts/loadmore/followings")]
+        public async Task<IActionResult> LoadMoreFollowings(
+            string? categoryFilter = null, 
+            int pageNumber = 1, 
+            string sortOrder = "DateDesc")
+        {
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Retrieve posts for the followings feed
+            (List<Post> posts, int totalPosts) = await _postService.GetFollowingPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
     }
 }
