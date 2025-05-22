@@ -428,5 +428,29 @@ namespace TrustTrade.Controllers
 
             return PartialView("_Feed", postPreviews);
         }
+
+        // GET: /posts/loadmore/userposts
+        [HttpGet("posts/loadmore/userposts")]
+        public async Task<IActionResult> LoadMoreUserPosts(
+            string username,
+            string? categoryFilter = null, 
+            int pageNumber = 1, 
+            string sortOrder = "DateDesc")
+        {
+            User? user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Ensure the user is the owner of the posts
+            if (user.Id != currentUser.Id) return Unauthorized();
+
+            // Retrieve posts for the user's feed
+            (List<Post> posts, int totalPosts) = await _postService.GetUserPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
     }
 }
