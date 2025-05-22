@@ -29,8 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const loadingElement = document.getElementById('loading');
         const endMessageElement = document.getElementById('endMessage');
         const postFeedContainer = document.getElementById('postFeedContainer');
+        const username = postFeedContainer.dataset.username;
         const url = postFeedContainer.dataset.url;
-        console.log(url);
 
         isLoading = true;
         loadingElement.style.display = 'block';
@@ -43,7 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         );
 
-        const response = await fetch(`${url}?${params.toString()}`)
+        let fetchUrl = `${url}?${params.toString()}`;
+        if (username) {
+            fetchUrl += `&username=${username}`;
+        }
+
+        const response = await fetch(fetchUrl);
 
         if (!response.ok) {
             console.error('Failed to load more posts');

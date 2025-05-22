@@ -657,6 +657,7 @@ namespace TrustTrade.Controllers
                 Posts = posts.ToPreviewViewModels(user.Id),
                 Pagination = paginationVM,
                 PostFilters = postFiltersVM,
+                Username = user.Username,
             };
 
             return View(vm);

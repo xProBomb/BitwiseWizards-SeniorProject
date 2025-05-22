@@ -404,5 +404,29 @@ namespace TrustTrade.Controllers
 
             return PartialView("_Feed", postPreviews);
         }
+
+        // GET: /posts/loadmore/saved
+        [HttpGet("posts/loadmore/saved")]
+        public async Task<IActionResult> LoadMoreSaved(
+            string username,
+            string? categoryFilter = null, 
+            int pageNumber = 1, 
+            string sortOrder = "DateDesc")
+        {
+            User? user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Ensure the user is the owner of the saved posts
+            if (user.Id != currentUser.Id) return Unauthorized();
+
+            // Retrieve posts for the saved feed
+            (List<Post> posts, int totalPosts) = await _postService.GetUserSavedPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
     }
 }
