@@ -7,11 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
     let currentPage = 2; // Start from page 2 since page 1 is already loaded
     let category = document.getElementById('categoryFilter').value;
+    let sortOrder = document.getElementById('sortOrder').value;
     let isLoading = false;
-    
 
     // Set up infinite scroll for loading more posts
     const observer = new IntersectionObserver((entries) => {
@@ -36,7 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
         isLoading = true;
         loadingElement.style.display = 'block';
 
-        const params = new URLSearchParams({ pageNumber: currentPage, categoryFilter: category });
+        const params = new URLSearchParams(
+            {
+                pageNumber: currentPage,
+                categoryFilter: category,
+                sortOrder: sortOrder
+            }
+        );
 
         const response = await fetch(`${url}?${params.toString()}`)
 
