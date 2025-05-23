@@ -619,9 +619,13 @@ namespace TrustTrade.Controllers
 
         [AllowAnonymous]
         [HttpGet("/Profile/User/{username}/Posts")]
-        public async Task<IActionResult> UserPosts(string username, string? categoryFilter = null, int pageNumber = 1,
+        public async Task<IActionResult> UserPosts(
+            string username,
+            string? categoryFilter = null,
             string sortOrder = "DateDesc")
         {
+            int pageNumber = 1; // Load the first page and let the JS handle the rest
+
             var user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
@@ -644,8 +648,13 @@ namespace TrustTrade.Controllers
 
         
         [HttpGet("/Profile/User/{username}/Saved")]
-        public async Task<IActionResult> UserSaves(string username, string? categoryFilter = null, int pageNumber = 1, string sortOrder = "DateDesc")
+        public async Task<IActionResult> UserSaves(
+            string username,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
         {
+            int pageNumber = 1; // Load the first page and let the JS handle the rest
+
             var user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
