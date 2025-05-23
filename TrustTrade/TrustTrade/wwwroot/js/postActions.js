@@ -18,11 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Attach click event listener to all save post buttons
-    document.querySelectorAll(".save-post-button").forEach(button => {
-        button.addEventListener("click", async (event) => {
-            event.preventDefault();
+    document.getElementById("postFeedContainer").addEventListener("click", async function (e) {
+        const button = e.target.closest(".save-post-button");
+        if (button) {
+            e.preventDefault();
             await togglePostSave(button);
-        });
+        }
     });
 });
 

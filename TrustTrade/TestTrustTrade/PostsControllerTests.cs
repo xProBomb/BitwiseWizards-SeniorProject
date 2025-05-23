@@ -19,6 +19,7 @@ public class PostsControllerTests
     private Mock<IPostRepository> _postRepositoryMock;
     private Mock<ITagRepository> _tagRepositoryMock;
     private Mock<IPhotoRepository> _photoRepositoryMock;
+    private Mock<IPostService> _postServiceMock;
     private PostsController _controller;
 
     private User _user1;
@@ -43,6 +44,7 @@ public class PostsControllerTests
         _postRepositoryMock = new Mock<IPostRepository>();
         _tagRepositoryMock = new Mock<ITagRepository>();
         _photoRepositoryMock = new Mock<IPhotoRepository>();
+        _postServiceMock = new Mock<IPostService>();
 
         _controller = new PostsController(
             _loggerMock.Object,
@@ -50,7 +52,8 @@ public class PostsControllerTests
             _holdingsRepositoryMock.Object,
             _postRepositoryMock.Object,
             _tagRepositoryMock.Object,
-            _photoRepositoryMock.Object
+            _photoRepositoryMock.Object,
+            _postServiceMock.Object
         );
 
         

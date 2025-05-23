@@ -473,7 +473,7 @@ namespace TestTrustTrade
                 .ReturnsAsync(_paginationPartialVM);
             
             // Act
-            var result = await _controller.UserPosts(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>());
+            var result = await _controller.UserPosts(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>());
 
             Assert.That(result, Is.Not.Null.And.InstanceOf<ViewResult>());
         }
@@ -492,7 +492,7 @@ namespace TestTrustTrade
                 .ReturnsAsync(_paginationPartialVM);
 
             // Act
-            var result = await _controller.UserPosts(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()) as ViewResult;
+            var result = await _controller.UserPosts(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()) as ViewResult;
             var model = result?.Model as UserPostsVM;
 
             // Assert

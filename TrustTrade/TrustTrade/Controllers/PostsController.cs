@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.DAL.Concrete;
+using TrustTrade.Models.ExtensionMethods;
 
 namespace TrustTrade.Controllers
 {
@@ -17,6 +18,7 @@ namespace TrustTrade.Controllers
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
         private readonly IPhotoRepository _photoRepository;
+        private readonly IPostService _postService;
 
         public PostsController(
             ILogger<PostsController> logger,
@@ -24,7 +26,8 @@ namespace TrustTrade.Controllers
             IHoldingsRepository holdingsRepository,
             IPostRepository postRepository,
             ITagRepository tagRepository,
-            IPhotoRepository photoRepository)
+            IPhotoRepository photoRepository,
+            IPostService postService)
         {
             _logger = logger;
             _userService = userService;
@@ -32,6 +35,7 @@ namespace TrustTrade.Controllers
             _postRepository = postRepository;
             _tagRepository = tagRepository;
             _photoRepository = photoRepository;
+            _postService = postService;
         }
 
         [HttpGet]
@@ -366,6 +370,95 @@ namespace TrustTrade.Controllers
             await _postRepository.DeleteAsync(post);
 
             return RedirectToAction("Index", "Home");
+        }
+
+        // GET: /posts/loadmore
+        [HttpGet("posts/loadmore")]
+        public async Task<IActionResult> LoadMore(
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+
+            // Retrieve posts for the general feed
+            (List<Post> posts, int totalPosts) = await _postService.GetPagedPostsAsync(categoryFilter, pageNumber, sortOrder, currentUser?.Id);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
+
+        // GET: /posts/loadmore/followings
+        [HttpGet("posts/loadmore/followings")]
+        public async Task<IActionResult> LoadMoreFollowings(
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Retrieve posts for the followings feed
+            (List<Post> posts, int totalPosts) = await _postService.GetFollowingPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
+
+        // GET: /posts/loadmore/saved
+        [HttpGet("posts/loadmore/saved")]
+        public async Task<IActionResult> LoadMoreSaved(
+            string username,
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Ensure the user is the owner of the saved posts
+            if (user.Id != currentUser.Id) return Unauthorized();
+
+            // Retrieve posts for the saved feed
+            (List<Post> posts, int totalPosts) = await _postService.GetUserSavedPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
+
+        // GET: /posts/loadmore/userposts
+        [HttpGet("posts/loadmore/userposts")]
+        public async Task<IActionResult> LoadMoreUserPosts(
+            string username,
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Ensure the user is the owner of the posts
+            if (user.Id != currentUser.Id) return Unauthorized();
+
+            // Retrieve posts for the user's feed
+            (List<Post> posts, int totalPosts) = await _postService.GetUserPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser.Id);
+
+            return PartialView("_Feed", postPreviews);
         }
     }
 }
