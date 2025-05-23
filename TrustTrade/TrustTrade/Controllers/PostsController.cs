@@ -375,10 +375,12 @@ namespace TrustTrade.Controllers
         // GET: /posts/loadmore
         [HttpGet("posts/loadmore")]
         public async Task<IActionResult> LoadMore(
-            string? categoryFilter = null, 
-            int pageNumber = 1, 
+            int pageNumber,
+            string? categoryFilter = null,
             string sortOrder = "DateDesc")
         {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
             User? currentUser = await _userService.GetCurrentUserAsync(User);
 
             // Retrieve posts for the general feed
@@ -391,10 +393,12 @@ namespace TrustTrade.Controllers
         // GET: /posts/loadmore/followings
         [HttpGet("posts/loadmore/followings")]
         public async Task<IActionResult> LoadMoreFollowings(
-            string? categoryFilter = null, 
-            int pageNumber = 1, 
+            int pageNumber,
+            string? categoryFilter = null,
             string sortOrder = "DateDesc")
         {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
             User? currentUser = await _userService.GetCurrentUserAsync(User);
             if (currentUser == null) return Unauthorized();
 
@@ -409,10 +413,12 @@ namespace TrustTrade.Controllers
         [HttpGet("posts/loadmore/saved")]
         public async Task<IActionResult> LoadMoreSaved(
             string username,
-            string? categoryFilter = null, 
-            int pageNumber = 1, 
+            int pageNumber,
+            string? categoryFilter = null,
             string sortOrder = "DateDesc")
         {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
             User? user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
@@ -433,10 +439,12 @@ namespace TrustTrade.Controllers
         [HttpGet("posts/loadmore/userposts")]
         public async Task<IActionResult> LoadMoreUserPosts(
             string username,
-            string? categoryFilter = null, 
-            int pageNumber = 1, 
+            int pageNumber,
+            string? categoryFilter = null,
             string sortOrder = "DateDesc")
         {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
             User? user = await _userService.GetUserByUsernameAsync(username);
             if (user == null) return NotFound();
 
