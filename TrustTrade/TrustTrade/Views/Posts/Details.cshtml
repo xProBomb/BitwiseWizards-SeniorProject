@@ -102,6 +102,12 @@
                                 </span>
                             </button>
                         </li>
+                        <li>
+                            <button class="dropdown-item text-danger" onclick="openReportModal('Post', @Model.Id)">
+                                <i class="bi bi-flag"></i>
+                                <span>Report Post</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -236,8 +242,11 @@
     </ul>
 </div>
 
+@await Html.PartialAsync("_ReportModal")
+
 @section Scripts {
     <script src="~/js/postActions.js"></script>
     <script src="~/js/commentActions.js"></script>
     <script src="~/js/commentLike.js"></script>
+    <script src="~/js/reportModal.js"></script>
 }

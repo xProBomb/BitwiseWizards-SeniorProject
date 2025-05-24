@@ -37,7 +37,7 @@ namespace TrustTrade.Models
         public int? ReviewedByUserId { get; set; }
         
         [MaxLength(500)]
-        public string AdminNotes { get; set; }
+        public string? AdminNotes { get; set; }
         
         // Navigation properties
         [ForeignKey("ReporterId")]

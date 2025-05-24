@@ -365,6 +365,12 @@ namespace TrustTrade.Services
             }
         }
 
+        public async Task CreateNotificationAsync(int userId, string type, string message, int? entityId,
+            string entityType, int? actorId)
+        {
+            await _notificationRepository.CreateNotificationAsync(userId, type, message, entityId, entityType, actorId);
+        }
+
         // Helper to truncate long post titles for notification messages
         private string TruncateTitle(string title, int maxLength = 50)
         {
