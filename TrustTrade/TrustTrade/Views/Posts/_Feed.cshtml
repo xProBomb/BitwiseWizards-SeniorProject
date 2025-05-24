@@ -68,6 +68,7 @@
                         </li>
                     </ul>
                 </div>
+                @await Html.PartialAsync("_ReportModal")
             </div>
 
             <!-- Main Post Content -->
@@ -99,8 +100,6 @@
         </li>
     }
 }
-
-@await Html.PartialAsync("_ReportModal")
 
 @section Scripts {
     <script src="~/js/reportModal.js"></script>

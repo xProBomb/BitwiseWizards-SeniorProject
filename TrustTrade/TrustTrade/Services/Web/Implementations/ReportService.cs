@@ -62,13 +62,18 @@ namespace TrustTrade.Services.Web.Implementations
 
             if (detailedReport == null)
             {
-                _logger.LogError($"Failed to retrieve details for report ID {report.Id} after creation. Notifications/Email might not be sent correctly.");
-                return report; // Return basic report if details fail
+                _logger.LogError($"Failed to retrieve details for report ID {report.Id} after creation. Notifications/Email will use basic report data and may lack some details."); 
+                // Pass the original 'report' object which is non-null but lacks loaded navigation properties.
+                // SendReportNotificationsAsync and SendReportEmailAsync should handle this with their ?? and ?. operators.
+                await SendReportNotificationsAsync(report); // Pass 'report' (basic) instead of 'detailedReport' (null)
+                return report; // Return the basic report
             }
-            
-            // Send in-app notifications to admins and the report email to the specified address
-            await SendReportNotificationsAsync(detailedReport);
-            return detailedReport;
+            else
+            {
+                // Send in-app notifications to admins and the report email to the specified address
+                await SendReportNotificationsAsync(detailedReport); 
+                return detailedReport; 
+            }
         }
 
         public async Task<bool> HasUserAlreadyReportedAsync(int userId, string reportType, int entityId)
@@ -76,7 +81,7 @@ namespace TrustTrade.Services.Web.Implementations
             return await _reportRepository.HasUserReportedEntityAsync(userId, reportType, entityId);
         }
 
-        public async Task SendReportNotificationsAsync(Report report) // report here is detailedReport
+        public async Task SendReportNotificationsAsync(Report report) // report here is detailedReport (or basic report if detailed failed)
         {
             // Fetch admins for in-app notifications
             var admins = await _userRepository.GetAllAdminsAsync();
@@ -86,22 +91,27 @@ namespace TrustTrade.Services.Web.Implementations
             }
 
             string notificationMessage;
-            string reporterName = report.Reporter?.Username ?? "A user";
+            // If 'report' is the basic version, report.Reporter might be null.
+            string reporterName = report.Reporter?.Username ?? "A user"; 
+            // If 'report' is the basic version, report.Category will still be available as it was set initially.
             string reportCategory = report.Category ?? "Unspecified";
 
             if (report.ReportType == "Post" && report.ReportedPost != null)
             {
+                // If 'report' is the basic version, report.ReportedPost will be null. This block will be skipped.
                 string postTitle = !string.IsNullOrWhiteSpace(report.ReportedPost.Title) ? report.ReportedPost.Title : "Untitled Post";
                 string postOwnerName = report.ReportedPost.User?.Username ?? "an unknown user";
                 notificationMessage = $"{reporterName} reported the post \"{postTitle}\" (owned by {postOwnerName}). Category: {reportCategory}.";
             }
             else if (report.ReportType == "Profile" && report.ReportedUser != null)
             {
+                // If 'report' is the basic version, report.ReportedUser might be null (unless ReportedUserId was set and it's loaded, unlikely for basic).
                 string reportedUserName = report.ReportedUser.Username ?? "an unknown user";
                 notificationMessage = $"{reporterName} reported the profile of {reportedUserName}. Category: {reportCategory}.";
             }
             else
             {
+                // This fallback will likely be hit if the basic 'report' object is used and navigation properties are null.
                 string targetDescription = "an entity";
                 if (report.ReportedPostId.HasValue) targetDescription = $"post ID {report.ReportedPostId.Value}";
                 else if (report.ReportedUserId.HasValue) targetDescription = $"user ID {report.ReportedUserId.Value}";
@@ -128,26 +138,40 @@ namespace TrustTrade.Services.Web.Implementations
             await SendReportEmailAsync(report);
         }
 
-        // Changed signature: removed List<User> admins parameter
         private async Task SendReportEmailAsync(Report report)
         {
-            // Send email only to the address used by ContactSupport
             string recipientEmail = "trusttrade.auth@gmail.com"; 
 
             string reportedContentDetails = "";
+            // If 'report' is the basic version, report.ReportedPost will be null.
             if (report.ReportType == "Post" && report.ReportedPost != null)
             {
                 reportedContentDetails = $"Post Title: \"{(!string.IsNullOrWhiteSpace(report.ReportedPost.Title) ? report.ReportedPost.Title : "Untitled Post")}\"<br/>Post Author: {report.ReportedPost.User?.Username ?? "N/A"} (ID: {report.ReportedPost.UserId})<br/>Post ID: {report.ReportedPost.Id}";
             }
+            // If 'report' is the basic version, report.ReportedUser will be null (unless ReportedUserId was set and it's loaded, unlikely for basic).
             else if (report.ReportType == "Profile" && report.ReportedUser != null)
             {
                 reportedContentDetails = $"User Profile: {report.ReportedUser.Username ?? "N/A"}<br/>User ID: {report.ReportedUser.Id}";
             }
             else
             {
-                reportedContentDetails = "Details not available.";
+                // Fallback for basic 'report' object or if details are otherwise unavailable
+                if (report.ReportType == "Post" && report.ReportedPostId.HasValue)
+                {
+                    reportedContentDetails = $"Post ID: {report.ReportedPostId.Value} (Full details like title/author require admin panel review if not loaded)";
+                }
+                else if (report.ReportType == "Profile" && report.ReportedUserId.HasValue)
+                {
+                    reportedContentDetails = $"User ID: {report.ReportedUserId.Value} (Full details like username require admin panel review if not loaded)";
+                }
+                else
+                {
+                    reportedContentDetails = "Details not fully available, please check admin panel for Report ID.";
+                }
             }
-
+            
+            // If 'report' is basic, report.Reporter might be null.
+            // report.Category and report.Id will be available from the initial object.
             string emailBody = $@"
                 <html>
                 <body>

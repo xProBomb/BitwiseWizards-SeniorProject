@@ -26,7 +26,7 @@ namespace TrustTrade.Models
         public string Category { get; set; }
         
         [MaxLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         
         // Status tracking
         [MaxLength(50)]
