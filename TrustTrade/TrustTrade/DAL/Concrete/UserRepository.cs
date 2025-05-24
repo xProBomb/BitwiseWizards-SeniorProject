@@ -10,9 +10,11 @@ namespace TrustTrade.DAL.Concrete;
 public class UserRepository : Repository<User>, IUserRepository
 {
     private DbSet<User> _users;
+    private TrustTradeDbContext _context;
 
     public UserRepository(TrustTradeDbContext context) : base(context)
     {
+        _context = context;
         _users = context.Users;
     }
 
@@ -42,5 +44,12 @@ public class UserRepository : Repository<User>, IUserRepository
         }
         
         return await users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+    }
+    
+    public async Task<List<User>> GetAllAdminsAsync()
+    {
+        return await _context.Set<User>()
+            .Where(u => u.IsAdmin == true)
+            .ToListAsync();
     }
 }

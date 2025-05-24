@@ -18,6 +18,7 @@ namespace TrustTrade.Controllers
         private readonly ILogger<NotificationsController> _logger;
         private readonly IUserRepository _userRepository;
         private readonly TrustTradeDbContext _context;
+        private readonly IReportRepository _reportRepository;
 
         public NotificationsController(
             INotificationService notificationService,
@@ -25,7 +26,9 @@ namespace TrustTrade.Controllers
             ILogger<NotificationsController> logger,
             INotificationRepository notificationRepository,
             IUserRepository userRepository,
-            TrustTradeDbContext context)
+            TrustTradeDbContext context,
+            IReportRepository reportRepository
+            )
         {
             _notificationService = notificationService;
             _userService = userService;
@@ -33,6 +36,7 @@ namespace TrustTrade.Controllers
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _context = context;
+            _reportRepository = reportRepository;
         }
 
         /// <summary>
@@ -471,6 +475,43 @@ namespace TrustTrade.Controllers
                             }
                         }
 
+                        break;
+                    
+                    case "Report":
+                        if (notification.EntityId.HasValue && notification.EntityType == "Report")
+                        {
+                            // The EntityId of the notification is the Id of the Report
+                            var report = await _reportRepository.GetReportWithDetailsAsync(notification.EntityId.Value);
+                            if (report != null)
+                            {
+                                if (report.ReportType == "Post" && report.ReportedPostId.HasValue)
+                                {
+                                    _logger.LogInformation($"Redirecting to reported post ID: {report.ReportedPostId.Value} from report notification ID: {id}");
+                                    return RedirectToAction("Details", "Posts", new { id = report.ReportedPostId.Value });
+                                }
+                                else if (report.ReportType == "Profile" && report.ReportedUserId.HasValue)
+                                {
+                                    var reportedUser = await _userRepository.FindByIdAsync(report.ReportedUserId.Value);
+                                    if (reportedUser != null)
+                                    {
+                                        _logger.LogInformation($"Redirecting to reported user profile: {reportedUser.Username} from report notification ID: {id}");
+                                        return RedirectToAction("UserProfile", "Profile", new { username = reportedUser.Username });
+                                    }
+                                    else
+                                    {
+                                        _logger.LogWarning($"Reported user (ID: {report.ReportedUserId.Value}) not found for report notification ID: {id}.");
+                                    }
+                                }
+                                else
+                                {
+                                     _logger.LogWarning($"Report (ID: {report.Id}) has an unknown or incomplete target for redirection from notification ID: {id}. ReportType: {report.ReportType}, ReportedPostId: {report.ReportedPostId}, ReportedUserId: {report.ReportedUserId}");
+                                }
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Report (supposedly ID: {notification.EntityId.Value}) not found for report notification ID: {id}.");
+                            }
+                        }
                         break;
 
                     // TODO: When we create mentioning with @

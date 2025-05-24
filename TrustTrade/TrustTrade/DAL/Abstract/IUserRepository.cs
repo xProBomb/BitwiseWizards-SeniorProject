@@ -22,4 +22,10 @@ public interface IUserRepository : IRepository<User>
     /// <param name="includeRelated">Whether to include related entities.</param>
     /// <returns>The user with the specified username, or null if not found.</returns>
     Task<User?> FindByUsernameAsync(string username, bool includeRelated = false);
+    
+    /// <summary>
+    /// Get all admin users.
+    /// </summary>
+    /// <returns>A list of admin users.</returns>
+    Task<List<User>> GetAllAdminsAsync();
 }

@@ -57,6 +57,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<Conversation> Conversations { get; set; }
     public virtual DbSet<Message> Messages { get; set; }
+    
+    public virtual DbSet<Report> Reports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -555,6 +557,42 @@ public partial class TrustTradeDbContext : DbContext
                 .HasForeignKey(d => d.RecipientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Recipient");
+        });
+        
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+    
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.Property(e => e.ReviewedAt)
+                .HasColumnType("datetime");
+    
+            entity.HasOne(d => d.Reporter)
+                .WithMany()
+                .HasForeignKey(d => d.ReporterId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_Reporter");
+        
+            entity.HasOne(d => d.ReportedUser)
+                .WithMany()
+                .HasForeignKey(d => d.ReportedUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_ReportedUser");
+        
+            entity.HasOne(d => d.ReportedPost)
+                .WithMany()
+                .HasForeignKey(d => d.ReportedPostId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_ReportedPost");
+        
+            entity.HasOne(d => d.ReviewedByUser)
+                .WithMany()
+                .HasForeignKey(d => d.ReviewedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_ReviewedByUser");
         });
 
         OnModelCreatingPartial(modelBuilder);
