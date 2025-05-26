@@ -17,5 +17,6 @@ namespace TrustTrade.Services
         Task<int> GetTotalNotificationsCountAsync(int userId);
         Task<bool> ArchiveNotificationAsync(int notificationId, int currentUserId);
         Task<bool> ArchiveAllNotificationsAsync(int userId);
+        Task CreateNotificationAsync(int userId, string type, string message, int? entityId, string entityType, int? actorId);
     }
 }
