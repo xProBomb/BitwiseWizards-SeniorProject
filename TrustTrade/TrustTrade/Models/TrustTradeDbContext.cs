@@ -33,6 +33,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<SavedPost> SavedPosts { get; set; }
 
+    public virtual DbSet<SiteSettings> SiteSettings { get; set; }
+
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Tag> Tags { get; set; }
@@ -290,6 +292,16 @@ public partial class TrustTradeDbContext : DbContext
                 .HasConstraintName("FK_SavedPosts_User");
         });
 
+        modelBuilder.Entity<SiteSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__SiteSett__3214EC27F1A0E5D8");
+
+            entity.ToTable("SiteSettings");
+
+            entity.Property(e => e.IsPresentationModeEnabled)
+                .HasDefaultValue(false);
+        });
+
         modelBuilder.Entity<Stock>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Stock__3214EC275CD17266");
@@ -394,6 +406,7 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.CanPostDuringPresentation).HasDefaultValue(false);
             entity.Property(e => e.BackgroundImage).HasColumnType("varbinary(max)");
             entity.Property(e => e.BackgroundImageUrl).HasMaxLength(500);
             entity.Property(e => e.BackgroundSource).HasMaxLength(10).HasDefaultValue("File");
