@@ -47,6 +47,8 @@ public partial class User
     public string? PlaidSettings { get; set; }
     
     public string? UserTag { get; set; }
+
+    public bool CanPostDuringPresentation { get; set; }
     
     public byte[]? BackgroundImage { get; set; }
     public string? BackgroundImageUrl { get; set; }
