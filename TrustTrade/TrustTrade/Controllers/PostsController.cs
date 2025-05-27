@@ -208,36 +208,14 @@ namespace TrustTrade.Controllers
             bool isOwnedByCurrentUser = user != null && user.Id == post.UserId;
             bool isLikedByCurrentUser = user != null && post.Likes.Any(l => l.UserId == user.Id);
 
-            // Convert comments to view model
-            List<CommentVM> comments = post.Comments.Select(comment =>
+            if (user != null && user.Is_Suspended == true)
             {
-                string? commentPortfolioValue = null;
+                post.User.ProfilePicture = Array.Empty<byte>();  // Set to default image unless justin tells me a better way
+            }
 
-                if (comment.User?.PlaidEnabled == true)
-                {
-                    commentPortfolioValue = comment.PortfolioValueAtPosting.HasValue
-                        ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(comment.PortfolioValueAtPosting.Value)
-                        : "$0";
-                }
-                 if (user != null && user.Is_Suspended == true)
-                    {
-                        post.User.ProfilePicture = Array.Empty<byte>(); // Set to default image unless justin tells me a better way
-                    }
-
-                return new CommentVM
-                {
-                    Id = comment.Id,
-                    Username = comment.User?.Username ?? "Unknown",
-                    Content = comment.Content,
-                    TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
-                    IsPlaidEnabled = comment.User?.PlaidEnabled ?? false,
-                    PortfolioValueAtPosting = commentPortfolioValue,
-                    ProfilePicture = comment.User?.Is_Suspended == true ? Array.Empty<byte>(): comment.User?.ProfilePicture,
-                    IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
-                    LikeCount = comment.CommentLikes?.Count ?? 0,
-                    IsLikedByCurrentUser = user != null && comment.CommentLikes?.Any(l => l.UserId == user.Id) == true,
-                };
-            }).ToList();
+            List<CommentVM> comments = post.Comments
+                .Select(comment => comment.ToViewModel(user))
+                .ToList();
 
             List<string> photos = (await _photoRepository.GetPhotosByPostIdAsync(post.Id))
                 .Where(photo => photo?.Image != null && photo.Image.Length > 0)
