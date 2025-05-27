@@ -92,12 +92,16 @@
                                 </span>
                             </button>
                         </li>
-                        <li>
-                            <button class="dropdown-item text-danger" onclick="openReportModal('Post', @Model.Id)">
-                                <i class="bi bi-flag"></i>
-                                <span>Report Post</span>
-                            </button>
-                        </li>
+                        <!-- Owner can't report their own post, but others can -->
+                        @if (!Model.IsOwnedByCurrentUser)
+                        {
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="openReportModal('Post', @Model.Id)">
+                                    <i class="bi bi-flag"></i>
+                                    <span>Report Post</span>
+                                </button>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
