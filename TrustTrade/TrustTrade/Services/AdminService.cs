@@ -6,13 +6,17 @@ using TrustTrade.Models;
 public class AdminService : IAdminService
 {
     private readonly IAdminRepository _adminRepository;
-
+    private readonly ISiteSettingsRepository _siteSettingsRepository;
     private readonly ILogger<AdminService> _logger;
 
-    public AdminService(IAdminRepository adminRepository, ILogger<AdminService> logger)
+    public AdminService(
+        IAdminRepository adminRepository,
+        ISiteSettingsRepository siteSettingsRepository,
+        ILogger<AdminService> logger)
     {
-        _logger = logger;
         _adminRepository = adminRepository;
+        _siteSettingsRepository = siteSettingsRepository;
+        _logger = logger;
     }
 
     public async Task<User?> GetCurrentUserAsync(ClaimsPrincipal principal)
@@ -64,4 +68,22 @@ public class AdminService : IAdminService
         return await _adminRepository.FindByIdAsync(userId);
     }
 
+    public async Task<SiteSettings> GetSiteSettingsAsync()
+    {
+        return await _siteSettingsRepository.GetSiteSettingsAsync();
+    }
+
+    public async Task EnablePresentationModeAsync()
+    {
+        var settings = await _siteSettingsRepository.GetSiteSettingsAsync();
+        settings.IsPresentationModeEnabled = true;
+        await _siteSettingsRepository.AddOrUpdateAsync(settings);
+    }
+
+    public async Task DisablePresentationModeAsync()
+    {
+        var settings = await _siteSettingsRepository.GetSiteSettingsAsync();
+        settings.IsPresentationModeEnabled = false;
+        await _siteSettingsRepository.AddOrUpdateAsync(settings);
+    }
 }

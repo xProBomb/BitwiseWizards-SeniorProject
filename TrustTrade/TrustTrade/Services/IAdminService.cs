@@ -9,4 +9,7 @@ public interface IAdminService
     Task SuspendUserAsync(int userId);
     Task UnsuspendUserAsync(int userId);
     Task<User?> FindUserByIdAsync(int userId);
+    Task<SiteSettings> GetSiteSettingsAsync();
+    Task EnablePresentationModeAsync();
+    Task DisablePresentationModeAsync();
 }
