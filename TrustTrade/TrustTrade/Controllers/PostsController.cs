@@ -7,6 +7,7 @@ using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.DAL.Concrete;
 using TrustTrade.Models.ExtensionMethods;
+using System.ComponentModel;
 
 namespace TrustTrade.Controllers
 {
@@ -19,6 +20,7 @@ namespace TrustTrade.Controllers
         private readonly ITagRepository _tagRepository;
         private readonly IPhotoRepository _photoRepository;
         private readonly IPostService _postService;
+        private readonly ISiteSettingsRepository _siteSettingsRepository;
 
         public PostsController(
             ILogger<PostsController> logger,
@@ -27,7 +29,8 @@ namespace TrustTrade.Controllers
             IPostRepository postRepository,
             ITagRepository tagRepository,
             IPhotoRepository photoRepository,
-            IPostService postService)
+            IPostService postService,
+            ISiteSettingsRepository siteSettingsRepository)
         {
             _logger = logger;
             _userService = userService;
@@ -36,16 +39,25 @@ namespace TrustTrade.Controllers
             _tagRepository = tagRepository;
             _photoRepository = photoRepository;
             _postService = postService;
+            _siteSettingsRepository = siteSettingsRepository;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Create()
         {
+            User? user = await _userService.GetCurrentUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
+
             // Retrieve all existing tags for the view model
             var vm = new CreatePostVM
             {
-                ExistingTags = await _tagRepository.GetAllTagNamesAsync()
+                ExistingTags = await _tagRepository.GetAllTagNamesAsync(),
+                CanPostDuringPresentation = user.CanPostDuringPresentation,
+                IsPresentationModeEnabled = siteSettings.IsPresentationModeEnabled,
+                
             };
 
             return View(vm);
@@ -64,6 +76,18 @@ namespace TrustTrade.Controllers
 
             User? user = await _userService.GetCurrentUserAsync(User);
             if (user == null) return Unauthorized();
+
+            // Check if the user is allowed to post during presentation mode.
+            // They normally shouldn't get this far if they can't post, but handle it gracefully.
+            SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
+            if (siteSettings.IsPresentationModeEnabled && !user.CanPostDuringPresentation)
+            {
+                _logger.LogWarning($"User {user.Username} attempted to post during presentation mode without permission.");
+                createPostVM.ExistingTags = await _tagRepository.GetAllTagNamesAsync();
+                createPostVM.CanPostDuringPresentation = user.CanPostDuringPresentation;
+                createPostVM.IsPresentationModeEnabled = siteSettings.IsPresentationModeEnabled;
+                return View(createPostVM);
+            }
 
             // Map the CreatePostVM to the Post entity
             var post = new Post
