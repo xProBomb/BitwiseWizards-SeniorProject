@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TrustTrade.Controllers
 {
@@ -168,6 +167,32 @@ namespace TrustTrade.Controllers
             </html>";
 
             await _emailSender.SendEmailAsync(user.Email, subject, body);
+
+            return Ok();
+        }
+
+        [HttpPost("/Admin/AddPresenter")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> AddPresenter([FromBody] UserActionDto dto)
+        {
+            var userId = dto.userId;
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
+
+            await _adminService.AddPresenterAsync(userId);
+
+            return Ok();
+        }
+
+        [HttpPost("/Admin/RemovePresenter")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> RemovePresenter([FromBody] UserActionDto dto)
+        {
+            var userId = dto.userId;
+            var currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin) return Unauthorized();
+
+            await _adminService.RemovePresenterAsync(userId);
 
             return Ok();
         }
