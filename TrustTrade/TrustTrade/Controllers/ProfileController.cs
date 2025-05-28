@@ -498,13 +498,20 @@ namespace TrustTrade.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Follow()
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Follow(string profileId)
         {
             var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(identityId))
             {
-                return Unauthorized();
+                return RedirectToAction("Profile", "Profile");
             }
 
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);
@@ -541,7 +548,7 @@ namespace TrustTrade.Controllers
             var identityId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(identityId))
             {
-                return Unauthorized();
+                return RedirectToAction("Profile", "Profile");
             }
 
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.IdentityId == identityId);

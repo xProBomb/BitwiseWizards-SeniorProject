@@ -35,7 +35,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: formData
             })
             .then(response => {
-                window.location.reload();
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
             })
         });
     });
