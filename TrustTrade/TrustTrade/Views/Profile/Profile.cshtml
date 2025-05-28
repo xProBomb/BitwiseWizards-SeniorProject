@@ -438,9 +438,21 @@
                 </div>
                 <div class="modal-body">
                     <ul>
-                        @foreach (var follower in Model.Followers)
+                        @for (int i = 0; i < Model.Followers.Count; i++)
                         {
+                            var follower = Model.Followers[i];
+                            var pfp = (Model.FollowersPfp != null && Model.FollowersPfp.Count > i) ? Model.FollowersPfp[i] : null;
                             <li class="mb-2">
+                                @if (pfp != null && pfp.Length > 0)
+                                {
+                                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(pfp)" alt="Follower Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
+                                else
+                                {
+                                    <img src="/icons/defpfp.png" alt="Follower Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
                                 <a asp-controller="Profile" asp-action="User" asp-route-id="@follower"
                                    class="btn">@follower</a>
                             </li>
@@ -462,9 +474,21 @@
                 </div>
                 <div class="modal-body">
                     <ul>
-                        @foreach (var following in Model.Following)
+                        @for (int i = 0; i < Model.Following.Count; i++)
                         {
+                            var following = Model.Following[i];
+                            var pfp = (Model.FollowingPfp != null && Model.FollowingPfp.Count > i) ? Model.FollowingPfp[i] : null;
                             <li class="mb-2">
+                                @if (pfp != null && pfp.Length > 0)
+                                {
+                                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(pfp)" alt="Following Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
+                                else
+                                {
+                                    <img src="/icons/defpfp.png" alt="Following Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
                                 <a asp-controller="Profile" asp-action="User" asp-route-id="@following"
                                    class="btn">@following</a>
                             </li>
