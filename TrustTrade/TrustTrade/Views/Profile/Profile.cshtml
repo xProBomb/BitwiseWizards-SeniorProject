@@ -1007,8 +1007,11 @@
             }
         });
 
-        cropAndUploadButton.addEventListener('click', function () {
+        cropAndUploadButton.addEventListener('click', function (e) {
+            e.preventDefault();
             if (cropper) {
+                cropAndUploadButton.disabled = true;
+                cropAndUploadButton.textContent = 'Uploading...';
                 const canvas = cropper.getCroppedCanvas({
                     width: 150,
                     height: 150,
@@ -1029,10 +1032,14 @@
                                 location.reload();
                             } else {
                                 alert('Failed to upload the image.');
+                                cropAndUploadButton.disabled = false;
+                                cropAndUploadButton.textContent = 'Crop & Upload';
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
+                            cropAndUploadButton.disabled = false;
+                            cropAndUploadButton.textContent = 'Crop & Upload';
                         });
                 });
             }

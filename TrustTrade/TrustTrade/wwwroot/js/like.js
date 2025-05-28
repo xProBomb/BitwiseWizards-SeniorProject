@@ -33,12 +33,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Handle unauthorized or error
                 if (response.status === 401) {
                     // Redirect to login page
-                    window.location.href = '/Identity/Account/Login?ReturnUrl=' + encodeURIComponent(window.location.pathname);
+                    window.location.href = '/Identity/Account/Login';
                     return;
                 }
                 throw new Error('Failed to toggle like');
             }
-            
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // If not JSON, likely a redirect or error page, redirect to login
+                window.location.href = '/Identity/Account/Login';
+                return;
+            }
             const data = await response.json();
             
             // Update button appearance
@@ -64,50 +71,4 @@ document.addEventListener('DOMContentLoaded', function() {
             likeButton.disabled = false;
         }
     });
-    
-    // Initialize like status for posts when page loads
-    async function fetchLikeStatus() {
-        const likeButtons = document.querySelectorAll('.like-btn[data-post-id]');
-        
-        for (const button of likeButtons) {
-            const postId = button.getAttribute('data-post-id');
-            try {
-                const response = await fetch(`/api/Like/status/${postId}`, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
-                });
-                
-                if (!response.ok) continue;
-                
-                const data = await response.json();
-                const iconElement = button.querySelector('.bi');
-                const countElement = button.querySelector('.like-count');
-                
-                // Update button appearance based on like status
-                if (data.isLiked) {
-                    iconElement.className = 'bi bi-hand-thumbs-up-fill';
-                    button.classList.add('liked');
-                } else {
-                    iconElement.className = 'bi bi-hand-thumbs-up';
-                    button.classList.remove('liked');
-                }
-                
-                // Update like count
-                if (countElement) {
-                    countElement.textContent = data.likeCount;
-                }
-                
-            } catch (error) {
-                console.error(`Error fetching like status for post ${postId}:`, error);
-            }
-        }
-    }
-    
-    // Only fetch like status if there are like buttons on the page
-    if (document.querySelectorAll('.like-btn[data-post-id]').length > 0) {
-        fetchLikeStatus();
-    }
 });
