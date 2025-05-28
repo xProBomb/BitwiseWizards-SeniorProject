@@ -1,15 +1,18 @@
 @model List<User>
 
 <div class="list-group">
-@foreach (var user in Model)
-{
-    <div class="list-group-item d-flex justify-content-between align-items-center user-row" data-user-id="@user.Id">
-        <span><strong>@user.Username</strong> (@user.Email)</span>
+    @foreach (var user in Model)
+    {
+        <div class="list-group-item d-flex justify-content-between align-items-center user-row" data-user-id="@user.Id">
+            <span><strong>@user.Username</strong> (@user.Email)</span>
             <button class="btn btn-sm @(user.Is_Suspended == true ? "btn-danger" : "btn-warning") suspend-btn"
                 data-user-id="@user.Id">
-            @(user.Is_Suspended == true ? "Reactivate" : "Suspend")
-        </button>
-        
-    </div>
-}
+                @(user.Is_Suspended == true ? "Reactivate" : "Suspend")
+            </button>
+            <button class="btn btn-sm @(user.CanPostDuringPresentation == true ? "btn-danger" : "btn-success") add-presenter-btn"
+                    data-user-id="@user.Id">
+                @(user.CanPostDuringPresentation == true ? "Remove Presenter" : "Make Presenter")
+            </button>
+        </div>
+    }
 </div>
