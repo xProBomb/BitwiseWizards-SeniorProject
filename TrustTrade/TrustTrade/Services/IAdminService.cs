@@ -12,4 +12,6 @@ public interface IAdminService
     Task<SiteSettings> GetSiteSettingsAsync();
     Task EnablePresentationModeAsync();
     Task DisablePresentationModeAsync();
+    Task AddPresenterAsync(int userId);
+    Task RemovePresenterAsync(int userId);
 }

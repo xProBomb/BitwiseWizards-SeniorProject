@@ -7,15 +7,18 @@ public class AdminService : IAdminService
 {
     private readonly IAdminRepository _adminRepository;
     private readonly ISiteSettingsRepository _siteSettingsRepository;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<AdminService> _logger;
 
     public AdminService(
         IAdminRepository adminRepository,
         ISiteSettingsRepository siteSettingsRepository,
+        IUserRepository userRepository,
         ILogger<AdminService> logger)
     {
         _adminRepository = adminRepository;
         _siteSettingsRepository = siteSettingsRepository;
+        _userRepository = userRepository;
         _logger = logger;
     }
 
@@ -85,5 +88,23 @@ public class AdminService : IAdminService
         var settings = await _siteSettingsRepository.GetSiteSettingsAsync();
         settings.IsPresentationModeEnabled = false;
         await _siteSettingsRepository.AddOrUpdateAsync(settings);
+    }
+
+    public async Task AddPresenterAsync(int userId)
+    {
+        var user = await _userRepository.FindByIdAsync(userId);
+        if (user == null) return;
+
+        user.CanPostDuringPresentation = true;
+        await _userRepository.AddOrUpdateAsync(user);
+    }
+
+    public async Task RemovePresenterAsync(int userId)
+    {
+        var user = await _userRepository.FindByIdAsync(userId);
+        if (user == null) return;
+
+        user.CanPostDuringPresentation = false;
+        await _userRepository.AddOrUpdateAsync(user);
     }
 }
