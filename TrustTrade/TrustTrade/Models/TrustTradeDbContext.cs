@@ -598,7 +598,7 @@ public partial class TrustTradeDbContext : DbContext
             entity.HasOne(d => d.ReportedPost)
                 .WithMany()
                 .HasForeignKey(d => d.ReportedPostId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Reports_ReportedPost");
         
             entity.HasOne(d => d.ReviewedByUser)
