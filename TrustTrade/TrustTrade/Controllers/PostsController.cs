@@ -258,6 +258,8 @@ namespace TrustTrade.Controllers
                 post.User.ProfilePicture = Array.Empty<byte>();
             }
 
+            SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
+
             // Map to ViewModel
             var vm = new PostDetailsVM
             {
@@ -278,6 +280,8 @@ namespace TrustTrade.Controllers
                 ProfilePicture = post.User?.ProfilePicture,
                 Comments = comments,
                 IsSavedByCurrentUser = user?.SavedPosts?.Any(sp => sp.PostId == post.Id) ?? false,
+                IsPresentationModeEnabled = siteSettings.IsPresentationModeEnabled,
+                CanPostDuringPresentation = user?.CanPostDuringPresentation ?? false
             };
 
             return View(vm);

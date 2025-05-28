@@ -144,15 +144,24 @@
     </div>
 
     <!-- Comment Section -->
-    <div class="mt-4 mb-4">
-        <div class="mb-3">
-            <input type="text" id="content" class="form-control" placeholder="Add a comment..." required />
-            <input type="hidden" id="postId" value="@Model.Id" />
+    @if (Model.IsPresentationModeEnabled && !Model.CanPostDuringPresentation)
+    {
+        <div class="alert alert-info mt-4 mb-4">
+            <strong>Presentation Mode is enabled!</strong> You cannot post comments during the presentation.
         </div>
-        <div id="submitButtonWrapper" style="display: none;">
-            <button id="submitCommentButton" class="btn btn-primary btn-sm">Post Comment</button>
+    }
+    else
+    {
+        <div class="mt-4 mb-4">
+            <div class="mb-3">
+                <input type="text" id="content" class="form-control" placeholder="Add a comment..." required />
+                <input type="hidden" id="postId" value="@Model.Id" />
+            </div>
+            <div id="submitButtonWrapper" style="display: none;">
+                <button id="submitCommentButton" class="btn btn-primary btn-sm">Post Comment</button>
+            </div>
         </div>
-    </div>
+    }
 
     <!-- Comments List -->
     <ul id="comments-section" class="list-group list-group-flush">
