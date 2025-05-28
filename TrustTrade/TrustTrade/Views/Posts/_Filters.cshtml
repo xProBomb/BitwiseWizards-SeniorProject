@@ -17,64 +17,60 @@
     };
 }
 
-<!-- Sort Order Drop-down -->
-<form id="sortForm" method="get">
-    <label for="sortOrder">Sort by:</label>
-    <select id="sortOrder" name="sortOrder" onchange="this.form.submit();">
-        @foreach (var option in sortOptions)
+<div class="d-flex align-items-end gap-4 flex-wrap">
+    <!-- Sort Order Drop-down -->
+    <form id="sortForm" method="get" class="d-flex align-items-end gap-1 mb-0 align-items-center">
+        <label for="sortOrder" class="form-label fw-semibold mb-0 me-2 align-self-center">Sort by:</label>
+        <select id="sortOrder" name="sortOrder" class="form-select rounded-5 align-self-center" style="width:auto;" onchange="this.form.submit();">
+            @foreach (var option in sortOptions)
+            {
+                // If this option matches the current sort order, mark it as selected
+                if (option.Value == selectedSortOrder)
+                {
+                    <option value="@option.Value" selected>@option.Text</option>
+                }
+                else
+                {
+                    <option value="@option.Value">@option.Text</option>
+                }
+            }
+        </select>
+        <input type="hidden" name="pageNumber" value="1" />
+        <input type="hidden" name="categoryFilter" value="@Model.SelectedCategory" />
+        <input type="hidden" name="search" value="@(Model.SearchQuery)" />
+    </form>
+
+    <!-- Category Filter Drop-down -->
+    <form id="filterForm" method="get" class="d-flex align-items-end gap-1 mb-0 align-items-center">
+        <label for="categoryFilter" class="form-label fw-semibold mb-0 me-2 align-self-center">Category:</label>
+        <select id="categoryFilter" name="categoryFilter" class="form-select rounded-5 align-self-center" style="width:auto;" onchange="this.form.submit();">
+            @if (Model.SelectedCategory == null)
+            {
+                <option value="" selected>All</option>
+            }
+            @foreach (var category in Model.Categories)
+            {
+                // If this option matches the current category filter, mark it as selected
+                if (category == Model.SelectedCategory)
+                {
+                    <option value="@category" selected>@category</option>
+                }
+                else
+                {
+                    <option value="@category">@category</option>
+                }
+            }
+        </select>
+        <input type="hidden" name="pageNumber" value="1" />
+        <input type="hidden" name="sortOrder" value="@selectedSortOrder" />
+        <input type="hidden" name="search" value="@(Model.SearchQuery)" />
+        @if (Model.SelectedCategory != null)
         {
-            // If this option matches the current sort order, mark it as selected
-            if (option.Value == selectedSortOrder)
-            {
-                <option value="@option.Value" selected>@option.Text</option>
-            }
-            else
-            {
-                <option value="@option.Value">@option.Text</option>
-            }
+            <a class="btn btn-primary ms-2" 
+                asp-route-sortOrder="@Model.SortOrder"
+                asp-route-search="@(Model.SearchQuery)">
+                Clear Filter
+            </a>
         }
-    </select>
-
-    <!-- Reset page to 1 when sort order changes -->
-    <input type="hidden" name="pageNumber" value="1" />
-    <input type="hidden" name="categoryFilter" value="@Model.SelectedCategory" />
-    <input type="hidden" name="search" value="@(Model.SearchQuery)" />
-</form>
-
-<!-- Category Filter Drop-down -->
-<form id="filterForm" method="get">
-    <label for="categoryFilter" class="mt-3">Category filter:</label>
-    <select id="categoryFilter" name="categoryFilter" class="mt-3" onchange="this.form.submit();">
-        @if (Model.SelectedCategory == null)
-        {
-            <option value="" selected>-- Select a Category --</option>
-        }
-        @foreach (var category in Model.Categories)
-        {
-            // If this option matches the current category filter, mark it as selected
-            if (category == Model.SelectedCategory)
-            {
-                <option value=@category selected>@category</option>
-            }
-            else
-            {
-                <option value="@category">@category</option>
-            }
-        }
-    </select>
-
-    <!-- Reset page to 1 when category filter changes -->
-    <input type="hidden" name="pageNumber" value="1" />
-    <input type="hidden" name="sortOrder" value="@selectedSortOrder" />
-    <input type="hidden" name="search" value="@(Model.SearchQuery)" />
-
-    @if (Model.SelectedCategory != null)
-    {
-    <!-- Clear the category filter -->
-    <a class="btn btn-primary ms-3" 
-        asp-route-sortOrder=@Model.SortOrder
-        asp-route-search="@(Model.SearchQuery)">
-        Clear Filter
-    </a>
-    }
-</form>
+    </form>
+</div>
