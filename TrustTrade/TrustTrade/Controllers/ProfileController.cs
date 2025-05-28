@@ -155,7 +155,8 @@ namespace TrustTrade.Controllers
             }
 
             TempData["ProfilePictureSuccess"] = "Profile picture updated successfully.";
-            return RedirectToAction("MyProfile");
+            return Json(new { success = true });
+
         }
 
         // In order to access the profile of a user, use the route below
