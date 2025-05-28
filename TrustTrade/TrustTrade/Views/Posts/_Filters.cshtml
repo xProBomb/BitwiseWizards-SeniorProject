@@ -19,9 +19,9 @@
 
 <div class="d-flex align-items-end gap-4 flex-wrap">
     <!-- Sort Order Drop-down -->
-    <form id="sortForm" method="get" class="d-flex align-items-end gap-1 mb-0">
-        <label for="sortOrder" class="form-label fw-semibold mb-0 me-2">Sort by:</label>
-        <select id="sortOrder" name="sortOrder" class="form-select rounded-5" style="width:auto;" onchange="this.form.submit();">
+    <form id="sortForm" method="get" class="d-flex align-items-end gap-1 mb-0 align-items-center">
+        <label for="sortOrder" class="form-label fw-semibold mb-0 me-2 align-self-center">Sort by:</label>
+        <select id="sortOrder" name="sortOrder" class="form-select rounded-5 align-self-center" style="width:auto;" onchange="this.form.submit();">
             @foreach (var option in sortOptions)
             {
                 // If this option matches the current sort order, mark it as selected
@@ -33,7 +33,6 @@
                 {
                     <option value="@option.Value">@option.Text</option>
                 }
-
             }
         </select>
         <input type="hidden" name="pageNumber" value="1" />
@@ -42,9 +41,9 @@
     </form>
 
     <!-- Category Filter Drop-down -->
-    <form id="filterForm" method="get" class="d-flex align-items-end gap-1 mb-0">
-        <label for="categoryFilter" class="form-label fw-semibold mb-0 me-2">Category:</label>
-        <select id="categoryFilter" name="categoryFilter" class="form-select rounded-5" style="width:auto;" onchange="this.form.submit();">
+    <form id="filterForm" method="get" class="d-flex align-items-end gap-1 mb-0 align-items-center">
+        <label for="categoryFilter" class="form-label fw-semibold mb-0 me-2 align-self-center">Category:</label>
+        <select id="categoryFilter" name="categoryFilter" class="form-select rounded-5 align-self-center" style="width:auto;" onchange="this.form.submit();">
             @if (Model.SelectedCategory == null)
             {
                 <option value="" selected>All</option>
