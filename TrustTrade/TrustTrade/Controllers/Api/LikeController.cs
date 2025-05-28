@@ -105,28 +105,5 @@ namespace TrustTrade.Controllers
 
             return Ok(new { isLiked, likeCount });
         }
-
-        // GET: api/Like/status/5
-        [HttpGet("status/{postId}")]
-        public async Task<IActionResult> GetLikeStatus(int postId)
-        {
-            var user = await _userService.GetCurrentUserAsync(User);
-            if (user == null)
-            {
-                return Unauthorized();
-            }
-
-            var post = await _postRepository.FindByIdAsync(postId);
-            if (post == null)
-            {
-                return NotFound("Post not found");
-            }
-
-            var existingLike = await _likeRepository.GetLikeByUserAndPostAsync(user.Id, postId);
-            bool isLiked = existingLike != null;
-            int likeCount = post.Likes.Count;
-
-            return Ok(new { isLiked, likeCount });
-        }
     }
 }
