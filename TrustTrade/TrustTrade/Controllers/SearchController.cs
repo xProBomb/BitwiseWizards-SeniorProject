@@ -46,6 +46,26 @@ namespace TrustTrade.Controllers
             var searchTerms = search.Split(' ').ToList();
             var posts = await _postService.SearchPostsAsync(searchTerms, currentUser?.Id);
 
+            if (currentUser != null)
+            {
+                // Get IDs of users the current user follows
+                var followingUserIds = currentUser.FollowerFollowingUsers
+                    .Select(f => f.FollowerUserId)
+                    .ToHashSet();
+
+                // Show public posts, own private posts, and private posts from followed users
+                posts = posts.Where(p =>
+                    p.IsPublic ||
+                    (!p.IsPublic && p.UserId == currentUser.Id) ||
+                    (!p.IsPublic && followingUserIds.Contains(p.UserId))
+                ).ToList();
+            }
+            else
+            {
+                // If not logged in, filter out private posts
+                posts = posts.Where(p => p.IsPublic).ToList();
+            }
+
             return PartialView("_PostSearchResultsPartial", posts.ToPreviewViewModels());
         }
 

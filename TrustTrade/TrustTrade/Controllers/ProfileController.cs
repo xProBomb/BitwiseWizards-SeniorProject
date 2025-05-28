@@ -60,7 +60,9 @@ namespace TrustTrade.Controllers
 
             var user = await _context.Users
                 .Include(u => u.FollowerFollowerUsers)
+                    .ThenInclude(f => f.FollowingUser)
                 .Include(u => u.FollowerFollowingUsers)
+                    .ThenInclude(f => f.FollowerUser)
                 .FirstOrDefaultAsync(u => u.IdentityId == identityId);
 
             if (user == null)
@@ -96,6 +98,9 @@ namespace TrustTrade.Controllers
 
             var (score, isRated, breakdown) = await _performanceScoreRepository.CalculatePerformanceScoreAsync(user.Id);
 
+            var followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser).ToList() ?? new List<Models.User>();
+            var following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser).ToList() ?? new List<Models.User>();
+
             var model = new ProfileViewModel
             {
                 IdentityId = user.IdentityId,
@@ -105,12 +110,12 @@ namespace TrustTrade.Controllers
                 IsVerified = user.IsVerified ?? false,
                 PlaidEnabled = user.PlaidEnabled ?? false,
                 LastPlaidSync = user.LastPlaidSync,
-                FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
-                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
-                            new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
-                            new List<string>(),
+                FollowersCount = followers.Count,
+                FollowingCount = following.Count,
+                Followers = followers.Select(u => u.Username).ToList(),
+                Following = following.Select(u => u.Username).ToList(),
+                FollowersPfp = followers.Select(u => u.ProfilePicture).ToList(),
+                FollowingPfp = following.Select(u => u.ProfilePicture).ToList(),
                 Holdings = holdingViewModels,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
@@ -177,10 +182,11 @@ namespace TrustTrade.Controllers
             var currentUserId = currentUser?.Id;
             _logger.LogDebug("Current User ID: {CurrentUserId}", currentUserId);
 
-
             var user = await _context.Users
                 .Include(u => u.FollowerFollowerUsers)
+                    .ThenInclude(f => f.FollowingUser)
                 .Include(u => u.FollowerFollowingUsers)
+                    .ThenInclude(f => f.FollowerUser)
                 .FirstOrDefaultAsync(u => u.Username == username);
 
             if (user.Is_Suspended == true)
@@ -234,6 +240,9 @@ namespace TrustTrade.Controllers
             var blockedUserIds = await _userBlockRepository.GetBlockedUserIdsAsync(currentUserId ?? 0);
             var isBlocked = blockedUserIds.Contains(user.Id);
 
+            var followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser).ToList() ?? new List<Models.User>();
+            var following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser).ToList() ?? new List<Models.User>();
+
             var model = new ProfileViewModel
             {
                 Id = user.Id,
@@ -244,12 +253,12 @@ namespace TrustTrade.Controllers
                 IsVerified = user.IsVerified ?? false,
                 PlaidEnabled = user.PlaidEnabled ?? false,
                 LastPlaidSync = user.LastPlaidSync,
-                FollowersCount = user.FollowerFollowerUsers?.Count ?? 0,
-                FollowingCount = user.FollowerFollowingUsers?.Count ?? 0,
-                Followers = user.FollowerFollowerUsers?.Select(f => f.FollowingUser.Username).ToList() ??
-                            new List<string>(),
-                Following = user.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username).ToList() ??
-                            new List<string>(),
+                FollowersCount = followers.Count,
+                FollowingCount = following.Count,
+                Followers = followers.Select(u => u.Username).ToList(),
+                Following = following.Select(u => u.Username).ToList(),
+                FollowersPfp = followers.Select(u => u.ProfilePicture).ToList(),
+                FollowingPfp = following.Select(u => u.ProfilePicture).ToList(),
                 Holdings = filteredHoldings,
                 LastHoldingsUpdate = holdings.Any() ? holdings.Max(h => h.LastUpdated) : null,
                 UserTag = user.UserTag,
@@ -470,6 +479,10 @@ namespace TrustTrade.Controllers
                                 .ToList() ?? new List<string>(),
                             Following = updatedUser.FollowerFollowingUsers?.Select(f => f.FollowerUser.Username)
                                 .ToList() ?? new List<string>(),
+                            FollowersPfp = updatedUser.FollowerFollowerUsers?
+                                .Select(f => f.FollowingUser.ProfilePicture).ToList() ?? new List<byte[]>(),
+                            FollowingPfp = updatedUser.FollowerFollowingUsers?
+                                .Select(f => f.FollowerUser.ProfilePicture).ToList() ?? new List<byte[]>(),
                             IsFollowing = false,
                             HideDetailedInformation = false,
                             HideAllPositions = false,
@@ -642,6 +655,26 @@ namespace TrustTrade.Controllers
             var (posts, totalPosts) = await _postService.GetUserPagedPostsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
             var postFiltersVM = await _postService.BuildPostFiltersAsync(categoryFilter, sortOrder);
             var paginationVM = await _postService.BuildPaginationAsync(categoryFilter, pageNumber, totalPosts, user.Id);
+
+            if (currentUser != null)
+            {
+                // Get IDs of users the current user follows
+                var followingUserIds = currentUser.FollowerFollowingUsers
+                    .Select(f => f.FollowerUserId)
+                    .ToHashSet();
+
+                // Show public posts, own private posts, and private posts from followed users
+                posts = posts.Where(p =>
+                    p.IsPublic ||
+                    (!p.IsPublic && p.UserId == currentUser.Id) ||
+                    (!p.IsPublic && followingUserIds.Contains(p.UserId))
+                ).ToList();
+            }
+            else
+            {
+                // If not logged in, filter out private posts
+                posts = posts.Where(p => p.IsPublic).ToList();
+            }
 
             var vm = new UserPostsVM
             {

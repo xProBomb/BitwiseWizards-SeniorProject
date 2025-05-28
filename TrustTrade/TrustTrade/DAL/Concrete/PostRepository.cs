@@ -188,6 +188,15 @@ public class PostRepository : Repository<Post>, IPostRepository
             case "TitleDesc":
                 return query.OrderByDescending(p => p.Title);
             case "DateDesc":
+                return query.OrderByDescending(p => p.CreatedAt);
+            case "LikesDesc":
+                return query.OrderByDescending(p => p.Likes.Count);
+            case "LikesAsc":
+                return query.OrderBy(p => p.Likes.Count);
+            case "CommentsDesc":
+                return query.OrderByDescending(p => p.Comments.Count);
+            case "CommentsAsc":
+                return query.OrderBy(p => p.Comments.Count);
             default:
                 return query.OrderByDescending(p => p.CreatedAt);
         }

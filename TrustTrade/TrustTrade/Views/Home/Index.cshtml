@@ -33,22 +33,19 @@
         </div>
 
         <!-- Financial News sidebar -->
-        @if (!Model.IsFollowing)
-        {
-            <div class="col-md-4 d-none d-md-block">
-                <div class="sidebar-widget">
-                    <div id="financialNewsWidget">
-                        <!-- Initial Loading Spinner -->
-                        <div class="loading-spinner text-center p-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Loading financial news...</p>
+        <div class="col-md-4 d-none d-md-block">
+            <div class="sidebar-widget">
+                <div id="financialNewsWidget">
+                    <!-- Initial Loading Spinner -->
+                    <div class="loading-spinner text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
+                        <p class="mt-2">Loading financial news...</p>
                     </div>
                 </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
