@@ -27,4 +27,8 @@ public class CreatePostVM
 
     [MaxLength(5, ErrorMessage = "No more than 5 tags are allowed.")]
     public List<string> SelectedTags { get; set; } = new List<string>();
+
+    public bool IsPresentationModeEnabled { get; set; }
+
+    public bool CanPostDuringPresentation { get; set; }
 }

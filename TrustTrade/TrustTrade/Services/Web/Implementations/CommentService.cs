@@ -18,6 +18,7 @@ public class CommentService : ICommentService
     private readonly INotificationService _notificationService;
     private readonly IPostRepository _postRepository;
     private readonly ICommentLikeRepository _commentLikeRepository;
+    private readonly ISiteSettingsRepository _siteSettingsRepository;
 
     public CommentService(
         ILogger<CommentService> logger, 
@@ -25,7 +26,8 @@ public class CommentService : ICommentService
         IHoldingsRepository holdingsRepository,
         INotificationService notificationService,
         IPostRepository postRepository,
-        ICommentLikeRepository commentLikeRepository)
+        ICommentLikeRepository commentLikeRepository,
+        ISiteSettingsRepository siteSettingsRepository)
     {
         _logger = logger;
         _commentRepository = commentRepository;
@@ -33,6 +35,7 @@ public class CommentService : ICommentService
         _notificationService = notificationService;
         _postRepository = postRepository;
         _commentLikeRepository = commentLikeRepository;
+        _siteSettingsRepository = siteSettingsRepository;
     }
 
     public async Task<List<CommentVM>> GetPostCommentsAsync(int postId)
@@ -83,6 +86,13 @@ public class CommentService : ICommentService
         {
             _logger.LogWarning($"Post with ID {commentCreateDTO.PostId} not found.");
             throw new KeyNotFoundException($"Post with ID {commentCreateDTO.PostId} not found.");
+        }
+
+        SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
+        if (siteSettings.IsPresentationModeEnabled && !user.CanPostDuringPresentation)
+        {
+            _logger.LogWarning($"User {user.Id} attempted to post a comment during presentation mode.");
+            throw new InvalidOperationException("Posting comments is not allowed during presentation mode.");
         }
 
         var comment = new Comment
