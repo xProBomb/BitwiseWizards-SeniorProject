@@ -19,7 +19,7 @@
 
             <!-- Post Preview Feed -->
             <ul class="list-group mt-4">
-                <div id="postFeedContainer" class="mt-5" data-url="@(Model.IsFollowing 
+                <div id="postFeedContainer" class="mt-4" data-url="@(Model.IsFollowing 
                     ? Url.Action("LoadMoreFollowings", "Posts")
                     : Url.Action("LoadMore", "Posts"))">
                     <partial name="../Posts/_Feed" model="Model.Posts" />
