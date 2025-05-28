@@ -16,6 +16,7 @@ public class CommentServiceTests
     private Mock<IHoldingsRepository> _holdingsRepositoryMock;
     private Mock<IPostRepository> _postRepositoryMock;
     private Mock<ICommentLikeRepository> _commentLikeRepositoryMock;
+    private Mock<ISiteSettingsRepository> _siteSettingsRepositoryMock;
     private Mock<INotificationService> _notificationServiceMock;
     private List<Comment> _comments;
     private List<Comment> _commentsWithPlaidEnabledUser;
@@ -29,6 +30,7 @@ public class CommentServiceTests
         _notificationServiceMock = new Mock<INotificationService>();
         _postRepositoryMock = new Mock<IPostRepository>();
         _commentLikeRepositoryMock = new Mock<ICommentLikeRepository>();
+        _siteSettingsRepositoryMock = new Mock<ISiteSettingsRepository>();
         
 
         _commentService = new CommentService(
@@ -37,7 +39,8 @@ public class CommentServiceTests
             _holdingsRepositoryMock.Object,
             _notificationServiceMock.Object,
             _postRepositoryMock.Object,
-            _commentLikeRepositoryMock.Object
+            _commentLikeRepositoryMock.Object,
+            _siteSettingsRepositoryMock.Object
         );
 
         var _user = new User
