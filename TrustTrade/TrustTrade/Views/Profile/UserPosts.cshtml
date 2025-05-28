@@ -14,7 +14,7 @@
 
 <!-- Post Preview Feed -->
 <ul class="list-group mt-4">
-    <div id="postFeedContainer" class="mt-5" data-url="@Url.Action("LoadMoreUserPosts", "Posts")" data-username="@Model.Username">
+    <div id="postFeedContainer" class="mt-4" data-url="@Url.Action("LoadMoreUserPosts", "Posts")" data-username="@Model.Username">
         <partial name="../Posts/_Feed" model="Model.Posts" />
     </div>
 </ul>
