@@ -35,4 +35,8 @@ public class PostDetailsVM
     public bool IsSavedByCurrentUser { get; set; }
 
     public List<string> Photos { get; set; } = new List<string>();
+    
+    public bool IsPresentationModeEnabled { get; set; }
+    
+    public bool CanPostDuringPresentation { get; set; }
 }

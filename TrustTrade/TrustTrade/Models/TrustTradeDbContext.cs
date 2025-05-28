@@ -33,6 +33,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<SavedPost> SavedPosts { get; set; }
 
+    public virtual DbSet<SiteSettings> SiteSettings { get; set; }
+
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Tag> Tags { get; set; }
@@ -57,6 +59,8 @@ public partial class TrustTradeDbContext : DbContext
 
     public virtual DbSet<Conversation> Conversations { get; set; }
     public virtual DbSet<Message> Messages { get; set; }
+    
+    public virtual DbSet<Report> Reports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -288,6 +292,16 @@ public partial class TrustTradeDbContext : DbContext
                 .HasConstraintName("FK_SavedPosts_User");
         });
 
+        modelBuilder.Entity<SiteSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__SiteSett__3214EC27F1A0E5D8");
+
+            entity.ToTable("SiteSettings");
+
+            entity.Property(e => e.IsPresentationModeEnabled)
+                .HasDefaultValue(false);
+        });
+
         modelBuilder.Entity<Stock>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Stock__3214EC275CD17266");
@@ -392,6 +406,7 @@ public partial class TrustTradeDbContext : DbContext
                 .HasColumnName("PastUsername");
             entity.Property(e => e.ProfilePicture).HasColumnType("varbinary(max)");
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.CanPostDuringPresentation).HasDefaultValue(false);
             entity.Property(e => e.BackgroundImage).HasColumnType("varbinary(max)");
             entity.Property(e => e.BackgroundImageUrl).HasMaxLength(500);
             entity.Property(e => e.BackgroundSource).HasMaxLength(10).HasDefaultValue("File");
@@ -555,6 +570,42 @@ public partial class TrustTradeDbContext : DbContext
                 .HasForeignKey(d => d.RecipientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Recipient");
+        });
+        
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+    
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        
+            entity.Property(e => e.ReviewedAt)
+                .HasColumnType("datetime");
+    
+            entity.HasOne(d => d.Reporter)
+                .WithMany()
+                .HasForeignKey(d => d.ReporterId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_Reporter");
+        
+            entity.HasOne(d => d.ReportedUser)
+                .WithMany()
+                .HasForeignKey(d => d.ReportedUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_ReportedUser");
+        
+            entity.HasOne(d => d.ReportedPost)
+                .WithMany()
+                .HasForeignKey(d => d.ReportedPostId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Reports_ReportedPost");
+        
+            entity.HasOne(d => d.ReviewedByUser)
+                .WithMany()
+                .HasForeignKey(d => d.ReviewedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Reports_ReviewedByUser");
         });
 
         OnModelCreatingPartial(modelBuilder);

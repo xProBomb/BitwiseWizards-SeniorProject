@@ -19,34 +19,6 @@
         </form>
     }
 
-    <!-- Owner Actions Dropdown (right side) -->
-    @if (Model.IsOwnedByCurrentUser)
-    {
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="postActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                Actions
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postActionsDropdown">
-                <li>
-                    <a class="dropdown-item" asp-controller="Posts" 
-                    asp-action="Edit" 
-                    asp-route-id="@Model.Id">
-                        <i class="bi bi-pencil"></i> Edit
-                    </a>
-                </li>
-                <li>
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="delete-post-form">
-                        <button type="submit" class="dropdown-item text-danger">
-                            <i class="bi bi-trash"></i> Delete
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    }
-</div>
-
-
 <div class="container mt-4">
     <!-- Post Details -->
     <div class="card">
@@ -94,6 +66,24 @@
                         <i class="bi bi-three-dots"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postActionsMenu-@Model.Id">
+                        <!-- Owner Actions -->
+                        @if (Model.IsOwnedByCurrentUser)
+                        {
+                            <li>
+                                <a class="dropdown-item" asp-controller="Posts" 
+                                asp-action="Edit" 
+                                asp-route-id="@Model.Id">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            </li>
+                            <li>
+                                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="delete-post-form">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </li>
+                        }
                         <li>
                             <button class="dropdown-item save-post-button" data-post-id="@Model.Id" data-is-saved="@Model.IsSavedByCurrentUser">
                                 <i class="bi @(Model.IsSavedByCurrentUser ? "bi-bookmark-fill" : "bi-bookmark")"></i>
@@ -102,6 +92,16 @@
                                 </span>
                             </button>
                         </li>
+                        <!-- Owner can't report their own post, but others can -->
+                        @if (!Model.IsOwnedByCurrentUser)
+                        {
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="openReportModal('Post', @Model.Id)">
+                                    <i class="bi bi-flag"></i>
+                                    <span>Report Post</span>
+                                </button>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -144,100 +144,46 @@
     </div>
 
     <!-- Comment Section -->
-    <div class="mt-4 mb-4">
-        <div class="mb-3">
-            <input type="text" id="content" class="form-control" placeholder="Add a comment..." required />
-            <input type="hidden" id="postId" value="@Model.Id" />
+    @if (Model.IsPresentationModeEnabled && !Model.CanPostDuringPresentation)
+    {
+        <div class="alert alert-info mt-4 mb-4">
+            <strong>Presentation Mode is enabled!</strong> You cannot post comments during the presentation.
         </div>
-        <div id="submitButtonWrapper" style="display: none;">
-            <button id="submitCommentButton" class="btn btn-primary btn-sm">Post Comment</button>
+    }
+    else
+    {
+        <div class="mt-4 mb-4">
+            <div class="mb-3">
+                <input type="text" id="content" class="form-control" placeholder="Add a comment..." required />
+                <input type="hidden" id="postId" value="@Model.Id" />
+            </div>
+            <div id="submitButtonWrapper" style="display: none;">
+                <button id="submitCommentButton" class="btn btn-primary btn-sm">Post Comment</button>
+            </div>
         </div>
-    </div>
+    }
 
     <!-- Comments List -->
     <ul id="comments-section" class="list-group list-group-flush">
         @if (!Model.Comments.Any())
         {
-            <p class="text-muted">No comments yet. Be the first to comment!</p>
+            <p id="noCommentsMessage" class="text-muted">No comments yet. Be the first to comment!</p>
         }
         else
         {
             @foreach (var comment in Model.Comments)
             {
-                <li class="list-group-item comment-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <!-- Profile Links -->
-                            <a asp-controller="Profile" 
-                                asp-action="UserProfile" 
-                                asp-route-username="@comment.Username"
-                                class="image-profile-link">
-                                <img src="@(comment.ProfilePicture != null 
-                                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(comment.ProfilePicture)}"
-                                        : "/icons/defpfp.png")"
-                                        alt="Profile Picture"
-                                        class="rounded-circle"
-                                        style="width: 50px; height: 50px;" />
-                            </a>
-                            <a asp-controller="Profile" 
-                                asp-action="UserProfile" 
-                                asp-route-username="@comment.Username"
-                                class="username-profile-link ms-2">
-                                @comment.Username
-                            </a>
-                            <!-- Display Plaid Info If Enabled-->
-                            @if (comment.IsPlaidEnabled)
-                            {
-                                <span class="text-success ms-2">
-                                    @if (!string.IsNullOrEmpty(comment.PortfolioValueAtPosting))
-                                    {
-                                        @comment.PortfolioValueAtPosting
-                                    }
-                                    <i class="bi bi-patch-check-fill"></i>
-                                </span>
-                            }
-                            <!-- Display Time Ago -->
-                            <span class="ms-2">@comment.TimeAgo</span>
-                        </div>
-        
-                        <!-- Display Comment Options Dropdown for the Owner -->
-                        @if (comment.IsOwnedByCurrentUser)
-                        {
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="commentActionsMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="commentActionsMenu">
-                                    <li>
-                                        <button class="dropdown-item text-danger delete-comment-button" data-comment-id="@comment.Id">
-                                            <i class="bi bi-trash"></i> Delete
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
-                    </div>
-
-                    <!-- Display Main Comment Content -->
-                    <p class="mt-3 mb-3 ps-5">@comment.Content</p>
-
-                    <!-- Like Button -->
-                    <div class="d-flex align-items-center mt-4 ps-5">
-                        <button class="btn btn-primary comment-like-button position-relative @(comment.IsLikedByCurrentUser ? "liked" : "")" 
-                                data-comment-id="@comment.Id" 
-                                aria-label="Like">
-                            <i class="bi @(comment.IsLikedByCurrentUser ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i> 
-                            <span class="like-count">@comment.LikeCount</span>
-                        </button>
-                    </div>
-                </li>
+                <partial name="../Comments/_CommentPartial" model="comment" />
             }
         }
     </ul>
 </div>
 
+@await Html.PartialAsync("_ReportModal")
+
 @section Scripts {
     <script src="~/js/postActions.js"></script>
     <script src="~/js/commentActions.js"></script>
     <script src="~/js/commentLike.js"></script>
+    <script src="~/js/reportModal.js"></script>
 }

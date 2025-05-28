@@ -115,7 +115,7 @@
                     if (score < 40) return "score-poor";
                     if (score >= 40 && score < 60) return "score-fair";
                     if (score >= 60 && score < 80) return "score-good";
-                    if (score >= 80 && score < 95) return "score-excellent";
+                    if (score >= 80 && score < 90) return "score-excellent";
                     return "score-elite";
                 }
 
@@ -140,6 +140,11 @@
                         @(Model.IsBlocked ? "Unblock" : "Block")
                     </button>
                 </form>
+                
+                <!-- Report button -->
+                <button type="button" class="btn btn-warning ms-2" onclick="openReportModal('Profile', @Model.Id)">
+                    <i class="bi bi-flag"></i> Report
+                </button>
             }
             @if (!isOwner && Model.CanMessage)
             {
@@ -633,7 +638,7 @@
                                 if (score < 40) return "Needs Improvement";
                                 if (score >= 40 && score < 60) return "Fair";
                                 if (score >= 60 && score < 80) return "Good";
-                                if (score >= 80 && score < 95) return "Excellent";
+                                if (score >= 80 && score < 90) return "Excellent";
                                 return "Elite";
                             }
 
@@ -684,6 +689,7 @@
         </div>
     }
 @await Html.PartialAsync("_BackgroundImageModal")
+    @await Html.PartialAsync("_ReportModal")    
 </div>
 
 @if (ViewBag.UsernameError != null)
@@ -701,6 +707,7 @@
     <script src="~/js/profile.js"></script>
     <script src="~/js/backroundImage.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <script src="~/js/reportModal.js"></script>
 }
 
 <style>
@@ -812,6 +819,7 @@
     .score-number {
         font-size: 2.5rem;
         font-weight: bold;
+        color: #6a0dad;
     }
 
     .score-label {

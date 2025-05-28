@@ -18,13 +18,17 @@
             </div>
 
             <!-- Post Preview Feed -->
-            <div class="mt-5">
-                <partial name="../Posts/_Feed" model="Model.Posts" />
-            </div>
+            <ul class="list-group mt-4">
+                <div id="postFeedContainer" class="mt-5" data-url="@(Model.IsFollowing 
+                    ? Url.Action("LoadMoreFollowings", "Posts")
+                    : Url.Action("LoadMore", "Posts"))">
+                    <partial name="../Posts/_Feed" model="Model.Posts" />
+                </div>
+            </ul>
 
-            <!-- Pagination Controls -->
-            <div class="mt-5">
-                <partial name="../Posts/_Pagination" model="Model.Pagination" />
+            <!-- Pagination Info -->
+            <div>
+                <partial name="../Posts/_PaginationInfo" />
             </div>
         </div>
 
@@ -106,5 +110,6 @@
         }
     });
 </script>
-    <script src="~/js/postFeed.js"></script>
+<script src="~/js/postFeed.js"></script>
+<script src="~/js/reportModal.js"></script>
 }

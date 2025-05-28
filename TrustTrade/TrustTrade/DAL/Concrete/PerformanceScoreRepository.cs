@@ -15,8 +15,8 @@ namespace TrustTrade.DAL.Concrete
         
         // Weight constants (inverse - lower means more important)
         private const decimal HOLDINGS_IN_GREEN_WEIGHT = 1;
-        private const decimal UPVOTES_WEIGHT = 3;
-        private const decimal PORTFOLIO_PERFORMANCE_WEIGHT = 5;
+        private const decimal UPVOTES_WEIGHT = 5;
+        private const decimal PORTFOLIO_PERFORMANCE_WEIGHT = 2;
         
         public PerformanceScoreRepository(
             TrustTradeDbContext context,
@@ -160,15 +160,17 @@ namespace TrustTrade.DAL.Concrete
         /// </summary>
         private decimal CalculateUpvotesScore(ICollection<Post> posts)
         {
-            // Since upvotes aren't implemented yet, this is a placeholder
-            // In the future, this would calculate score based on likes per post
-            
-            // For now, just check if they have posts
+            // If no posts, return zero
             if (posts == null || !posts.Any())
                 return 0;
                 
-            // Placeholder: Give a minimum score of 50 just for having posts
-            return 50;
+            // Calculate total number of upvotes
+            int totalUpvotes = posts.Sum(p => p.Likes.Count);
+            
+            // Map total upvotes to a 0-100 score
+            // More upvotes score higher
+            return Math.Min(50 + (totalUpvotes * 2.5m), 100);
+            
         }
         
         /// <summary>

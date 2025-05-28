@@ -30,11 +30,11 @@ namespace TrustTrade.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Index(
-            string? categoryFilter = null,
-            int pageNumber = 1,
-            string sortOrder = "DateDesc")
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string? categoryFilter = null, string sortOrder = "DateDesc")
         {
+            int pageNumber = 1; // Load the first page and let the JS handle the rest
+
             User? currentUser = await _userService.GetCurrentUserAsync(User);
 
             // Retrieve posts for the general feed
@@ -54,11 +54,10 @@ namespace TrustTrade.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Following(
-            string? categoryFilter = null,
-            int pageNumber = 1,
-            string sortOrder = "DateDesc")
-        {                
+        public async Task<IActionResult> Following(string? categoryFilter = null, string sortOrder = "DateDesc")
+        {
+            int pageNumber = 1; // Load the first page and let the JS handle the rest
+
             User? currentUser = await _userService.GetCurrentUserAsync(User);
             if (currentUser == null) return Unauthorized();
 

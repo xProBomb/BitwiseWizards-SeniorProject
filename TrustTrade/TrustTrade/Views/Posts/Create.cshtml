@@ -14,86 +14,96 @@
         <p class="text-muted">Share your thoughts, ideas, or strategies with the community.</p>
     </div>
 
-    <div class="card shadow-sm border-0 rounded-4 p-4 mx-auto" style="max-width: 700px;">
-        <form asp-action="Create" method="post" novalidate>
-            <!-- Title -->
-            <div class="mb-4">
-                <label asp-for="Title" class="form-label fw-semibold">Title</label>
-                <input asp-for="Title" class="form-control rounded-3" maxlength="130" placeholder="Enter a short and descriptive title..." />
-                <span asp-validation-for="Title" class="text-danger small"></span>
-            </div>
+    @if (Model.IsPresentationModeEnabled && !Model.CanPostDuringPresentation)
+    {
+        <div class="alert alert-warning text-center">
+            <strong>Presentation Mode is enabled!</strong> You cannot create posts during this time.
+        </div>
+    }
+    else
+    {
 
-            <!-- Content -->
-            <div class="mb-4">
-                <label asp-for="Content" class="form-label fw-semibold">Content</label>
-                <textarea asp-for="Content" class="form-control rounded-3" rows="6" maxlength="1026" placeholder="Write your post..."></textarea>
-                <span asp-validation-for="Content" class="text-danger small"></span>
-            </div>
-
-            <!-- Image Adder -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Add Images</label>
-                <div class="input-group">
-                    <input type="file" class="form-control rounded-3" id="imageInput" accept=".png, .jpg, .jpeg .gif" multiple />
-                    <button type="button" class="btn btn-secondary rounded-3" id="addImageButton">Add Images</button>
+        <div class="card shadow-sm border-0 rounded-4 p-4 mx-auto" style="max-width: 700px;">
+            <form asp-action="Create" method="post" novalidate>
+                <!-- Title -->
+                <div class="mb-4">
+                    <label asp-for="Title" class="form-label fw-semibold">Title</label>
+                    <input asp-for="Title" class="form-control rounded-3" maxlength="130" placeholder="Enter a short and descriptive title..." />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
                 </div>
-                <div id="imagePreview" class="mt-3 d-flex flex-wrap gap-2">
-                    <input asp-for="Photos" type="hidden" value=""/>
-                    <!-- Image previews will be added here -->
+
+                <!-- Content -->
+                <div class="mb-4">
+                    <label asp-for="Content" class="form-label fw-semibold">Content</label>
+                    <textarea asp-for="Content" class="form-control rounded-3" rows="6" maxlength="1026" placeholder="Write your post..."></textarea>
+                    <span asp-validation-for="Content" class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="Photos" class="text-danger small"></span>
-            </div>
 
-            <!-- Visibility -->
-            <div class="mb-4">
-                <label asp-for="IsPublic" class="form-label fw-semibold">Visibility</label>
-                <select asp-for="IsPublic" class="form-select rounded-3">
-                    <option value="">-- Select Privacy --</option>
-                    <option value="true">Public</option>
-                    <option value="false">Private</option>
-                </select>
-                <span asp-validation-for="IsPublic" class="text-danger small"></span>
-            </div>
+                <!-- Image Adder -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Add Images</label>
+                    <div class="input-group">
+                        <input type="file" class="form-control rounded-3" id="imageInput" accept=".png, .jpg, .jpeg .gif" multiple />
+                        <button type="button" class="btn btn-secondary rounded-3" id="addImageButton">Add Images</button>
+                    </div>
+                    <div id="imagePreview" class="mt-3 d-flex flex-wrap gap-2">
+                        <input asp-for="Photos" type="hidden" value=""/>
+                        <!-- Image previews will be added here -->
+                    </div>
+                    <span asp-validation-for="Photos" class="text-danger small"></span>
+                </div>
 
-            <!-- Tags -->
-            <div class="mb-4">
-                <label asp-for="ExistingTags" class="form-label fw-semibold">Tags</label>
-                <div class="mt-2 p-2 rounded-3 border scrollable-checkbox-tags" style="max-height: 180px; overflow-y: auto;">
-                    @if (Model.ExistingTags.Count == 0)
-                    {
-                        <p class="text-muted">No tags available.</p>
-                    }
-                    else
-                    {
-                        <div class="row">
-                            @foreach (var tag in Model.ExistingTags)
-                            {
-                                <div class="col-sm-6">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" value="@tag" id="tag-@tag" name="SelectedTags"
-                                               @(Model.SelectedTags.Contains(tag) ? "checked" : "") />
-                                        <label class="form-check-label" for="tag-@tag">@tag</label>
+                <!-- Visibility -->
+                <div class="mb-4">
+                    <label asp-for="IsPublic" class="form-label fw-semibold">Visibility</label>
+                    <select asp-for="IsPublic" class="form-select rounded-3">
+                        <option value="">-- Select Privacy --</option>
+                        <option value="true">Public</option>
+                        <option value="false">Private</option>
+                    </select>
+                    <span asp-validation-for="IsPublic" class="text-danger small"></span>
+                </div>
+
+                <!-- Tags -->
+                <div class="mb-4">
+                    <label asp-for="ExistingTags" class="form-label fw-semibold">Tags</label>
+                    <div class="mt-2 p-2 rounded-3 border scrollable-checkbox-tags" style="max-height: 180px; overflow-y: auto;">
+                        @if (Model.ExistingTags.Count == 0)
+                        {
+                            <p class="text-muted">No tags available.</p>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                @foreach (var tag in Model.ExistingTags)
+                                {
+                                    <div class="col-sm-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="@tag" id="tag-@tag" name="SelectedTags"
+                                                @(Model.SelectedTags.Contains(tag) ? "checked" : "") />
+                                            <label class="form-check-label" for="tag-@tag">@tag</label>
+                                        </div>
                                     </div>
-                                </div>
-                            }
-                        </div>
-                        <div class="mt-3">
-                            <input type="text" class="form-control" id="newTag" placeholder="Add a new tag..." />
-                            <button type="button" class="btn btn-primary mt-2" id="addTagButton">Add Tag</button>
-                        </div>
-                    }
+                                }
+                            </div>
+                            <div class="mt-3">
+                                <input type="text" class="form-control" id="newTag" placeholder="Add a new tag..." />
+                                <button type="button" class="btn btn-primary mt-2" id="addTagButton">Add Tag</button>
+                            </div>
+                        }
+                    </div>
+                    <span asp-validation-for="SelectedTags" class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="SelectedTags" class="text-danger small"></span>
-            </div>
 
-            <!-- Submit Button -->
-            <div class="text-end mt-5">
-                <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" id="submitButton">
-                    <i class="bi bi-send me-1"></i> Post
-                </button>
-            </div>
-        </form>
-    </div>
+                <!-- Submit Button -->
+                <div class="text-end mt-5">
+                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" id="submitButton">
+                        <i class="bi bi-send me-1"></i> Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
 </div>
 
 @section Scripts {

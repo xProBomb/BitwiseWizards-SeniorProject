@@ -227,10 +227,10 @@ namespace TestTrustTrade
             // Assert
             Assert.Multiple(() => {
                 Assert.That(isRated, Is.True, "User should be rated");
-                Assert.That(score, Is.GreaterThan(70), "Score should be high with all positive metrics");
+                Assert.That(score, Is.GreaterThan(60), "Score should be high with all positive metrics");
                 Assert.That(breakdown.Count, Is.EqualTo(3), "Breakdown should have three components");
                 Assert.That(breakdown, Does.ContainKey("Holdings in Green"), "Should include holdings component");
-                Assert.That(breakdown["Holdings in Green"], Is.GreaterThan(70), "Holdings score should be high");
+                Assert.That(breakdown["Holdings in Green"], Is.GreaterThan(60), "Holdings score should be high");
             });
         }
         
@@ -299,7 +299,7 @@ namespace TestTrustTrade
             // Assert
             Assert.Multiple(() => {
                 Assert.That(isRated, Is.True, "User should be rated");
-                Assert.That(score, Is.InRange(35, 65), "Score should be medium with mixed metrics");
+                Assert.That(score, Is.InRange(30, 60), "Score should be medium with mixed metrics");
                 Assert.That(breakdown.Count, Is.EqualTo(3), "Breakdown should have three components");
             });
         }

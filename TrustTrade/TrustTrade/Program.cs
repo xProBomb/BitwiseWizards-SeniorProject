@@ -12,6 +12,7 @@ using TrustTrade.Services;
 using TrustTrade.Services.Background;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.Services.Web.Implementations;
+using System.ComponentModel;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +45,9 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
 builder.Services.AddScoped<ISavedPostRepository, SavedPostRepository>();
-builder.Services.AddScoped<ISaveService, SaveService>();
+builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<ISiteSettingsRepository, SiteSettingsRepository>();
 
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
     ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
@@ -98,8 +101,8 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
-builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
-
+builder.Services.AddScoped<ISaveService, SaveService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // Add services for performance scoring
 builder.Services.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>();

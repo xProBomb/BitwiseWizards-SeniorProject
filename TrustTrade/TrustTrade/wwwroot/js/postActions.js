@@ -17,13 +17,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Attach click event listener to all save post buttons
-    document.querySelectorAll(".save-post-button").forEach(button => {
-        button.addEventListener("click", async (event) => {
-            event.preventDefault();
-            await togglePostSave(button);
+    // Attach click event listener to all save post buttons in the feed
+    const postFeedContainer = document.getElementById("postFeedContainer");
+    if (postFeedContainer) {
+        postFeedContainer.addEventListener("click", async function (e) {
+            const button = e.target.closest(".save-post-button");
+            if (button) {
+                e.preventDefault();
+                await togglePostSave(button);
+            }
         });
-    });
+    }
+
+    // Attach click event listener for save button on post details page
+    const detailsSaveButton = document.querySelector(".save-post-button");
+    if (detailsSaveButton && !postFeedContainer) {
+        detailsSaveButton.addEventListener("click", async function (e) {
+            e.preventDefault();
+            await togglePostSave(detailsSaveButton);
+        });
+    }
 });
 
 async function togglePostSave(button) {
