@@ -6,7 +6,7 @@
 
 <h1 class="mb-4">Manage Site Settings</h1>
 <form asp-action="@(Model.IsPresentationModeEnabled ? "DisablePresentationMode" : "EnablePresentationMode")" method="post">
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn @(Model.IsPresentationModeEnabled ? "btn-danger" : "btn-success")">
         @((Model.IsPresentationModeEnabled ? "Disable" : "Enable") + " Presentation Mode")
     </button>
 </form>

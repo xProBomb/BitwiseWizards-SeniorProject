@@ -455,14 +455,10 @@ namespace TrustTrade.Controllers
             if (user == null) return NotFound();
 
             User? currentUser = await _userService.GetCurrentUserAsync(User);
-            if (currentUser == null) return Unauthorized();
-
-            // Ensure the user is the owner of the posts
-            if (user.Id != currentUser.Id) return Unauthorized();
 
             // Retrieve posts for the user's feed
-            (List<Post> posts, int totalPosts) = await _postService.GetUserPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
-            var postPreviews = posts.ToPreviewViewModels(currentUser.Id);
+            (List<Post> posts, int totalPosts) = await _postService.GetUserPagedPostsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
 
             return PartialView("_Feed", postPreviews);
         }
