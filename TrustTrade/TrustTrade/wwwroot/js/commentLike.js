@@ -1,11 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Attach click event listener to all comment like buttons
-    document.querySelectorAll(".comment-like-button").forEach(button => {
-        button.addEventListener("click", async (event) => {
-            event.preventDefault();
-            await toggleCommentLike(button);
+    const commentsContainer = document.getElementById("comments-section");
+    if (commentsContainer) {
+        commentsContainer.addEventListener("click", async function (e) {
+            const button = e.target.closest(".comment-like-button");
+            if (button) {
+                e.preventDefault();
+                await toggleCommentLike(button);
+            }
         });
-    });
+    }
 });
 
 async function toggleCommentLike(button) {
