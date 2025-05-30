@@ -1,0 +1,57 @@
+@model TrustTrade.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Page Not Found";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4 p-2 text-center">
+                <div class="error-code">
+                    <h1 class="display-1 fw-bold text-danger">404</h1>
+                    <h2 class="mb-2">Investment Not Found</h2>
+                </div>
+                
+                <div class="error-image mb-2">
+                    <img src="https://img.freepik.com/free-vector/bear-market-concept-illustration_114360-4881.jpg?ga=GA1.1.1615474836.1747804804&semt=ais_hybrid&w=740" 
+                         alt="Bear market chart" class="img-fluid rounded-3" style="max-height: 300px;">
+                </div>
+                
+                <div class="error-message mb-2">
+                    <p class="lead">Looks like this investment has crashed!</p>
+                    <p>The page you're looking for doesn't exist or has been moved to a different exchange.</p>
+                    
+                    <div class="alert alert-light border mt-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle text-primary fs-4 me-3"></i>
+                            <div class="text-start">
+                                <strong>Error Details:</strong><br>
+                                @if (!string.IsNullOrEmpty(Model.RequestId))
+                                {
+                                    <span>Request ID: @Model.RequestId</span>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                    <span>@Model.ErrorMessage</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="error-actions d-flex flex-column flex-md-row justify-content-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-house-door me-2"></i>Back to Home
+                    </a>
+                    <a asp-controller="Support" asp-action="ContactSupport" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="bi bi-headset me-2"></i>Contact Support
+                    </a>
+                </div>
+                
+                <div class="mt-2 text-muted">
+                    <p>Try checking the URL for errors, or return to the homepage and start again.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

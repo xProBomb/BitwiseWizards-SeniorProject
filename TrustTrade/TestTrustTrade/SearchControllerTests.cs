@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
+using System.Security.Claims;
 using TrustTrade.Controllers;
 using TrustTrade.Data;
 using TrustTrade.Models;
@@ -55,6 +56,7 @@ namespace TrustTrade.Tests.Controllers
                         CreatedAt = DateTime.UtcNow,
                         UserId = user.Id,
                         User = user,
+                        IsPublic = true,
                     }
             };
 
@@ -214,6 +216,8 @@ namespace TrustTrade.Tests.Controllers
         public async Task SearchPosts_ReturnsPostPreviewList()
         {
             // Arrange
+            _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+                .ReturnsAsync(() => null);
             _postServiceMock.Setup(s => s.SearchPostsAsync(It.IsAny<List<string>>(), null))
                 .ReturnsAsync(_posts);
 

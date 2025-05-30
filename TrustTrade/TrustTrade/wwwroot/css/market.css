@@ -1,3 +1,16 @@
+[data-theme="dark"] {
+    --text-color: #ffffff;
+    --border-color: #000000;
+}
+
+[data-theme="light"] {
+    --text-color: #000000;
+    --border-color: #ffffff;
+}
+
+
+
+
 .market-toolbar {
     display: flex;
     justify-content: space-between;
@@ -132,15 +145,15 @@
     border-radius: 0.5rem;
     color: #000000;
     background-color: transparent;
-    border: 1px solid #000000;
+    border: 1px solid var(--border-color);
     transition: all 0.2s ease-in-out;
     box-shadow: none;
-    color: white;
+    color: var(--text-color);
     text-decoration: none;
 }
 
 .invest-btn:hover {
-    color: #fff;
+    color: var(--text-color);
     background-color: #d35b49;
     border-color: #cf3d3d;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);

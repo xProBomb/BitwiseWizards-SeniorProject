@@ -15,6 +15,18 @@ public class PostRepository : Repository<Post>, IPostRepository
         _posts = context.Posts;
     }
 
+    private void SanitizeSuspendedUsers(List<Post> posts)
+    {
+        foreach (var post in posts)
+        {
+            if (post.User?.Is_Suspended == true)
+            {
+                post.User.ProfilePicture = Array.Empty<byte>(); // Until justin tells me how
+            }
+        }
+    }
+
+
     public async Task<(List<Post> posts, int totalPosts)> GetPagedPostsAsync(
         string? categoryFilter = null, 
         int pageNumber = 1,
@@ -34,6 +46,7 @@ public class PostRepository : Repository<Post>, IPostRepository
         
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -63,6 +76,7 @@ public class PostRepository : Repository<Post>, IPostRepository
 
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -90,6 +104,7 @@ public class PostRepository : Repository<Post>, IPostRepository
 
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -117,6 +132,7 @@ public class PostRepository : Repository<Post>, IPostRepository
 
         query = ApplyPagination(query, pageNumber, pageSize);
         var posts = await query.ToListAsync();
+        SanitizeSuspendedUsers(posts);
 
         return (posts, totalPosts);
     }
@@ -172,6 +188,15 @@ public class PostRepository : Repository<Post>, IPostRepository
             case "TitleDesc":
                 return query.OrderByDescending(p => p.Title);
             case "DateDesc":
+                return query.OrderByDescending(p => p.CreatedAt);
+            case "LikesDesc":
+                return query.OrderByDescending(p => p.Likes.Count);
+            case "LikesAsc":
+                return query.OrderBy(p => p.Likes.Count);
+            case "CommentsDesc":
+                return query.OrderByDescending(p => p.Comments.Count);
+            case "CommentsAsc":
+                return query.OrderBy(p => p.Comments.Count);
             default:
                 return query.OrderByDescending(p => p.CreatedAt);
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TrustTrade.Models;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.Models.DTO;
+using Humanizer;
 
 namespace TrustTrade.Controllers.Api
 {
@@ -46,6 +47,11 @@ namespace TrustTrade.Controllers.Api
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Invalid operation while creating comment.");
+                return BadRequest("Invalid operation: " + ex.Message);
             }
             catch (Exception ex)
             {

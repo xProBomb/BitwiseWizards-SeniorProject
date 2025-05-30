@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using TrustTrade.Helpers;
 using TrustTrade.Services.Web.Interfaces;
 using TrustTrade.DAL.Concrete;
+using TrustTrade.Models.ExtensionMethods;
+using System.ComponentModel;
 
 namespace TrustTrade.Controllers
 {
@@ -17,6 +19,8 @@ namespace TrustTrade.Controllers
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
         private readonly IPhotoRepository _photoRepository;
+        private readonly IPostService _postService;
+        private readonly ISiteSettingsRepository _siteSettingsRepository;
 
         public PostsController(
             ILogger<PostsController> logger,
@@ -24,7 +28,9 @@ namespace TrustTrade.Controllers
             IHoldingsRepository holdingsRepository,
             IPostRepository postRepository,
             ITagRepository tagRepository,
-            IPhotoRepository photoRepository)
+            IPhotoRepository photoRepository,
+            IPostService postService,
+            ISiteSettingsRepository siteSettingsRepository)
         {
             _logger = logger;
             _userService = userService;
@@ -32,16 +38,26 @@ namespace TrustTrade.Controllers
             _postRepository = postRepository;
             _tagRepository = tagRepository;
             _photoRepository = photoRepository;
+            _postService = postService;
+            _siteSettingsRepository = siteSettingsRepository;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Create()
         {
+            User? user = await _userService.GetCurrentUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
+
             // Retrieve all existing tags for the view model
             var vm = new CreatePostVM
             {
-                ExistingTags = await _tagRepository.GetAllTagNamesAsync()
+                ExistingTags = await _tagRepository.GetAllTagNamesAsync(),
+                CanPostDuringPresentation = user.CanPostDuringPresentation,
+                IsPresentationModeEnabled = siteSettings.IsPresentationModeEnabled,
+                
             };
 
             return View(vm);
@@ -60,6 +76,18 @@ namespace TrustTrade.Controllers
 
             User? user = await _userService.GetCurrentUserAsync(User);
             if (user == null) return Unauthorized();
+
+            // Check if the user is allowed to post during presentation mode.
+            // They normally shouldn't get this far if they can't post, but handle it gracefully.
+            SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
+            if (siteSettings.IsPresentationModeEnabled && !user.CanPostDuringPresentation)
+            {
+                _logger.LogWarning($"User {user.Username} attempted to post during presentation mode without permission.");
+                createPostVM.ExistingTags = await _tagRepository.GetAllTagNamesAsync();
+                createPostVM.CanPostDuringPresentation = user.CanPostDuringPresentation;
+                createPostVM.IsPresentationModeEnabled = siteSettings.IsPresentationModeEnabled;
+                return View(createPostVM);
+            }
 
             // Map the CreatePostVM to the Post entity
             var post = new Post
@@ -186,6 +214,8 @@ namespace TrustTrade.Controllers
             var isPlaidEnabled = post.User?.PlaidEnabled ?? false;
             string? portfolioValue = null;
 
+           
+
             // Retrieve and format the portfolio value if Plaid is enabled
             if (isPlaidEnabled)
             {
@@ -202,32 +232,14 @@ namespace TrustTrade.Controllers
             bool isOwnedByCurrentUser = user != null && user.Id == post.UserId;
             bool isLikedByCurrentUser = user != null && post.Likes.Any(l => l.UserId == user.Id);
 
-            // Convert comments to view model
-            List<CommentVM> comments = post.Comments.Select(comment =>
+            if (user != null && user.Is_Suspended == true)
             {
-                string? commentPortfolioValue = null;
+                post.User.ProfilePicture = Array.Empty<byte>();  // Set to default image unless justin tells me a better way
+            }
 
-                if (comment.User?.PlaidEnabled == true)
-                {
-                    commentPortfolioValue = comment.PortfolioValueAtPosting.HasValue
-                        ? FormatCurrencyAbbreviate.FormatCurrencyAbbreviated(comment.PortfolioValueAtPosting.Value)
-                        : "$0";
-                }
-
-                return new CommentVM
-                {
-                    Id = comment.Id,
-                    Username = comment.User?.Username ?? "Unknown",
-                    Content = comment.Content,
-                    TimeAgo = TimeAgoHelper.GetTimeAgo(comment.CreatedAt),
-                    IsPlaidEnabled = comment.User?.PlaidEnabled ?? false,
-                    PortfolioValueAtPosting = commentPortfolioValue,
-                    ProfilePicture = comment.User?.ProfilePicture,
-                    IsOwnedByCurrentUser = user != null && comment.UserId == user.Id,
-                    LikeCount = comment.CommentLikes?.Count ?? 0,
-                    IsLikedByCurrentUser = user != null && comment.CommentLikes?.Any(l => l.UserId == user.Id) == true,
-                };
-            }).ToList();
+            List<CommentVM> comments = post.Comments
+                .Select(comment => comment.ToViewModel(user))
+                .ToList();
 
             List<string> photos = (await _photoRepository.GetPhotosByPostIdAsync(post.Id))
                 .Where(photo => photo?.Image != null && photo.Image.Length > 0)
@@ -238,6 +250,15 @@ namespace TrustTrade.Controllers
             {
                 _logger.LogInformation($"No photos found for post {post.Id}");
             }
+
+            // Ensure previous profile picture is set to default if user is suspended
+           
+            if (post.User?.Is_Suspended == true)
+            {
+                post.User.ProfilePicture = Array.Empty<byte>();
+            }
+
+            SiteSettings siteSettings = await _siteSettingsRepository.GetSiteSettingsAsync();
 
             // Map to ViewModel
             var vm = new PostDetailsVM
@@ -259,6 +280,8 @@ namespace TrustTrade.Controllers
                 ProfilePicture = post.User?.ProfilePicture,
                 Comments = comments,
                 IsSavedByCurrentUser = user?.SavedPosts?.Any(sp => sp.PostId == post.Id) ?? false,
+                IsPresentationModeEnabled = siteSettings.IsPresentationModeEnabled,
+                CanPostDuringPresentation = user?.CanPostDuringPresentation ?? false
             };
 
             return View(vm);
@@ -353,6 +376,91 @@ namespace TrustTrade.Controllers
             await _postRepository.DeleteAsync(post);
 
             return RedirectToAction("Index", "Home");
+        }
+
+        // GET: /posts/loadmore
+        [HttpGet("posts/loadmore")]
+        public async Task<IActionResult> LoadMore(
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+
+            // Retrieve posts for the general feed
+            (List<Post> posts, int totalPosts) = await _postService.GetPagedPostsAsync(categoryFilter, pageNumber, sortOrder, currentUser?.Id);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
+
+        // GET: /posts/loadmore/followings
+        [HttpGet("posts/loadmore/followings")]
+        public async Task<IActionResult> LoadMoreFollowings(
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Retrieve posts for the followings feed
+            (List<Post> posts, int totalPosts) = await _postService.GetFollowingPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
+
+        // GET: /posts/loadmore/saved
+        [HttpGet("posts/loadmore/saved")]
+        public async Task<IActionResult> LoadMoreSaved(
+            string username,
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            // Ensure the user is the owner of the saved posts
+            if (user.Id != currentUser.Id) return Unauthorized();
+
+            // Retrieve posts for the saved feed
+            (List<Post> posts, int totalPosts) = await _postService.GetUserSavedPagedPostsAsync(currentUser.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser.Id);
+
+            return PartialView("_Feed", postPreviews);
+        }
+
+        // GET: /posts/loadmore/userposts
+        [HttpGet("posts/loadmore/userposts")]
+        public async Task<IActionResult> LoadMoreUserPosts(
+            string username,
+            int pageNumber,
+            string? categoryFilter = null,
+            string sortOrder = "DateDesc")
+        {
+            if (pageNumber <= 1) pageNumber = 2; // More posts are loaded starting from page 2
+
+            User? user = await _userService.GetUserByUsernameAsync(username);
+            if (user == null) return NotFound();
+
+            User? currentUser = await _userService.GetCurrentUserAsync(User);
+
+            // Retrieve posts for the user's feed
+            (List<Post> posts, int totalPosts) = await _postService.GetUserPagedPostsAsync(user.Id, categoryFilter, pageNumber, sortOrder);
+            var postPreviews = posts.ToPreviewViewModels(currentUser?.Id);
+
+            return PartialView("_Feed", postPreviews);
         }
     }
 }

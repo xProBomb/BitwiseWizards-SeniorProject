@@ -115,7 +115,7 @@
                     if (score < 40) return "score-poor";
                     if (score >= 40 && score < 60) return "score-fair";
                     if (score >= 60 && score < 80) return "score-good";
-                    if (score >= 80 && score < 95) return "score-excellent";
+                    if (score >= 80 && score < 90) return "score-excellent";
                     return "score-elite";
                 }
 
@@ -140,6 +140,11 @@
                         @(Model.IsBlocked ? "Unblock" : "Block")
                     </button>
                 </form>
+                
+                <!-- Report button -->
+                <button type="button" class="btn btn-warning ms-2" onclick="openReportModal('Profile', @Model.Id)">
+                    <i class="bi bi-flag"></i> Report
+                </button>
             }
             @if (!isOwner && Model.CanMessage)
             {
@@ -223,14 +228,17 @@
                                 Posts
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link"
-                                asp-controller="Profile" 
-                                asp-action="UserSaves" 
-                                asp-route-username="@Model.Username">
-                                Saved
-                            </a>
-                        </li>
+                        @if (isOwner)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    asp-controller="Profile" 
+                                    asp-action="UserSaves" 
+                                    asp-route-username="@Model.Username">
+                                    Saved
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -433,9 +441,21 @@
                 </div>
                 <div class="modal-body">
                     <ul>
-                        @foreach (var follower in Model.Followers)
+                        @for (int i = 0; i < Model.Followers.Count; i++)
                         {
+                            var follower = Model.Followers[i];
+                            var pfp = (Model.FollowersPfp != null && Model.FollowersPfp.Count > i) ? Model.FollowersPfp[i] : null;
                             <li class="mb-2">
+                                @if (pfp != null && pfp.Length > 0)
+                                {
+                                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(pfp)" alt="Follower Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
+                                else
+                                {
+                                    <img src="/icons/defpfp.png" alt="Follower Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
                                 <a asp-controller="Profile" asp-action="User" asp-route-id="@follower"
                                    class="btn">@follower</a>
                             </li>
@@ -457,9 +477,21 @@
                 </div>
                 <div class="modal-body">
                     <ul>
-                        @foreach (var following in Model.Following)
+                        @for (int i = 0; i < Model.Following.Count; i++)
                         {
+                            var following = Model.Following[i];
+                            var pfp = (Model.FollowingPfp != null && Model.FollowingPfp.Count > i) ? Model.FollowingPfp[i] : null;
                             <li class="mb-2">
+                                @if (pfp != null && pfp.Length > 0)
+                                {
+                                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(pfp)" alt="Following Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
+                                else
+                                {
+                                    <img src="/icons/defpfp.png" alt="Following Profile Picture"
+                                         class="rounded-circle" style="width: 40px; height: 40px;">
+                                }
                                 <a asp-controller="Profile" asp-action="User" asp-route-id="@following"
                                    class="btn">@following</a>
                             </li>
@@ -633,7 +665,7 @@
                                 if (score < 40) return "Needs Improvement";
                                 if (score >= 40 && score < 60) return "Fair";
                                 if (score >= 60 && score < 80) return "Good";
-                                if (score >= 80 && score < 95) return "Excellent";
+                                if (score >= 80 && score < 90) return "Excellent";
                                 return "Elite";
                             }
 
@@ -684,6 +716,7 @@
         </div>
     }
 @await Html.PartialAsync("_BackgroundImageModal")
+    @await Html.PartialAsync("_ReportModal")    
 </div>
 
 @if (ViewBag.UsernameError != null)
@@ -701,6 +734,7 @@
     <script src="~/js/profile.js"></script>
     <script src="~/js/backroundImage.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <script src="~/js/reportModal.js"></script>
 }
 
 <style>
@@ -812,6 +846,7 @@
     .score-number {
         font-size: 2.5rem;
         font-weight: bold;
+        color: #6a0dad;
     }
 
     .score-label {
@@ -999,8 +1034,11 @@
             }
         });
 
-        cropAndUploadButton.addEventListener('click', function () {
+        cropAndUploadButton.addEventListener('click', function (e) {
+            e.preventDefault();
             if (cropper) {
+                cropAndUploadButton.disabled = true;
+                cropAndUploadButton.textContent = 'Uploading...';
                 const canvas = cropper.getCroppedCanvas({
                     width: 150,
                     height: 150,
@@ -1021,10 +1059,14 @@
                                 location.reload();
                             } else {
                                 alert('Failed to upload the image.');
+                                cropAndUploadButton.disabled = false;
+                                cropAndUploadButton.textContent = 'Crop & Upload';
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
+                            cropAndUploadButton.disabled = false;
+                            cropAndUploadButton.textContent = 'Crop & Upload';
                         });
                 });
             }

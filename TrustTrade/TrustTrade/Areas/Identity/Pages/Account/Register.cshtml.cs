@@ -135,7 +135,15 @@ namespace TrustTrade.Areas.Identity.Pages.Account
                     // Use the created user instance directly instead of fetching via User
                     var identityUser = user;  
                     var trustTradeUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == identityUser.Email);
+                    // Read all words from the local words.txt file
+                    var words = await System.IO.File.ReadAllLinesAsync("wwwroot/words.txt");
+                    var rng = new Random();
+                    var word1 = words[rng.Next(words.Length)];
+                    var word2 = words[rng.Next(words.Length)];
+                    var number = rng.Next(0, 100);
 
+                    // Format username: word1_word2<number>
+                    var generatedUsername = $"{word1}_{word2}{number}";
                     if (trustTradeUser == null)
                     {
                         _logger.LogInformation("Creating new TrustTrade user for {Email}", identityUser.Email);
@@ -144,7 +152,7 @@ namespace TrustTrade.Areas.Identity.Pages.Account
                             // Ensure you're using the correct instance's Id
                             IdentityId = identityUser.Id,  
                             Email = identityUser.Email!,
-                            Username = identityUser.Email ?? identityUser.Email!,
+                            Username = generatedUsername,
                             ProfileName = identityUser.UserName ?? identityUser.Email!,
                             PasswordHash = "[MANAGED_BY_IDENTITY]",
                             CreatedAt = DateTime.UtcNow

@@ -331,7 +331,7 @@ body.sidebar-expanded {
 }
 
 .brand-logo {
-  height: 34px;
+  height: 34px !important;
   width: auto;
   margin-left: 0.5rem;
 }
@@ -399,7 +399,7 @@ body.sidebar-expanded {
 }
 
 .sidebar-brand {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--bs-body-color);
   text-decoration: none;
@@ -630,6 +630,46 @@ body.sidebar-expanded {
 .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
   background-color: var(--accent-color);
   border-color: var(--accent-color);
+}
+
+/* Button focus and active states */
+.btn:focus,
+.btn:active,
+.btn:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 0.25rem rgba(93, 63, 211, 0.25) !important;
+  border-color: var(--accent-color) !important;
+}
+
+/* Primary button active state */
+.btn-primary:active,
+.btn-primary:focus {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+/* Links active and focus states */
+a:focus,
+a:active {
+  color: var(--accent-hover) !important;
+  outline: none !important;
+}
+
+/* Secondary/outline button active and focus states */
+.btn-outline-primary:focus,
+.btn-outline-primary:active,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:active {
+  color: white !important;
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+
+/* For other button types if needed */
+.btn-secondary:focus,
+.btn-secondary:active {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
 }
 
 /* Card enhancements */

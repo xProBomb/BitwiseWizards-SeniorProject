@@ -13,13 +13,15 @@
 </div>
 
 <!-- Post Preview Feed -->
-<div class="mt-5">
-    <partial name="../Posts/_Feed" model="Model.Posts" />
-</div>
+<ul class="list-group mt-4">
+    <div id="postFeedContainer" class="mt-4" data-url="@Url.Action("LoadMoreUserPosts", "Posts")" data-username="@Model.Username">
+        <partial name="../Posts/_Feed" model="Model.Posts" />
+    </div>
+</ul>
 
-<!-- Pagination Controls -->
-<div class="mt-5">
-    <partial name="../Posts/_Pagination" model="Model.Pagination" />
+<!-- Pagination Info -->
+<div>
+    <partial name="../Posts/_PaginationInfo" />
 </div>
 
 @section Scripts {

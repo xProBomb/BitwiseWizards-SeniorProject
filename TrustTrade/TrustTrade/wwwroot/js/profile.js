@@ -35,19 +35,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: formData
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                if (response.redirected) {
+                    window.location.href = response.url;
                 }
-                return response.json();
             })
-            .then(data => {
-                // Refresh the page after successful follow/unfollow
-                window.location.reload();
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                isSubmitting = false; // Reset the flag in case of error
-            });
         });
     });
 });

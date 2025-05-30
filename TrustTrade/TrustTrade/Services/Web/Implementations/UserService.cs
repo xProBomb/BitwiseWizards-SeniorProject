@@ -3,6 +3,7 @@ using TrustTrade.DAL.Abstract;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using TrustTrade.Services.Web.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrustTrade.Services.Web.Implementations;
 
@@ -35,13 +36,23 @@ public class UserService : IUserService
         }
 
         // Retrieve the user from the main database
-        User? currentUser = await _userRepository.FindByIdentityIdAsync(identityUserId, includeRelated);
+        User? currentUser;
+        if (!includeRelated)
+        {
+            currentUser = await _userRepository.FindByIdentityIdAsync(identityUserId, false);
+        }
+        else
+        {
+            // Eagerly load FollowerFollowingUsers
+            currentUser = await _userRepository.FindByIdentityIdAsync(identityUserId, true);
+        }
+
         if (currentUser == null)
         {
             _logger.LogWarning($"User with IdentityId '{identityUserId}' not found in the database.");
             return null;
         }
-        
+
         _logger.LogInformation($"Successfully retrieved user '{currentUser.Username}' with IdentityId '{identityUserId}'.");
         return currentUser;
     }
@@ -58,7 +69,7 @@ public class UserService : IUserService
         _logger.LogInformation($"Successfully retrieved user '{user.Username}'");
         return user;
     }
-    
+
     public async Task<User> GetUserByIdAsync(int userId)
     {
         try

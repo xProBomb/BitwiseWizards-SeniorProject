@@ -46,6 +46,36 @@
             });
         });
     }
+    
+    function attachAddPresenterButtons() {
+        document.querySelectorAll('.add-presenter-btn').forEach(button => {
+            button.addEventListener('click', async e => {
+                e.preventDefault();
+
+                const userId = parseInt(button.dataset.userId);
+                const isRemovePresenter = button.textContent.trim().toLowerCase() === "remove presenter";
+                const endpoint = isRemovePresenter ? "/Admin/RemovePresenter" : "/Admin/AddPresenter";
+
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": token
+                    },
+                    body: JSON.stringify({ userId })
+                });
+
+                if (response.ok) {
+                    // Toggle button state
+                    button.textContent = isRemovePresenter ? "Make Presenter" : "Remove Presenter";
+                    button.classList.toggle("btn-danger");
+                    button.classList.toggle("btn-success");
+                } else {
+                    alert("Failed to update user presenter status.");
+                }
+            });
+        });
+    }
 
     // Search + reattach buttons after AJAX
     const searchInput = document.getElementById('userSearchInput');
@@ -54,8 +84,10 @@
         const html = await response.text();
         document.getElementById('userList').innerHTML = html;
         attachSuspendButtons();
+        attachAddPresenterButtons();
     });
 
     attachSuspendButtons(); // Initial attach
+    attachAddPresenterButtons(); // Initial attach
 </script>
 }

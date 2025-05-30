@@ -683,6 +683,70 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("TrustTrade.Models.Report", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ReportType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ReportedPostId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReportedUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReporterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("ReviewedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportedPostId");
+
+                    b.HasIndex("ReportedUserId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.ToTable("Reports");
+                });
+
             modelBuilder.Entity("TrustTrade.Models.SavedPost", b =>
                 {
                     b.Property<int>("Id")
@@ -712,6 +776,25 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasDatabaseName("UQ__SavedPost__A9D10534A3A3D3A4");
 
                     b.ToTable("SavedPosts");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.SiteSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsPresentationModeEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.HasKey("Id")
+                        .HasName("PK__SiteSett__3214EC27F1A0E5D8");
+
+                    b.ToTable("SiteSettings", (string)null);
                 });
 
             modelBuilder.Entity("TrustTrade.Models.Stock", b =>
@@ -874,6 +957,11 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("CanPostDuringPresentation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -1244,6 +1332,7 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                     b.HasOne("TrustTrade.Models.Post", "Post")
                         .WithMany("Photos")
                         .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Photos_Post");
 
@@ -1283,6 +1372,42 @@ namespace TrustTrade.Data.Migrations.TrustTrade
                         .HasConstraintName("FK_Posts_User");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrustTrade.Models.Report", b =>
+                {
+                    b.HasOne("TrustTrade.Models.Post", "ReportedPost")
+                        .WithMany()
+                        .HasForeignKey("ReportedPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("FK_Reports_ReportedPost");
+
+                    b.HasOne("TrustTrade.Models.User", "ReportedUser")
+                        .WithMany()
+                        .HasForeignKey("ReportedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Reports_ReportedUser");
+
+                    b.HasOne("TrustTrade.Models.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Reports_Reporter");
+
+                    b.HasOne("TrustTrade.Models.User", "ReviewedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Reports_ReviewedByUser");
+
+                    b.Navigation("ReportedPost");
+
+                    b.Navigation("ReportedUser");
+
+                    b.Navigation("Reporter");
+
+                    b.Navigation("ReviewedByUser");
                 });
 
             modelBuilder.Entity("TrustTrade.Models.SavedPost", b =>

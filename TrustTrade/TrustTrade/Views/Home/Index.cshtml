@@ -18,33 +18,34 @@
             </div>
 
             <!-- Post Preview Feed -->
-            <div class="mt-5">
-                <partial name="../Posts/_Feed" model="Model.Posts" />
-            </div>
+            <ul class="list-group mt-4">
+                <div id="postFeedContainer" class="mt-4" data-url="@(Model.IsFollowing 
+                    ? Url.Action("LoadMoreFollowings", "Posts")
+                    : Url.Action("LoadMore", "Posts"))">
+                    <partial name="../Posts/_Feed" model="Model.Posts" />
+                </div>
+            </ul>
 
-            <!-- Pagination Controls -->
-            <div class="mt-5">
-                <partial name="../Posts/_Pagination" model="Model.Pagination" />
+            <!-- Pagination Info -->
+            <div>
+                <partial name="../Posts/_PaginationInfo" />
             </div>
         </div>
 
         <!-- Financial News sidebar -->
-        @if (!Model.IsFollowing)
-        {
-            <div class="col-md-4 d-none d-md-block">
-                <div class="sidebar-widget">
-                    <div id="financialNewsWidget">
-                        <!-- Initial Loading Spinner -->
-                        <div class="loading-spinner text-center p-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Loading financial news...</p>
+        <div class="col-md-4 d-none d-md-block">
+            <div class="sidebar-widget">
+                <div id="financialNewsWidget">
+                    <!-- Initial Loading Spinner -->
+                    <div class="loading-spinner text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
+                        <p class="mt-2">Loading financial news...</p>
                     </div>
                 </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
@@ -106,5 +107,6 @@
         }
     });
 </script>
-    <script src="~/js/postFeed.js"></script>
+<script src="~/js/postFeed.js"></script>
+<script src="~/js/reportModal.js"></script>
 }
