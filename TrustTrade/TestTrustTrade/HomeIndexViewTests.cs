@@ -53,6 +53,7 @@ namespace TestTrustTrade
                         CreatedAt = DateTime.UtcNow,
                         UserId = _user.Id,
                         User = _user,
+                        IsPublic = true,
                     }
             };
 
@@ -97,6 +98,8 @@ namespace TestTrustTrade
                 .ReturnsAsync(_postFiltersPartialVM);
              _postServiceMock.Setup(s => s.BuildPaginationAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null))
                 .ReturnsAsync(_paginationPartialVM);
+            _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+                .ReturnsAsync(() => null);
 
             // Act
             var result = await _controller.Index() as ViewResult;

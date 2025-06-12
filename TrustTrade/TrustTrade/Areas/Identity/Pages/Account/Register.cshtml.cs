@@ -136,7 +136,7 @@ namespace TrustTrade.Areas.Identity.Pages.Account
                     var identityUser = user;  
                     var trustTradeUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == identityUser.Email);
                     // Read all words from the local words.txt file
-                    var words = await System.IO.File.ReadAllLinesAsync("Areas/Identity/Pages/Account/Manage/words.txt");
+                    var words = await System.IO.File.ReadAllLinesAsync("wwwroot/words.txt");
                     var rng = new Random();
                     var word1 = words[rng.Next(words.Length)];
                     var word2 = words[rng.Next(words.Length)];

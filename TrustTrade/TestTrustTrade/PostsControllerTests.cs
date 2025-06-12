@@ -35,6 +35,7 @@ public class PostsControllerTests
     private CreatePostVM _invalidCreatePostVM;
     private PostEditVM _validPostEditVM;
     private PostEditVM _invalidPostEditVM;
+    private SiteSettings _siteSettings;
 
     [SetUp]
     public void Setup()
@@ -68,7 +69,8 @@ public class PostsControllerTests
             ProfileName = "johnDoe",
             Username = "johnDoe",
             Email = "johndoe@example.com",
-            PasswordHash = "dummyHash"
+            PasswordHash = "dummyHash",
+            CanPostDuringPresentation = false
         };
 
         _user2 = new User
@@ -185,6 +187,13 @@ public class PostsControllerTests
             IsPublic = false,
             SelectedTags = new List<string> { "Memes", "Gain", "Loss" }
         };
+
+        // Test site settings
+        _siteSettings = new SiteSettings
+        {
+            Id = 1,
+            IsPresentationModeEnabled = false,
+        };
     }
 
     [TearDown]
@@ -198,6 +207,9 @@ public class PostsControllerTests
     {
         // Arrange
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Create();
@@ -211,6 +223,9 @@ public class PostsControllerTests
     {
         // Arrange
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Create() as ViewResult;
@@ -226,6 +241,9 @@ public class PostsControllerTests
         // Arrange
         var tags = new List<string> { "Memes", "Gain", "Loss", "Stocks", "Crypto" };
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(tags);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Create() as ViewResult;
@@ -241,6 +259,9 @@ public class PostsControllerTests
     {
         // Arrange
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Create() as ViewResult;
@@ -256,6 +277,7 @@ public class PostsControllerTests
     {
         // Arrange
         _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
         // Act
@@ -280,6 +302,7 @@ public class PostsControllerTests
         };
 
         _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
         _tagRepositoryMock.Setup(r => r.FindByTagNameAsync(It.IsAny<string>())).ReturnsAsync(new Tag());
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
 
@@ -319,6 +342,7 @@ public class PostsControllerTests
         };
 
         _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(user);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
         _holdingsRepositoryMock.Setup(r => r.RefreshHoldingsAsync(It.IsAny<int>())).ReturnsAsync(true);
         _holdingsRepositoryMock.Setup(r => r.GetHoldingsForUserAsync(It.IsAny<int>())).ReturnsAsync(investmentPositions).Verifiable();
         _postRepositoryMock.Setup(r => r.AddOrUpdateAsync(It.IsAny<Post>())).Verifiable();
@@ -399,6 +423,9 @@ public class PostsControllerTests
     {
         // Arrange
         _tagRepositoryMock.Setup(r => r.GetAllTagNamesAsync()).ReturnsAsync(new List<string>());
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
         _controller.ModelState.AddModelError("Title", "Title is required");
 
         // Act
@@ -415,6 +442,9 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Details(1);
@@ -428,6 +458,9 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -442,6 +475,9 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -476,6 +512,9 @@ public class PostsControllerTests
         };
 
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(post);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
+        _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>()))
+            .ReturnsAsync(_user1);
 
         // Act
         var result = await _controller.Details(1) as ViewResult;
@@ -492,6 +531,7 @@ public class PostsControllerTests
     {
         // Arrange
         _postRepositoryMock.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync(_postByUser1);
+        _siteSettingsRepositoryMock.Setup(s => s.GetSiteSettingsAsync()).ReturnsAsync(_siteSettings);
         _userServiceMock.Setup(s => s.GetCurrentUserAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<bool>())).ReturnsAsync(_user1);
 
         // Act
